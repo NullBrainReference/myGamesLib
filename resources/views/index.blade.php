@@ -11,7 +11,13 @@
     <header>
         <x-navbar />
     </header>
-    <main></main>
+    <main>
+    {{-- list here --}}
+    @foreach($games as $game)
+        <x-game-card :game="$game" />
+    @endforeach
+
+    </main>
 
     <script src="{{ url('js/bootstrap.bundle.min.js') }}"></script>
 </body>
