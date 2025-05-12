@@ -14,7 +14,9 @@
     <main>
     {{-- list here --}}
     @foreach($games as $game)
+    <div class="d-flex justify-content-center flex-wrap">
         <x-game-card :game="$game" />
+    </div>
     @endforeach
 
     </main>
