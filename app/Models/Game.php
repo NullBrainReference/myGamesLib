@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Game extends Model
 {
@@ -15,4 +16,8 @@ class Game extends Model
     protected $fillable = ['title', 'description', 'img_src']; // Fillable columns
 
     public $incrementing = false; // If game_id is non-incrementing
+
+    public function users(): BelongsToMany {
+        return $this->belongsToMany(User::class, 'game_user');
+    }
 }
