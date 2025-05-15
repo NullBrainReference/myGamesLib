@@ -6,5 +6,9 @@ use App\Http\Controllers\GameController;
 
 Route::get('/', [HomeController::class, 'index']);
 
-Route::get('/game/{game}', [GameController::class, 'show'])->name('game.show');
+Route::get('/shop', [GameController::class, 'shop'])->name('shop');
+
+Route::get('/game/{id}', [GameController::class, 'view'])
+    ->where('id', '[0-9]+')
+    ->name('game.view');
 
