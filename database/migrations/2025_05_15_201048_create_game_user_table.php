@@ -9,7 +9,7 @@ return new class extends Migration {
         Schema::create('game_user', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('game_id')->constrained()->onDelete('cascade');
+            $table->foreignId('game_id')->constrained('games', 'game_id')->onDelete('cascade');
             $table->timestamps();
         });
     }

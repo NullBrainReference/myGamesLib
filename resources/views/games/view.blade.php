@@ -10,6 +10,17 @@
             <div class="card-body">
                 <h5 class="card-title">{{ $game->title }}</h5>
                 <p class="card-text">{{ $game->description }}</p>
+
+                @auth
+                @if(Auth::user()->games->contains($game->game_id)) 
+                    <span class="badge bg-success">In Your Library</span>
+                @else
+                    <form action="{{ route('games.add', ['game' => $game->game_id]) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-primary">Add to Library</button>
+                    </form>
+                @endif
+                @endauth
             </div>
         </div>
     </div>
