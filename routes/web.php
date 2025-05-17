@@ -24,6 +24,23 @@ Route::get('/game/{id}', [GameController::class, 'view'])
     ->where('id', '[0-9]+')
     ->name('game.view');
 
+Route::get('/games/{id}/remove', [GameController::class, 'confirmRemoval'])
+    ->where('id', '[0-9]+')
+    ->middleware('auth')
+    ->name('games.remove');
+
+Route::delete('/games/{id}/delete', [GameController::class, 'delete'])
+    ->middleware('auth')
+    ->name('games.delete');
+
+Route::get('/games/publish', [GameController::class, 'create'])
+    ->name('games.create')
+    ->middleware('auth');
+
+Route::post('peliculas/publish', [GameController::class, 'store'])
+    ->name('games.store')
+    ->middleware('auth');
+
 Route::post('/games/{id}/add', [GameController::class, 'addToLibrary'])
     ->where('id', '[0-9]+')
     ->name('games.add');

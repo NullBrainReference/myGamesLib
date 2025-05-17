@@ -35,6 +35,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -48,7 +53,8 @@ class User extends Authenticatable
         ];
     }
 
-    public function games(): BelongsToMany {
+    public function games(): BelongsToMany 
+    {
         return $this->belongsToMany(Game::class, 'game_user', 'user_id', 'game_id');
     }
 

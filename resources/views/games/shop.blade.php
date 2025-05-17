@@ -12,6 +12,11 @@
         <x-navbar />
     </header>
     <main class="mt-3">
+    @auth
+        @if(Auth::user()->isAdmin())
+            <a href="{{ route('games.create') }}" class="btn btn-success mt-3 ms-3">Add New Game</a>
+        @endif
+    @endauth
     {{-- list here --}}
     @foreach($games as $game)
     <div class="d-flex justify-content-center flex-wrap mb-5">

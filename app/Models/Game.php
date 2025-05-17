@@ -17,7 +17,8 @@ class Game extends Model
 
     public $incrementing = false; // If game_id is non-incrementing
 
-    public function users(): BelongsToMany {
+    public function users(): BelongsToMany 
+    {
         return $this->belongsToMany(User::class, 'game_user', 'game_id', 'user_id');
     }
 }
