@@ -12,15 +12,14 @@
         <x-navbar />
     </header>
     <main class="mt-3">
-    @if($latestGame)
-        <div class="d-flex justify-content-center flex-wrap mb-5">
-            <div class="w-25">
-                <x-game-card :game="$latestGame" />
-            </div>
+    {{-- list here --}}
+    @foreach($games as $game)
+    <div class="d-flex justify-content-center flex-wrap mb-5">
+        <div class="w-25">
+            <x-game-card :game="$game" />
         </div>
-    @else
-        <p class="text-center">No games available.</p>
-    @endif
+    </div>
+    @endforeach
 
     </main>
 

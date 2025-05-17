@@ -15,7 +15,7 @@
                 @if(Auth::user()->games->contains($game->game_id)) 
                     <span class="badge bg-success">In Your Library</span>
                 @else
-                    <form action="{{ route('games.add', ['game' => $game->game_id]) }}" method="POST">
+                    <form action="{{ route('games.add', ['id' => $game->game_id]) }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-primary">Add to Library</button>
                     </form>

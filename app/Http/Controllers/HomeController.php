@@ -10,8 +10,8 @@ class HomeController extends Controller
     //
     public function index()
     {
-        $games = Game::all();
-        return view('index', compact('games'));
+        $latestGame = Game::orderBy('created_at', 'desc')->first();
+        return view('index', compact('latestGame'));
         // return view('index');
     }
 }

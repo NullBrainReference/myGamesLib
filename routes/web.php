@@ -16,7 +16,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/', [HomeController::class, 'index']);
+Route::get('/', [HomeController::class, 'index'])->name('index');
 
 Route::get('/shop', [GameController::class, 'shop'])->name('shop');
 
@@ -28,7 +28,7 @@ Route::post('/games/{id}/add', [GameController::class, 'addToLibrary'])
     ->where('id', '[0-9]+')
     ->name('games.add');
 
-
+Route::get('/library', [GameController::class, 'library'])->name('library');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
