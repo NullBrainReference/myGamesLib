@@ -3,6 +3,19 @@
 @section('title', $game->title)
 
 @section('content')
+
+@if(session('success'))
+    <div class="alert alert-success text-center">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger text-center">
+        {{ session('error') }}
+    </div>
+@endif
+
 <div class="row justify-content-center">
     <div class="col-md-8 mt-3 w-25">
         <div class="card border rounded p-3">
@@ -21,10 +34,16 @@
                     </form>
                 @endif
                 @if(Auth::user()->isAdmin()) 
+                    <a href="{{ route('games.edit', ['id' => $game->game_id]) }}" 
+                        class="btn btn-warning mt-1">
+                        Edit Game
+                    </a>
+
                     <form action="{{ route('games.remove', ['id' => $game->game_id]) }}" method="GET"
                         class="mt-1">
                         <button type="submit" class="btn btn-danger">Delete Game</button>
                     </form>
+                    
                 @endif
                 @endauth
             </div>

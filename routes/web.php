@@ -41,6 +41,16 @@ Route::post('peliculas/publish', [GameController::class, 'store'])
     ->name('games.store')
     ->middleware('auth');
 
+Route::get('/games/{id}/edit', [GameController::class, 'edit'])
+    ->where('id', '[0-9]+')
+    ->name('games.edit')
+    ->middleware('auth');
+
+Route::post('/games/{id}/update', [GameController::class, 'update'])
+    ->where('id', '[0-9]+')
+    ->name('games.update')
+    ->middleware('auth');
+
 Route::post('/games/{id}/add', [GameController::class, 'addToLibrary'])
     ->where('id', '[0-9]+')
     ->name('games.add');

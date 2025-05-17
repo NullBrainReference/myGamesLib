@@ -73,6 +73,34 @@ class GameController extends Controller
         return redirect()->route('shop')->with('success', 'Game created successfully!');
     }
 
+    public function edit(int $id)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized'); // Prevent non-admins from accessing
+        }
+
+        $game = Game::findOrFail($id);
+        return view('games.edit', compact('game'));
+    }
+
+    public function update(Request $request, int $id)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:1000',
+            'img_src' => 'required|url',
+        ]);
+
+        $game = Game::findOrFail($id);
+        $game->update($validated);
+
+        return redirect()->route('game.view', ['id' => $game->game_id])->with('success', 'Game updated successfully!');
+    }
+
     public function addToLibrary(int $gameId)
     {
         $user = Auth::user();

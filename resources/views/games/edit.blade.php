@@ -1,0 +1,37 @@
+@extends('layouts.app')
+
+@section('title', 'Edit Game')
+
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Edit Game</h5>
+
+                <form action="{{ route('games.update', ['id' => $game->game_id]) }}" method="POST">
+                    @csrf
+
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Game Title</label>
+                        <input type="text" name="title" class="form-control" value="{{ $game->title }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea name="description" class="form-control" required>{{ $game->description }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="img_src" class="form-label">Image URL</label>
+                        <input type="url" name="img_src" class="form-control" value="{{ $game->img_src }}" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{{ route('game.view', ['id' => $game->game_id]) }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
