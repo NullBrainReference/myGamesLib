@@ -101,33 +101,33 @@ class GameController extends Controller
         return redirect()->route('game.view', ['id' => $game->game_id])->with('success', 'Game updated successfully!');
     }
 
-    public function addToLibrary(int $gameId)
-    {
-        $user = Auth::user();
-        if ($user) 
-        {
-            $game = Game::findOrFail($gameId);
-            //dd($user->id, $game->game_id);
+    // public function addToLibrary(int $gameId)
+    // {
+    //     $user = Auth::user();
+    //     if ($user) 
+    //     {
+    //         $game = Game::findOrFail($gameId);
+    //         //dd($user->id, $game->game_id);
 
-            $user->games()->syncWithoutDetaching($game->game_id);
+    //         $user->games()->syncWithoutDetaching($game->game_id);
             
-            return back()->with('success', 'Game added to your library!');
-        }
+    //         return back()->with('success', 'Game added to your library!');
+    //     }
 
-        return redirect()->route('login')->with('error', 'You must be logged in to add games.');
-    }
+    //     return redirect()->route('login')->with('error', 'You must be logged in to add games.');
+    // }
 
-    public function library()
-    {
-        $user = Auth::user();   
+    // public function library()
+    // {
+    //     $user = Auth::user();   
 
-        if ($user) 
-        {
-            $games = $user->games;;
+    //     if ($user) 
+    //     {
+    //         $games = $user->games;;
 
-            return view('games.library', compact('games'));
-        }
+    //         return view('games.library', compact('games'));
+    //     }
 
-        return redirect()->route('login')->with('error', 'You must be logged in to add games.');
-    }
+    //     return redirect()->route('login')->with('error', 'You must be logged in to add games.');
+    // }
 }

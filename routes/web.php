@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LibraryController;
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -51,11 +52,17 @@ Route::post('/games/{id}/update', [GameController::class, 'update'])
     ->name('games.update')
     ->middleware('auth');
 
-Route::post('/games/{id}/add', [GameController::class, 'addToLibrary'])
-    ->where('id', '[0-9]+')
-    ->name('games.add');
+// Route::post('/games/{id}/add', [GameController::class, 'addToLibrary'])
+//     ->where('id', '[0-9]+')
+//     ->name('games.add');
 
-Route::get('/library', [GameController::class, 'library'])->name('library');
+// Route::get('/library', [GameController::class, 'library'])->name('library');
+
+Route::get('/library', [LibraryController::class, 'index'])->name('library');
+
+Route::post('/library/{id}/add', [LibraryController::class, 'add'])
+    ->where('id', '[0-9]+')
+    ->name('library.add');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
