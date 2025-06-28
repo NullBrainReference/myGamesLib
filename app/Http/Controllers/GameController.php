@@ -27,9 +27,9 @@ class GameController extends Controller
     {
         $game = Game::findOrFail($id);
 
-        if (!Auth::user()->isAdmin()) {
-            abort(403, 'Unauthorized'); // Prevent non-admins from accessing this
-        }
+        // if (!Auth::user()->isAdmin()) {
+        //     abort(403, 'Unauthorized'); // Prevent non-admins from accessing this
+        // }
 
         return view('games.confirm_remove', compact('game'));
     }
@@ -38,9 +38,9 @@ class GameController extends Controller
     {
         $game = Game::findOrFail($id);
 
-        if (!Auth::user()->isAdmin()) {
-            abort(403, 'Unauthorized'); // Prevent deletion by non-admins
-        }
+        // if (!Auth::user()->isAdmin()) {
+        //     abort(403, 'Unauthorized'); // Prevent deletion by non-admins
+        // }
 
         $game->delete();
 
@@ -49,18 +49,18 @@ class GameController extends Controller
 
     public function create()
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403, 'Unauthorized'); // Only admins can create games
-        }
+        // if (!Auth::user()->isAdmin()) {
+        //     abort(403, 'Unauthorized'); // Only admins can create games
+        // }
 
         return view('games.create');
     }
 
     public function store(Request $request)
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403, 'Unauthorized');
-        }
+        // if (!Auth::user()->isAdmin()) {
+        //     abort(403, 'Unauthorized');
+        // }
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -75,9 +75,9 @@ class GameController extends Controller
 
     public function edit(int $id)
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403, 'Unauthorized'); // Prevent non-admins from accessing
-        }
+        // if (!Auth::user()->isAdmin()) {
+        //     abort(403, 'Unauthorized'); // Prevent non-admins from accessing
+        // }
 
         $game = Game::findOrFail($id);
         return view('games.edit', compact('game'));
@@ -85,9 +85,9 @@ class GameController extends Controller
 
     public function update(Request $request, int $id)
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403, 'Unauthorized');
-        }
+        // if (!Auth::user()->isAdmin()) {
+        //     abort(403, 'Unauthorized');
+        // }
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
