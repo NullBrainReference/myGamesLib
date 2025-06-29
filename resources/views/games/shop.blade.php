@@ -12,17 +12,7 @@
         <x-navbar />
     </header>
     <main class="">
-    @if(session('success'))
-        <div class="alert alert-success text-center">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger text-center">
-            {{ session('error') }}
-        </div>
-    @endif
+    <x-callback-message />
 
     @auth
         @if(Auth::user()->isAdmin())
@@ -38,6 +28,12 @@
         </div>
     </div>
     @endforeach
+
+    <div class="d-flex flex-column align-items-center gap-2">
+        {{-- {{ $games->links('pagination::bootstrap-5') }} --}}
+        {{ $games->links('pagination::simple-bootstrap-5') }}
+    </div>
+    
 
     </main>
 

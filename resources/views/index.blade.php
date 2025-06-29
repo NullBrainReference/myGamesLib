@@ -10,6 +10,7 @@
 <body>
     <header>
         <x-navbar />
+        <x-callback-message />
     </header>
     <main class="mt-3">
     @if($latestGame)

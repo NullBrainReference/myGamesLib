@@ -14,17 +14,7 @@
         
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        @if(session('success'))
-            <div class="alert alert-success text-center mb-0">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert alert-danger text-center mb-0">
-                {{ session('error') }}
-            </div>
-        @endif
+        <x-callback-message />
         
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
