@@ -52,8 +52,8 @@ class GameController extends Controller
         // $redirectUrl = $this->fallbackBackUrl('shop');
 
         $redirect = $request->input('back_url', route('shop'));
-        
-        return redirect($redirect)->with('success', 'Game updated successfully!');
+
+        return redirect($redirect)->with('success', 'Game deleted successfully!');
 
         // return redirect($redirectUrl)->with('success', 'Game deleted successfully!');
     }
