@@ -7,7 +7,7 @@
     <h1>Users</h1>
 
     <form method="GET" action="{{ route('dashboard.users') }}" class="mb-3 d-flex">
-        <input type="text" name="search" value="{{ request('search') }}" class="form-control me-2" placeholder="Поиск по имени или email">
+        <input type="text" name="search" value="{{ request('search') }}" class="form-control me-2" placeholder="Search by name or email">
         <button class="btn btn-primary">Search</button>
     </form>
 

@@ -1,5 +1,5 @@
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x/dist/cdn.min.js" defer></script>
-<nav x-data="{ open: false }" class="navbar navbar-expand-lg navbar-light bg-light border-b border-gray-100">
+<nav x-data="{ open: false }" class="navbar navbar-expand-lg navbar-light bg-light border-b border-gray-100" style="height: 14vh;">
     <div class="container-fluid">
         <!-- Logo -->
         <a class="navbar-brand" href="{{ route('dashboard') }}">
@@ -24,33 +24,27 @@
 
             <!-- Auth Section -->
             @auth
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="btn btn-light">
-                            {{ Auth::user()->name }}
-                            <svg class="ms-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0-01-1.414 0l-4-4a1 1 0-010-1.414z"/>
-                            </svg>
-                        </button>
-                    </x-slot>
+            <div class="position-relative">
+                <div class="dropdown">
+                    <button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ Auth::user()->name }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item" href="{{ route('library') }}">My Library</a></li>
+                        <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                        <a class="dropdown-item" href="#"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            Log Out
+                        </a>
+                        </li>
+                    </ul>
+                </div>
 
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('library')">
-                            My Library
-                        </x-dropdown-link>
-                        @if (Auth::user()->isAdmin())
-                        <x-dropdown-link :href="route('dashboard')">
-                            Dashboard
-                        </x-dropdown-link>
-                        @endif
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
-                                Log Out
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
+
+            </div>
             @else
                 <a href="{{ route('login') }}" class="btn btn-primary">{{ __('Login') }}</a>
                 <a href="{{ route('register') }}" class="btn btn-secondary ms-2">{{ __('Register') }}</a>
