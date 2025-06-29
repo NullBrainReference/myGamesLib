@@ -52,19 +52,17 @@
 </div>
 <div class="row justify-content-center mt-4">
     <div class="col-md-8">
-        <h5>Comments</h5>
+        <h5 class="mt-4">Comments</h5>
 
         @auth
         <form action="{{ route('comments.store', ['id' => $game->game_id]) }}" method="POST" class="mb-3">
             @csrf
-            <div class="mb-2">
-                <textarea name="content" class="form-control" rows="3" placeholder="Your comment..." required></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Send</button>
+            <textarea name="content" class="form-control" rows="3" placeholder="Leave a comment..." required></textarea>
+            <button type="submit" class="btn btn-primary mt-2">Submit</button>
         </form>
         @endauth
 
-        @forelse ($game->comments as $comment)
+        @forelse ($comments as $comment)
             <div class="card mb-2">
                 <div class="card-body">
                     <strong>{{ $comment->user->name }}</strong>
@@ -72,19 +70,24 @@
                     <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
 
                     @auth
-                        @if(Auth::id() === $comment->user_id || Auth::user()->isAdmin())
+                        @if(auth()->id() === $comment->user_id || auth()->user()->isAdmin())
                             <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="mt-1">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                <button class="btn btn-sm btn-outline-danger">Delete</button>
                             </form>
                         @endif
                     @endauth
                 </div>
             </div>
         @empty
-            <p class="text-muted">No comments. Be the first one!</p>
+            <p class="text-muted">No comments yet. Be the first!</p>
         @endforelse
+
+        <div class="mt-3">
+            {{ $comments->links('pagination::simple-bootstrap-5') }}
+        </div>
+
     </div>
 </div>
 @endsection
