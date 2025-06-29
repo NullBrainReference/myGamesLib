@@ -38,6 +38,11 @@
                         <x-dropdown-link :href="route('library')">
                             My Library
                         </x-dropdown-link>
+                        @if (Auth::user()->isAdmin())
+                        <x-dropdown-link :href="route('dashboard')">
+                            Dashboard
+                        </x-dropdown-link>
+                        @endif
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
