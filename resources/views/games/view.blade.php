@@ -50,4 +50,41 @@
         </div>
     </div>
 </div>
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <h5>Comments</h5>
+
+        @auth
+        <form action="{{ route('comments.store', ['id' => $game->game_id]) }}" method="POST" class="mb-3">
+            @csrf
+            <div class="mb-2">
+                <textarea name="content" class="form-control" rows="3" placeholder="Your comment..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+        @endauth
+
+        @forelse ($game->comments as $comment)
+            <div class="card mb-2">
+                <div class="card-body">
+                    <strong>{{ $comment->user->name }}</strong>
+                    <p class="mb-1">{{ $comment->content }}</p>
+                    <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
+
+                    @auth
+                        @if(Auth::id() === $comment->user_id || Auth::user()->isAdmin())
+                            <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="mt-1">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                            </form>
+                        @endif
+                    @endauth
+                </div>
+            </div>
+        @empty
+            <p class="text-muted">No comments. Be the first one!</p>
+        @endforelse
+    </div>
+</div>
 @endsection

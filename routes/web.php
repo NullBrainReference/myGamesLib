@@ -7,6 +7,7 @@ use App\Http\Controllers\GameController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CommentController;
 
 
 // Route::get('/dashboard', function () {
@@ -53,12 +54,20 @@ Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {
     Route::get('/', [DashboardController::class, 'users'])->name('dashboard');
 
     Route::get('/users', [DashboardController::class, 'users'])->name('dashboard.users');
-
     Route::patch('/users/{id}/role', [DashboardController::class, 'updateRole'])->name('dashboard.users.updateRole');
+    
+    Route::get('/games', [GameController::class, 'dashboard'])->name('dashboard.games');
+
+    Route::get('/comments', [CommentController::class, 'dashboard'])->name('dashboard.comments');
 });
 
-Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {
-    Route::get('/games', [GameController::class, 'dashboard'])->name('dashboard.games');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/games/{id}/comments', [CommentController::class, 'store'])
+        ->where('id', '[0-9]+')
+        ->name('comments.store');
+
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 
 

@@ -8,6 +8,7 @@
     <div class="d-flex align-items-baseline gap-2 mb-3">
         <h1 class="mb-0">Games</h1>
         <a href="{{ route('dashboard.users') }}" class="text-decoration-none lh-1 pt-1">to users</a>
+        <a href="{{ route('dashboard.comments') }}" class="text-decoration-none lh-1 pt-1">to comments</a>
     </div>
 
     <form method="GET" action="{{ route('dashboard.games') }}" class="mb-3 d-flex">

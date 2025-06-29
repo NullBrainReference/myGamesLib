@@ -58,4 +58,9 @@ class User extends Authenticatable
         return $this->belongsToMany(Game::class, 'game_user', 'user_id', 'game_id');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
 }
