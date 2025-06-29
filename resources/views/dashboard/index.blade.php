@@ -4,7 +4,11 @@
 <div class="container">
     <x-callback-message />
 
-    <h1>Users</h1>
+    {{-- <h1>Users</h1> --}}
+    <div class="d-flex align-items-baseline gap-2 mb-3">
+        <h1 class="mb-0">Users</h1>
+        <a href="{{ route('dashboard.games') }}" class="text-decoration-none lh-1 pt-1">to games</a>
+    </div>
 
     <form method="GET" action="{{ route('dashboard.users') }}" class="mb-3 d-flex">
         <input type="text" name="search" value="{{ request('search') }}" class="form-control me-2" placeholder="Search by name or email">

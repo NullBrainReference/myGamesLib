@@ -13,8 +13,10 @@
                 <form action="{{ route('games.delete', ['id' => $game->game_id]) }}" method="POST">
                     @csrf
                     @method('DELETE')
+                    <input type="hidden" name="back_url" value="{{ $backUrl }}">
                     <button type="submit" class="btn btn-danger">Confirm Delete</button>
-                    <a href="{{ route('game.view', ['id' => $game->game_id]) }}" class="btn btn-secondary">Cancel</a>
+                    <a href="{{ $backUrl }}" class="btn btn-secondary me-2">Cancel</a>
+                    {{-- <a href="{{ route('game.view', ['id' => $game->game_id]) }}" class="btn btn-secondary">Cancel</a> --}}
                 </form>
             </div>
         </div>

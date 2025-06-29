@@ -26,9 +26,11 @@
                         <label for="img_src" class="form-label">Image URL</label>
                         <input type="url" name="img_src" class="form-control" value="{{ $game->img_src }}" required>
                     </div>
-
+                    
+                    <input type="hidden" name="back_url" value="{{ $backUrl }}">
                     <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a href="{{ route('game.view', ['id' => $game->game_id]) }}" class="btn btn-secondary">Cancel</a>
+                    <a href="{{ $backUrl }}" class="btn btn-secondary me-2">Cancel</a>
+                    {{-- <a href="{{ route('game.view', ['id' => $game->game_id]) }}" class="btn btn-secondary">Cancel</a> --}}
                 </form>
             </div>
         </div>

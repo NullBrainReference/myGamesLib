@@ -57,6 +57,9 @@ Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {
     Route::patch('/users/{id}/role', [DashboardController::class, 'updateRole'])->name('dashboard.users.updateRole');
 });
 
+Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {
+    Route::get('/games', [GameController::class, 'dashboard'])->name('dashboard.games');
+});
 
 
 Route::get('/library', [LibraryController::class, 'index'])->name('library');
