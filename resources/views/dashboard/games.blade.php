@@ -40,6 +40,7 @@
                             <a href="{{ route('game.view', $game->game_id) }}" class="btn btn-sm btn-outline-primary">View</a>
                             <a href="{{ route('games.edit', $game->game_id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
                             <form method="GET" action="{{ route('games.remove', $game->game_id) }}">
+                                <input type="hidden" name="back_url" value="{{ request()->fullUrl() }}">
                                 <button class="btn btn-sm btn-outline-danger">Delete</button>
                             </form>
                         </td>

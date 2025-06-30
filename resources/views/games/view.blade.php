@@ -39,11 +39,10 @@
                         Edit Game
                     </a>
 
-                    <form action="{{ route('games.remove', ['id' => $game->game_id]) }}" method="GET"
-                        class="mt-1">
-                        <button type="submit" class="btn btn-danger">Delete Game</button>
-                    </form>
-                    
+                    <form action="{{ route('games.remove', ['id' => $game->game_id]) }}" method="GET" class="mt-1">
+                            <input type="hidden" name="back_url" value="{{ $backUrl }}">
+                            <button type="submit" class="btn btn-danger">Delete Game</button>
+                        </form>
                 @endif
                 @endauth
             </div>

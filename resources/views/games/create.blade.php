@@ -9,7 +9,8 @@
             <div class="card-body">
                 <h5 class="card-title">Create New Game</h5>
 
-                <form action="{{ route('games.store') }}" method="POST">
+                {{-- <form action="{{ route('games.store') }}" method="POST"> --}}
+                <form action="{{ route('games.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="mb-3">
@@ -23,8 +24,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="img_src" class="form-label">Image URL</label>
-                        <input type="url" name="img_src" class="form-control" required>
+                        <label for="image" class="form-label">Game Cover Image</label>
+                        <input type="file" name="image" class="form-control" accept=".png,.jpg,.jpeg,.webp" required>
                     </div>
 
                     <button type="submit" class="btn btn-primary">Create Game</button>

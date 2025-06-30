@@ -31,17 +31,19 @@ class GameController extends Controller
     public function view(int $id)
     {
         $game = Game::findOrFail($id);
-
         $comments = $game->comments()->with('user')->latest()->paginate(5);
 
-        return view('games.view', compact('game', 'comments'));
+        $backUrl = request()->input('back_url') ?? $this->fallbackBackUrl('shop');
+
+        return view('games.view', compact('game', 'comments', 'backUrl'));
     }
 
     public function confirmRemoval(int $id)
     {
         $game = Game::findOrFail($id);
 
-        $backUrl = request()->headers->get('referer') ?? route('shop');
+        // $backUrl = request()->headers->get('referer') ?? route('shop');
+        $backUrl = request()->input('back_url') ?? $this->fallbackBackUrl('shop');
 
         return view('games.confirm_remove', compact('game', 'backUrl'));
     }
@@ -72,12 +74,28 @@ class GameController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
-            'img_src' => 'required|url',
+            'image' => 'required|image|mimes:jpeg,png,webp|max:2048',
         ]);
 
-        Game::create($validated);
+        $path = $request->file('image')->store('game_images', 'public');
+
+        Game::create([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'img_src' => '/storage/' . $path,
+        ]);
 
         return redirect($this->fallbackBackUrl('shop'))->with('success', 'Game created successfully!');
+
+        // $validated = $request->validate([
+        //     'title' => 'required|string|max:255',
+        //     'description' => 'required|string|max:1000',
+        //     'img_src' => 'required|url',
+        // ]);
+
+        // Game::create($validated);
+
+        // return redirect($this->fallbackBackUrl('shop'))->with('success', 'Game created successfully!');
         // return redirect()->route('shop')->with('success', 'Game created successfully!');
     }
 
@@ -93,22 +111,27 @@ class GameController extends Controller
 
     public function update(Request $request, int $id)
     {
-
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
-            'img_src' => 'required|url',
+            'image' => 'nullable|image|mimes:jpeg,png,webp|max:2048',
         ]);
 
         $game = Game::findOrFail($id);
-        $game->update($validated);
+
+        $game->title = $validated['title'];
+        $game->description = $validated['description'];
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('game_images', 'public');
+            $game->img_src = '/storage/' . $path;
+        }
+
+        $game->save();
 
         $redirect = $request->input('back_url', route('shop'));
 
         return redirect($redirect)->with('success', 'Game updated successfully!');
-
-        // return redirect($this->fallbackBackUrl('shop'))->with('success', 'Game updated successfully!');
-        // return redirect()->route('game.view', ['id' => $game->game_id])->with('success', 'Game updated successfully!');
     }
 
     private function fallbackBackUrl(string $defaultRoute)
