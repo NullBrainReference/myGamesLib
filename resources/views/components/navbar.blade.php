@@ -31,7 +31,11 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
                         <li><a class="dropdown-item" href="{{ route('library') }}">My Library</a></li>
+
+                        @if (Auth::user()->isAdmin())
                         <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>
+                        @endif
+                        
                         <li><hr class="dropdown-divider"></li>
                         <li>
                         <a class="dropdown-item" href="#"
