@@ -25,7 +25,7 @@
                 <p class="card-text">{{ $game->description }}</p>
 
                 @auth
-                @if(Auth::user()->games->contains($game->game_id)) 
+                @if(Auth::user()->games->contains($game->game_id))
                     <span class="badge bg-success">In Your Library</span>
                 @else
                     <form action="{{ route('library.add', ['id' => $game->game_id]) }}" method="POST">
@@ -33,8 +33,8 @@
                         <button type="submit" class="btn btn-primary">Add to Library</button>
                     </form>
                 @endif
-                @if(Auth::user()->isAdmin()) 
-                    <a href="{{ route('games.edit', ['id' => $game->game_id]) }}" 
+                @if(Auth::user()->isAdmin())
+                    <a href="{{ route('games.edit', ['id' => $game->game_id]) }}"
                         class="btn btn-warning mt-1">
                         Edit Game
                     </a>
@@ -80,7 +80,9 @@
                 </div>
             </div>
         @empty
+        @auth
             <p class="text-muted">No comments yet. Be the first!</p>
+        @endauth
         @endforelse
 
         <div class="mt-3">
