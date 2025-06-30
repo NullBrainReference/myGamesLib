@@ -9,9 +9,16 @@ use Illuminate\Support\Facades\Auth;
 class GameController extends Controller
 {
     //
-    public function shop()
+    public function shop(Request $request)
     {
-        $games = Game::paginate(2);
+        $query = Game::query();
+
+        if ($search = $request->input('search')) {
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        $games = $query->paginate(2);
+
         return view('games.shop', compact('games'));
     }
 
