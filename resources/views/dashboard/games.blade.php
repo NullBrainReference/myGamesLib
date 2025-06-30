@@ -16,6 +16,10 @@
         <button class="btn btn-primary">Search</button>
     </form>
 
+
+    <a href="{{ route('games.create') }}" class="btn btn-success mt-0 ms-0 mb-1">Add New Game</a>
+
+
     @if($games->count())
         <table class="table">
             <thead>
