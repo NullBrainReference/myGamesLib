@@ -84,4 +84,32 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    public function comments($id)
+    {
+        $user = User::findOrFail($id);
+        $comments = $user->comments()->with('game')->latest()->paginate(10);
+
+        return view('profile.comments', compact('user', 'comments'));
+    }
+
+    public function ban($id)
+    {
+        $user = User::findOrFail($id);
+        if (auth()->user()->isAdmin()) {
+            $user->banned = true;
+            $user->save();
+        }
+        return back();
+    }
+
+    public function unban($id)
+    {
+        $user = User::findOrFail($id);
+        if (auth()->user()->isAdmin()) {
+            $user->banned = false;
+            $user->save();
+        }
+        return back();
+    }
 }

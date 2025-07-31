@@ -6,8 +6,28 @@
         <div class="col-md-8">
 
             <div class="card p-4">
+                @if(auth()->check() && auth()->user()->isAdmin() && !$isSelf)
+                    @if($user->isBanned())
+                        <form action="{{ route('profile.unban', $user->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            <button class="btn btn-success btn-sm">Unban</button>
+                        </form>
+                    @else
+                        <form action="{{ route('profile.ban', $user->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            <button class="btn btn-danger btn-sm">Ban</button>
+                        </form>
+                    @endif
+                @endif
+
+                @if($user->isBanned())
+                    <div class="alert alert-danger mt-3">
+                        This user is banned.
+                    </div>
+                @endif
                 <div class="d-flex align-items-start">
                     
+
                     <div class="me-4 text-center">
                         @if($profile && $profile->avatar)
                             <img src="{{ asset('storage/' . $profile->avatar) }}" alt="Avatar" class="rounded-circle mb-2" style="width: 120px; height: 120px; object-fit: cover;">
@@ -53,11 +73,19 @@
                 </div>
 
                 @if($isSelf)
-                <div class="mt-2">
-                    <a href="{{ route('profile.edit') }}" class="btn btn-outline-secondary btn-sm">
-                        Edit profile
-                    </a>
-                </div>
+                    <div class="mt-2">
+                        <a href="{{ route('profile.edit') }}" class="btn btn-outline-secondary btn-sm">
+                            Edit profile
+                        </a>
+                    </div>
+                @endif
+
+                @if($user->comments()->count())
+                    <div class="mt-3">
+                        <a href="{{ route('profile.comments', $user->id) }}" class="btn btn-outline-info btn-sm">
+                            View comments ({{ $user->comments()->count() }})
+                        </a>
+                    </div>
                 @endif
             </div>
 

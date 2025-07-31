@@ -38,6 +38,12 @@ Route::middleware('auth')->prefix('profile')->group(function () {
     Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+Route::get('/profile/{id}/comments', [ProfileController::class, 'comments'])->name('profile.comments');
+
+Route::middleware('role.guard:admin')->group(function () {
+    Route::post('/profile/{id}/ban', [ProfileController::class, 'ban'])->name('profile.ban');
+    Route::post('/profile/{id}/unban', [ProfileController::class, 'unban'])->name('profile.unban');
+});
 
 Route::get('/', [HomeController::class, 'index'])->name('index');
 

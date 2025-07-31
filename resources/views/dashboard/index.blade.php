@@ -22,6 +22,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Banned</th>
                     <th>Role</th>
                     <th>Actions</th>
                 </tr>
@@ -36,6 +37,12 @@
                             </a>
                         </td>
                         <td>{{ $user->email }}</td>
+                        <td>
+                            @if($user->isBanned())
+                                <span class="text-danger">Yes</span>
+                            @else
+                                <span class="text-success">No</span>
+                            @endif
                         <td>{{ $user->role }}</td>
                         <td>
                             <form method="POST" action="{{ route('dashboard.users.updateRole', $user->id) }}" class="d-flex">

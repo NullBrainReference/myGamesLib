@@ -40,6 +40,11 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isBanned(): bool
+    {
+        return $this->banned;
+    }
+
     /**
      * Get the attributes that should be cast.
      *
