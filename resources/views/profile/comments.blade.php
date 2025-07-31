@@ -1,3 +1,4 @@
+{{-- filepath: resources/views/profile/comments.blade.php --}}
 @extends('layouts.app')
 
 @section('content')
@@ -14,6 +15,16 @@
                     </strong>
                     <div>{{ $comment->content }}</div>
                     <small class="text-muted">{{ $comment->created_at->format('Y-m-d H:i') }}</small>
+
+                    @auth
+                        @if(auth()->id() === $comment->user_id || auth()->user()->isAdmin())
+                            <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="d-inline ms-2">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        @endif
+                    @endauth
                 </li>
             @endforeach
         </ul>
