@@ -27,6 +27,13 @@
                 @auth
                 @if(Auth::user()->games->contains($game->game_id))
                     <span class="badge bg-success">In Your Library</span>
+                    <form action="{{ route('library.remove', $game->game_id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Удалить из библиотеки">
+                            Delete from my Library
+                        </button>
+                    </form>
                 @else
                     <form action="{{ route('library.add', ['id' => $game->game_id]) }}" method="POST">
                         @csrf
@@ -64,7 +71,12 @@
         @forelse ($comments as $comment)
             <div class="card mb-2">
                 <div class="card-body">
-                    <strong>{{ $comment->user->name }}</strong>
+                    {{-- <strong>{{ $comment->user->name }}</strong> --}}
+                    <strong>
+                        <a href="{{ route('profile.view', $comment->user->id) }}">
+                            {{ $comment->user->name }}
+                        </a>
+                    </strong>
                     <p class="mb-1">{{ $comment->content }}</p>
                     <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
 

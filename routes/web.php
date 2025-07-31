@@ -14,10 +14,29 @@ use App\Http\Controllers\CommentController;
 //     return view('dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// Route::get('/profile/{id?}', function ($id = null) {
+//     $id = $id ?? Auth::id();
+//     return app(\App\Http\Controllers\ProfileController::class)->view($id);
+// })->middleware('auth')->name('profile.view');
+
+// Route::middleware('auth')->group(function () {
+//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// });
+
+Route::get('/profile', function () {
+    return app(\App\Http\Controllers\ProfileController::class)->view(Auth::id());
+})->middleware('auth')->name('profile');
+
+Route::get('/profile/{id}', [ProfileController::class, 'view'])
+    ->where('id', '[0-9]+')
+    ->name('profile.view');
+
+Route::middleware('auth')->prefix('profile')->group(function () {
+    Route::get('/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 Route::get('/', [HomeController::class, 'index'])->name('index');
@@ -70,12 +89,14 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 
-
+Route::get('/library/user/{id}', [LibraryController::class, 'userLibrary'])->name('library.user');
 Route::get('/library', [LibraryController::class, 'index'])->name('library');
+
 
 Route::post('/library/{id}/add', [LibraryController::class, 'add'])
     ->where('id', '[0-9]+')
     ->name('library.add');
+Route::delete('/library/remove/{game}', [LibraryController::class, 'remove'])->name('library.remove');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);

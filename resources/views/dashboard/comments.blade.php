@@ -45,7 +45,12 @@
                 @foreach($comments as $comment)
                     <tr>
                         <td><a href="{{ route('game.view', $comment->game->game_id) }}">{{ $comment->game->title }}</a></td>
-                        <td>{{ $comment->user->name }}</td>
+                        {{-- <td>{{ $comment->user->name }}</td> --}}
+                        <td>
+                            <a href="{{ route('profile.view', $comment->user->id) }}">
+                                {{ $comment->user->name }}
+                            </a>
+                        </td>
                         <td>{{ Str::limit($comment->content, 80) }}</td>
                         <td>{{ $comment->created_at->format('Y-m-d H:i') }}</td>
                         <td>

@@ -15,11 +15,19 @@ class LibraryController extends Controller
 
         if ($user) {
             $games = $user->games;
-
-            return view('library.library', compact('games'));
+            $canDelete = true;
+            return view('library.library', compact('games', 'canDelete'));
         }
 
         return redirect()->route('login')->with('error', 'You must be logged in to access your library.');
+    }
+
+    public function userLibrary($userId)
+    {
+        $user = \App\Models\User::findOrFail($userId);
+        $games = $user->games;
+        $canDelete = (Auth::check() && Auth::id() == $user->id);
+        return view('library.library', compact('games', 'user', 'canDelete'));
     }
 
     public function add(int $gameId)
@@ -34,5 +42,15 @@ class LibraryController extends Controller
         }
 
         return redirect()->route('login')->with('error', 'You must be logged in to add games.');
+    }
+
+    public function remove($gameId)
+    {
+        $user = Auth::user();
+        if ($user) {
+            $user->games()->detach($gameId);
+            return back()->with('success', 'Game was removed from your library.');
+        }
+        return redirect()->route('login')->with('error', 'You must be logged in.');
     }
 }

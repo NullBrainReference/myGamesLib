@@ -1,29 +1,50 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
-                </div>
+@section('content')
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <div class="card p-4">
+                <h3>Edit Profile</h3>
+                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PATCH')
+
+                    <div class="mb-3">
+                        <label for="avatar" class="form-label">Avatar</label>
+                        <input type="file" class="form-control" id="avatar" name="avatar">
+                        @if($profile && $profile->avatar)
+                            <img src="{{ asset('storage/' . $profile->avatar) }}" alt="Avatar" class="rounded mt-2" style="width: 80px; height: 80px; object-fit: cover;">
+                        @endif
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="birth_date" class="form-label">Birth date</label>
+                        <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ old('birth_date', $profile->birth_date ?? '') }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender">
+                            <option value="">Not set</option>
+                            <option value="male" @selected(($profile->gender ?? '') === 'male')>Male</option>
+                            <option value="female" @selected(($profile->gender ?? '') === 'female')>Female</option>
+                            <option value="other" @selected(($profile->gender ?? '') === 'other')>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="about_me" class="form-label">About me</label>
+                        <textarea class="form-control" id="about_me" name="about_me" rows="4">{{ old('about_me', $profile->about_me ?? '') }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <a href="{{ route('profile.view', $user->id) }}" class="btn btn-secondary ms-2">Cancel</a>
+                </form>
             </div>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
-                </div>
-            </div>
-
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
-                </div>
-            </div>
         </div>
     </div>
-</x-app-layout>
+</div>
+@endsection

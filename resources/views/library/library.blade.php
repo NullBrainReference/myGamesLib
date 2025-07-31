@@ -16,7 +16,8 @@
     @foreach($games as $game)
     <div class="d-flex justify-content-center flex-wrap mb-5">
         <div class="w-25">
-            <x-game-card :game="$game" />
+            {{-- <x-game-card :game="$game" /> --}}
+            <x-library-game-card :game="$game" :can-delete="$canDelete ?? false" />
         </div>
     </div>
     @endforeach
