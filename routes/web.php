@@ -99,11 +99,19 @@ Route::middleware(['auth', 'logout.banned'])->group(function () {
 Route::middleware(['auth', 'logout.banned'])->prefix('blog')->group(function () {
     Route::get('/create', [BlogController::class, 'create'])->name('blog.create');
     Route::post('/store', [BlogController::class, 'store'])->name('blog.store');
+    Route::get('/{id}/edit', [BlogController::class, 'edit'])->name('blog.edit');
+    Route::put('/update', [BlogController::class, 'update'])->name('blog.update');
+    Route::delete('/{id}', [BlogController::class, 'destroy'])->name('blog.delete');
 });
 
 Route::get('/blog/{id}', [BlogController::class, 'show'])
     ->where('id', '[0-9]+')
     ->name('blog.view');
+
+Route::get('/blogs', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blogs/author/{id}', [BlogController::class, 'byAuthor'])
+    ->where('id', '[0-9]+')
+    ->name('blog.author');
 
 
 Route::middleware(['auth', 'logout.banned'])->group(function () {

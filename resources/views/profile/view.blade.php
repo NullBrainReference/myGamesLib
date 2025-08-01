@@ -92,6 +92,10 @@
                         </a>
                     </div>
                 @endif
+
+                <a href="{{ route('blog.author', $user->id) }}" class="btn btn-outline-primary btn-sm mt-3">
+                    {{ $isSelf ? 'Your blog posts' : "$user->name's blog posts" }}
+                </a>
             </div>
 
         </div>

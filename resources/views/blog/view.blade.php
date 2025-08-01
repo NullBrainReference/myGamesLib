@@ -21,7 +21,12 @@
                 <h2 class="mb-3">{{ $blog->title }}</h2>
 
                 <div class="text-muted mb-2">
-                    By <strong>{{ $blog->user->name }}</strong> 
+                    By 
+                    <strong>
+                        <a href="{{ route('profile.view', ['id' => $blog->user->id]) }}">
+                            {{ $blog->user->name }}
+                        </a>
+                    </strong> 
                     • Posted {{ $blog->created_at->diffForHumans() }}
                 </div>
 
@@ -31,12 +36,25 @@
                     {!! \Illuminate\Support\Str::markdown($blog->content) !!}
                 </div>
 
-                <div class="mt-4">
-                    <a href="{{ route('shop') }}" class="btn btn-outline-secondary btn-sm">← Back to posts</a>
+                <div class="mt-4 d-flex justify-content-between align-items-center">
+                    <a href="{{ route('blog.index') }}" class="btn btn-outline-secondary btn-sm">← To posts</a>
+                    
+                    @if(auth()->check() && (auth()->id() === $blog->user_id || auth()->user()->isAdmin()))
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('blog.edit', $blog->id) }}" class="btn btn-outline-warning btn-sm">Edit</a>
+                            <form action="{{ route('blog.delete', $blog->id) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete this post</button>
+                            </form>
+                        </div>
+                    @endif
                 </div>
+
             </div>
 
         </div>
     </div>
+
 </div>
 @endsection
