@@ -40,7 +40,12 @@ class BlogController extends Controller
     {
         $blog = Blog::with('images')->findOrFail($id);
 
-        return view('blog.view', compact('blog'));
+        $comments = $blog->comments()
+            ->with('user')
+            ->latest()
+            ->paginate(5);
+
+        return view('blog.view', compact('blog', 'comments'));
     }
 
     public function create()

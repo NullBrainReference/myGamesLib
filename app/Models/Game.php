@@ -22,8 +22,14 @@ class Game extends Model
         return $this->belongsToMany(User::class, 'game_user', 'game_id', 'user_id');
     }
 
+    // public function comments()
+    // {
+    //     return $this->hasMany(Comment::class, 'game_id', 'game_id');
+    // }
+
     public function comments()
     {
-        return $this->hasMany(Comment::class, 'game_id', 'game_id');
+        return $this->morphMany(Comment::class, 'commentable');
     }
+
 }

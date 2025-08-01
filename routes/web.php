@@ -91,11 +91,12 @@ Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {
 
 
 Route::middleware(['auth', 'logout.banned'])->group(function () {
-    Route::post('/games/{id}/comments', [CommentController::class, 'store'])
-        ->where('id', '[0-9]+')
+    Route::post('/comments/{type}/{id}', [CommentController::class, 'store'])
+        ->where(['type' => '[a-z]+', 'id' => '[0-9]+'])
         ->name('comments.store');
 
-    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
+        ->name('comments.destroy');
 });
 
 Route::middleware(['auth', 'logout.banned'])->prefix('blog')->group(function () {

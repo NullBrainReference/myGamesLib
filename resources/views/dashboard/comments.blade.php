@@ -35,7 +35,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Game</th>
+                    <th>Object</th>
                     <th>User</th>
                     <th>Comment</th>
                     <th>Date</th>
@@ -45,7 +45,19 @@
             <tbody>
                 @foreach($comments as $comment)
                     <tr>
-                        <td><a href="{{ route('game.view', $comment->game->game_id) }}">{{ $comment->game->title }}</a></td>
+                        <td>
+                            @if($comment->commentable instanceof \App\Models\Game)
+                                <a href="{{ route('game.view', $comment->commentable->game_id) }}">
+                                    {{ $comment->commentable->title }}
+                                </a>
+                            @elseif($comment->commentable instanceof \App\Models\Blog)
+                                <a href="{{ route('blog.view', $comment->commentable->id) }}">
+                                    {{ $comment->commentable->title }}
+                                </a>
+                            @else
+                                <span class="text-muted">Unknown object</span>
+                            @endif
+                        </td>
                         {{-- <td>{{ $comment->user->name }}</td> --}}
                         <td>
                             <a href="{{ route('profile.view', $comment->user->id) }}">
