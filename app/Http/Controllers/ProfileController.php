@@ -89,7 +89,7 @@ class ProfileController extends Controller
     public function comments($id)
     {
         $user = User::findOrFail($id);
-        $comments = $user->comments()->with('game')->latest()->paginate(10);
+        $comments = $user->comments()->with('commentable')->latest()->paginate(10);
 
         return view('profile.comments', compact('user', 'comments'));
     }

@@ -9,9 +9,18 @@
             @foreach($comments as $comment)
                 <li class="list-group-item">
                     <strong>
-                        <a href="{{ route('game.view', $comment->game->game_id) }}">
-                            {{ $comment->game->title }}
-                        </a>
+                        @if($comment->commentable instanceof \App\Models\Game)
+                            <a href="{{ route('game.view', $comment->commentable->game_id) }}">
+                                {{ $comment->commentable->title }}
+                            </a>
+                        @elseif($comment->commentable instanceof \App\Models\Blog)
+                            <a href="{{ route('blog.view', $comment->commentable->id) }}">
+                                {{ $comment->commentable->title }}
+                            </a>
+                        @else
+                            <span class="text-muted">Unknown object</span>
+                        @endif
+
                     </strong>
                     <div>{{ $comment->content }}</div>
                     <small class="text-muted">{{ $comment->created_at->format('Y-m-d H:i') }}</small>
