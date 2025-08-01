@@ -20,6 +20,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('shop') }}">Shop</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('blog.index') }}">Posts</a>
+                </li>
             </ul>
 
             <!-- Auth Section -->

@@ -85,6 +85,8 @@ Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {
     Route::get('/games', [GameController::class, 'dashboard'])->name('dashboard.games');
 
     Route::get('/comments', [CommentController::class, 'dashboard'])->name('dashboard.comments');
+
+    Route::get('/posts', [BlogController::class, 'dashboard'])->name('dashboard.posts');
 });
 
 
@@ -101,6 +103,8 @@ Route::middleware(['auth', 'logout.banned'])->prefix('blog')->group(function () 
     Route::post('/store', [BlogController::class, 'store'])->name('blog.store');
     Route::get('/{id}/edit', [BlogController::class, 'edit'])->name('blog.edit');
     Route::put('/update', [BlogController::class, 'update'])->name('blog.update');
+
+    Route::get('/{id}/confirm-delete', [BlogController::class, 'confirmDelete'])->name('blog.confirm-delete');
     Route::delete('/{id}', [BlogController::class, 'destroy'])->name('blog.delete');
 });
 

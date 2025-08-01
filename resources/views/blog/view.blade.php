@@ -42,11 +42,8 @@
                     @if(auth()->check() && (auth()->id() === $blog->user_id || auth()->user()->isAdmin()))
                         <div class="d-flex gap-2">
                             <a href="{{ route('blog.edit', $blog->id) }}" class="btn btn-outline-warning btn-sm">Edit</a>
-                            <form action="{{ route('blog.delete', $blog->id) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete this post</button>
-                            </form>
+                            <a href="{{ route('blog.confirm-delete', $blog->id) }}" class="btn btn-outline-danger btn-sm">Delete</a>
+
                         </div>
                     @endif
                 </div>

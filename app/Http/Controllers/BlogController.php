@@ -91,6 +91,17 @@ class BlogController extends Controller
             ->with('success', 'Published!');
     }
 
+    public function confirmDelete($id)
+    {
+        $blog = Blog::findOrFail($id);
+
+        if (auth()->id() !== $blog->user_id && !auth()->user()->isAdmin()) {
+            return redirect()->route('blogs')->with('error', 'You are not allowed to delete this post.');
+        }
+
+        return view('blog.confirm-delete', compact('blog'));
+    }
+
     public function destroy($id)
     {
         $blog = Blog::findOrFail($id);
@@ -162,6 +173,20 @@ class BlogController extends Controller
         session()->forget(['pending_images', 'editing_blog_id']);
 
         return redirect()->route('blog.view', $blog->id)->with('success', 'Updated!');
+    }
+
+    public function dashboard(Request $request)
+    {
+        $title = $request->input('title');
+        $author = $request->input('author');
+
+        $blogs = Blog::with('user')
+            ->when($title, fn($q) => $q->where('title', 'like', "%{$title}%"))
+            ->when($author, fn($q) => $q->whereHas('user', fn($u) => $u->where('name', 'like', "%{$author}%")))
+            ->latest()
+            ->paginate(10);
+
+        return view('dashboard.posts', compact('blogs', 'title', 'author'));
     }
  
 }

@@ -12,6 +12,12 @@
 
     <h3 class="mb-4">📚 All Posts</h3>
 
+    @auth
+        <a href="{{ route('blog.create') }}" class="btn btn-success mb-2">
+            Create Post
+        </a>
+    @endauth
+
     @forelse($blogs as $blog)
         <div class="card mb-3 p-3 shadow-sm">
             <h5>{{ $blog->title }}</h5>
