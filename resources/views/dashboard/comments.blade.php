@@ -21,7 +21,7 @@
             <input type="text" name="comment" value="{{ request('comment') }}" class="form-control" placeholder="Comment content">
         </div>
         <div class="col-md-4">
-            <input type="text" name="game" value="{{ request('game') }}" class="form-control" placeholder="Game title">
+            <input type="text" name="object" value="{{ request('object') }}" class="form-control" placeholder="Title">
         </div>
         <div class="col-md-4">
             <input type="text" name="user" value="{{ request('user') }}" class="form-control" placeholder="User name">
