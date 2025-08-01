@@ -57,6 +57,11 @@
                                 Was not set.
                             @endif
                         </div>
+                        <div class="mb-2">
+                            <strong>Location:</strong>
+                            {{ $profile && $profile->location ? $profile->location : 'Was not set.' }}
+                        </div>
+
                     </div>
                 </div>
 

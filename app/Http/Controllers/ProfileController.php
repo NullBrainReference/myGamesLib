@@ -48,6 +48,7 @@ class ProfileController extends Controller
             'birth_date' => 'nullable|date',
             'gender' => 'nullable|in:male,female,other',
             'about_me' => 'nullable|string|max:1000',
+            'location' => 'nullable|string|max:255',
         ]);
 
         if ($request->hasFile('avatar')) {
