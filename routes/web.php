@@ -8,7 +8,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CommentController;
-
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\ImageController;
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
@@ -95,6 +96,20 @@ Route::middleware(['auth', 'logout.banned'])->group(function () {
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 
+Route::middleware(['auth', 'logout.banned'])->prefix('blog')->group(function () {
+    Route::get('/create', [BlogController::class, 'create'])->name('blog.create');
+    Route::post('/store', [BlogController::class, 'store'])->name('blog.store');
+});
+
+Route::get('/blog/{id}', [BlogController::class, 'show'])
+    ->where('id', '[0-9]+')
+    ->name('blog.view');
+
+
+Route::middleware(['auth', 'logout.banned'])->group(function () {
+    Route::post('/image/upload-temp', [ImageController::class, 'uploadTempImage'])
+        ->name('image.upload-temp');
+});
 
 Route::get('/library/user/{id}', [LibraryController::class, 'userLibrary'])->name('library.user');
 Route::get('/library', [LibraryController::class, 'index'])->name('library');
