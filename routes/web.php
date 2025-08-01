@@ -87,7 +87,7 @@ Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {
 });
 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'logout.banned'])->group(function () {
     Route::post('/games/{id}/comments', [CommentController::class, 'store'])
         ->where('id', '[0-9]+')
         ->name('comments.store');
@@ -95,14 +95,16 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 
+
 Route::get('/library/user/{id}', [LibraryController::class, 'userLibrary'])->name('library.user');
 Route::get('/library', [LibraryController::class, 'index'])->name('library');
 
-
-Route::post('/library/{id}/add', [LibraryController::class, 'add'])
-    ->where('id', '[0-9]+')
-    ->name('library.add');
-Route::delete('/library/remove/{game}', [LibraryController::class, 'remove'])->name('library.remove');
+Route::middleware(['auth', 'logout.banned'])->group(function () {
+    Route::post('/library/{id}/add', [LibraryController::class, 'add'])
+        ->where('id', '[0-9]+')
+        ->name('library.add');
+    Route::delete('/library/remove/{game}', [LibraryController::class, 'remove'])->name('library.remove');
+});
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);

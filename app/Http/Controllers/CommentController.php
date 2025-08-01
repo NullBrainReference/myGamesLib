@@ -11,6 +11,10 @@ class CommentController extends Controller
 
     public function store(Request $request, int $id)
     {
+        if (auth()->user()->isBanned()) {
+            return back()->with('error', 'Banned users cannot post comments.');
+        }
+
         $request->validate([
             'content' => 'required|string|max:1000',
         ]);

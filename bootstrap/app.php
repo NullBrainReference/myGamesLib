@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role.guard' => \App\Http\Middleware\RoleGuard::class,
+            'logout.banned' => \App\Http\Middleware\LogoutBannedUser::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

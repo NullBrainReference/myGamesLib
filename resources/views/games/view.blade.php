@@ -94,6 +94,8 @@
         @empty
         @auth
             <p class="text-muted">No comments yet. Be the first!</p>
+        @else
+            <p class="text-muted">No comments yet.</p>
         @endauth
         @endforelse
 

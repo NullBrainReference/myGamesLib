@@ -30,6 +30,7 @@
                         {{ Auth::user()->name }}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item" href="{{ route('profile') }}">Profile</a></li>
                         <li><a class="dropdown-item" href="{{ route('library') }}">My Library</a></li>
 
                         @if (Auth::user()->isAdmin())
