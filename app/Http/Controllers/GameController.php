@@ -77,7 +77,7 @@ class GameController extends Controller
 
     public function store(Request $request)
     {
-        
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:1000',

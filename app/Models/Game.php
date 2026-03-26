@@ -37,6 +37,11 @@ class Game extends Model
         return $this->hasMany(Rating::class, 'game_id', 'game_id');
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'game_id', 'game_id');
+    }
+
     public function getAverageRatingAttribute()
     {
         return round($this->ratings()->avg('rating'), 1) ?? 0; // Rounded to 1 decimal

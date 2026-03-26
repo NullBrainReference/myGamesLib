@@ -11,6 +11,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\ReviewController;
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
@@ -55,6 +56,11 @@ Route::get('/game/{id}', [GameController::class, 'view'])
     ->where('id', '[0-9]+')
     ->name('game.view');
 
+Route::middleware(['auth', 'logout.banned'])->prefix('reviews')->group(function () {
+    Route::post('/games/{gameId}', [ReviewController::class, 'store'])->name('review.store');
+    Route::put('/{reviewId}', [ReviewController::class, 'update'])->name('review.update');
+    Route::delete('/{reviewId}', [ReviewController::class, 'delete'])->name('review.delete');
+});
 
 Route::middleware('role.guard:admin')->group(function () {
     Route::get('/games/{id}/remove', [GameController::class, 'confirmRemoval'])
