@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\RatingController;
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
@@ -81,7 +82,7 @@ Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {
 
     Route::get('/users', [DashboardController::class, 'users'])->name('dashboard.users');
     Route::patch('/users/{id}/role', [DashboardController::class, 'updateRole'])->name('dashboard.users.updateRole');
-    
+
     Route::get('/games', [GameController::class, 'dashboard'])->name('dashboard.games');
 
     Route::get('/comments', [CommentController::class, 'dashboard'])->name('dashboard.comments');
@@ -89,6 +90,7 @@ Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {
     Route::get('/posts', [BlogController::class, 'dashboard'])->name('dashboard.posts');
 });
 
+Route::post('/games/{gameId}/rate', [RatingController::class, 'store'])->name('rating.store')->middleware('auth');
 
 Route::middleware(['auth', 'logout.banned'])->group(function () {
     Route::post('/comments/{type}/{id}', [CommentController::class, 'store'])

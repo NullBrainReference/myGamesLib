@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Star Rating Styles */
+.star-rating {
+  position: relative;
+  display: inline-block;
+  font-size: 20px;
+  line-height: 1;
+}
+.back-stars {
+  color: #ddd; /* Gray for empty */
+}
+.front-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #ffc107; /* Yellow for filled */
+  overflow: hidden;
+  white-space: nowrap;
+}

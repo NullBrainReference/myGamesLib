@@ -58,7 +58,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function games(): BelongsToMany 
+    public function games(): BelongsToMany
     {
         return $this->belongsToMany(Game::class, 'game_user', 'user_id', 'game_id');
     }
@@ -66,6 +66,11 @@ class User extends Authenticatable
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
     }
 
     public function profile()

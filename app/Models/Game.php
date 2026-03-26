@@ -17,7 +17,7 @@ class Game extends Model
 
     public $incrementing = false; // If game_id is non-incrementing
 
-    public function users(): BelongsToMany 
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'game_user', 'game_id', 'user_id');
     }
@@ -30,6 +30,16 @@ class Game extends Model
     public function comments()
     {
         return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class, 'game_id', 'game_id');
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return round($this->ratings()->avg('rating'), 1) ?? 0; // Rounded to 1 decimal
     }
 
 }
