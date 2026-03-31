@@ -43,7 +43,12 @@ class GameController extends Controller
 
         $backUrl = request()->input('back_url') ?? $this->fallbackBackUrl('shop');
 
-        return view('games.view', compact('game', 'comments', 'reviews', 'backUrl')); // Pass reviews to the view
+        $userReview = null;
+        if (Auth::check()) {
+            $userReview = $game->reviews()->where('user_id', Auth::id())->first();
+        }
+
+        return view('games.view', compact('game', 'comments', 'reviews', 'backUrl', 'userReview'));
     }
 
     public function confirmRemoval(int $id)

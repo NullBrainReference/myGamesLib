@@ -100,58 +100,72 @@
                 <h5 class="mb-0">Reviews</h5>
             </div>
             <div class="card-body">
+
                 @auth
-                    {{-- Image Upload (similar to blog) --}}
-                    @if ($errors->has('image'))
-                        <div class="alert alert-danger">
-                            {{ $errors->first('image') }}
+                    @if(!$userReview)
+                        {{-- image upload + keep review text --}}
+                        <div class="card mb-4 p-3">
+                            <h6>Upload Images for Review</h6>
+                            <form action="{{ route('image.upload-temp') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <input type="hidden" name="title" value="{{ old('title') }}">
+                                <input type="hidden" name="content" value="{{ old('content') }}">
+                                <div class="mb-3">
+                                    <label for="review_image" class="form-label">Choose image</label>
+                                    <input type="file" class="form-control" id="review_image" name="image" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Upload</button>
+                            </form>
+
+                            @if(session('pending_images'))
+                                <div class="mt-3">
+                                    <h6>🖼️ Uploaded Images</h6>
+                                    <form action="{{ route('image.clear-temp') }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-danger mb-2">Clear All Images</button>
+                                    </form>
+                                    <div class="row gx-2 gy-2">
+                                        @foreach(session('pending_images') as $index => $imgPath)
+                                            <div class="col-6 col-md-4">
+                                                <div class="ratio ratio-4x3 overflow-hidden rounded border">
+                                                    <img src="{{ asset($imgPath) }}" class="w-100 h-100 object-fit-cover" alt="Uploaded preview">
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary btn-block mt-2 w-100" onclick="copyToClipboard('markdown-{{ $index }}')">
+                                                    Copy
+                                                </button>
+                                                <form action="{{ route('image.delete-temp', $index) }}" method="POST" class="d-inline mt-1">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">Delete</button>
+                                                </form>
+                                                <pre style="display:none"><code id="markdown-{{ $index }}">![Alt text]({{ asset($imgPath) }})</code></pre>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- review form --}}
+                        <form action="{{ route('review.store', $game->game_id) }}" method="POST" class="mb-4">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="review_title" class="form-label">Review Title</label>
+                                <input type="text" name="title" id="review_title" class="form-control" value="{{ old('title') }}" required maxlength="255">
+                            </div>
+                            <div class="mb-3">
+                                <label for="review_content" class="form-label">Review Content (Markdown supported)</label>
+                                <textarea name="content" id="review_content" class="form-control" rows="8" required>{{ old('content') }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                            <button type="button" class="btn btn-secondary ms-2" onclick="clearReviewForm()">Clear</button>
+                        </form>
+                    @else
+                        <div class="alert alert-info">
+                            You have already submitted a review for this game. <a href="#user-review" class="alert-link">Edit your review</a>.
                         </div>
                     @endif
-                    <div class="card mb-4 p-3">
-                        <h6>Upload Images for Review</h6>
-                        <form action="{{ route('image.upload-temp') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <input type="hidden" name="title" value="{{ old('review_title') }}">
-                            <input type="hidden" name="content" value="{{ old('review_content') }}">
-                            <div class="mb-3">
-                                <label for="review_image" class="form-label">Choose image</label>
-                                <input type="file" class="form-control" id="review_image" name="image" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Upload</button>
-                        </form>
-
-                        {{-- Show pending images preview --}}
-                        @if(session('pending_images'))
-                            <div class="mt-3">
-                                <h6>🖼️ Uploaded Images</h6>
-                                <div class="row">
-                                    @foreach(session('pending_images') as $imgPath)
-                                        <div class="col-md-4 mb-3">
-                                            <img src="{{ asset($imgPath) }}" alt="Preview" class="img-fluid rounded shadow border">
-                                            <pre class="bg-light p-2 mt-2"><code id="markdown-{{ $loop->index }}">![Alt text]({{ asset($imgPath) }})</code></pre>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="copyToClipboard('markdown-{{ $loop->index }}')">Copy Markdown</button>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-
-                    {{-- Review Form with Markdown --}}
-                    <form action="{{ route('review.store', $game->game_id) }}" method="POST" class="mb-4">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="review_title" class="form-label">Review Title</label>
-                            <input type="text" name="title" id="review_title" class="form-control" value="{{ old('title') }}" required maxlength="255">
-                        </div>
-                        <div class="mb-3">
-                            <label for="review_content" class="form-label">Review Content (Markdown supported)</label>
-                            <textarea name="content" id="review_content" class="form-control" rows="8" placeholder="Write your review here using Markdown...">{{ old('content') }}</textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit Review</button>
-                    </form>
                 @else
-                    <p class="text-muted"><a href="{{ route('login') }}" class="text-decoration-none">Log in to write a review</a></p>
+                    <p class="text-muted"><a href="{{ route('login') }}">Log in to write a review</a></p>
                 @endauth
 
                 @if($reviews->count() > 0)
@@ -181,16 +195,62 @@
         </div>
     </div>
 </div>
-
 <script>
 function copyToClipboard(elementId) {
     const codeElement = document.getElementById(elementId);
     const text = codeElement.textContent || codeElement.innerText;
-    navigator.clipboard.writeText(text).then(() => {
-        // alert('Markdown copied to clipboard!');
-    }).catch(err => {
+    navigator.clipboard.writeText(text).catch(err => {
         console.error('Failed to copy: ', err);
     });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadForm = document.querySelector('form[action*="image.upload-temp"]');
+    const reviewTitle = document.getElementById('review_title');
+    const reviewContent = document.getElementById('review_content');
+
+    if (reviewTitle && localStorage.getItem('review_title')) {
+        reviewTitle.value = localStorage.getItem('review_title');
+    }
+    if (reviewContent && localStorage.getItem('review_content')) {
+        reviewContent.value = localStorage.getItem('review_content');
+    }
+
+    const syncHidden = () => {
+        if (!uploadForm || !reviewTitle || !reviewContent) return;
+        const hiddenTitle = uploadForm.querySelector('input[name="title"]');
+        const hiddenContent = uploadForm.querySelector('input[name="content"]');
+        if (hiddenTitle) hiddenTitle.value = reviewTitle.value;
+        if (hiddenContent) hiddenContent.value = reviewContent.value;
+    };
+
+    reviewTitle?.addEventListener('input', () => {
+        localStorage.setItem('review_title', reviewTitle.value);
+    });
+    reviewContent?.addEventListener('input', () => {
+        localStorage.setItem('review_content', reviewContent.value);
+    });
+
+    uploadForm?.addEventListener('submit', function() {
+        syncHidden();
+        localStorage.setItem('review_title', reviewTitle.value);
+        localStorage.setItem('review_content', reviewContent.value);
+    });
+
+    const reviewForm = document.querySelector('form[action*="review.store"]');
+    reviewForm?.addEventListener('submit', function() {
+        localStorage.removeItem('review_title');
+        localStorage.removeItem('review_content');
+    });
+});
+
+function clearReviewForm() {
+    const reviewTitle = document.getElementById('review_title');
+    const reviewContent = document.getElementById('review_content');
+    if (reviewTitle) reviewTitle.value = '';
+    if (reviewContent) reviewContent.value = '';
+    localStorage.removeItem('review_title');
+    localStorage.removeItem('review_content');
 }
 </script>
 

@@ -45,4 +45,22 @@ class ImageController extends Controller
 
         return redirect()->back()->with('image_uploaded', true)->withInput();
     }
+
+    public function clearTempImages()
+    {
+        // dd('cleared');
+        session()->forget('pending_images');
+        return back();
+    }
+
+    public function deleteTempImage($index)
+    {
+        $pending = session('pending_images', []);
+        if (isset($pending[$index])) {
+            Storage::disk('public')->delete($pending[$index]);
+            unset($pending[$index]);
+            session(['pending_images' => array_values($pending)]);
+        }
+        return back();
+    }
 }

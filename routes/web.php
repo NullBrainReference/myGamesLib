@@ -130,6 +130,15 @@ Route::get('/blogs/author/{id}', [BlogController::class, 'byAuthor'])
 Route::middleware(['auth', 'logout.banned'])->group(function () {
     Route::post('/image/upload-temp', [ImageController::class, 'uploadTempImage'])
         ->name('image.upload-temp');
+
+
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/image/clear-temp', [ImageController::class, 'clearTempImages'])
+        ->name('image.clear-temp');
+    Route::post('/image/delete-temp/{index}', [ImageController::class, 'deleteTempImage'])
+        ->name('image.delete-temp');
 });
 
 Route::get('/library/user/{id}', [LibraryController::class, 'userLibrary'])->name('library.user');
