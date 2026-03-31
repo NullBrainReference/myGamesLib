@@ -128,7 +128,8 @@
                                     @foreach(session('pending_images') as $imgPath)
                                         <div class="col-md-4 mb-3">
                                             <img src="{{ asset($imgPath) }}" alt="Preview" class="img-fluid rounded shadow border">
-                                            <pre class="bg-light p-2 mt-2"><code>![Alt text]({{ asset($imgPath) }})</code></pre>
+                                            <pre class="bg-light p-2 mt-2"><code id="markdown-{{ $loop->index }}">![Alt text]({{ asset($imgPath) }})</code></pre>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="copyToClipboard('markdown-{{ $loop->index }}')">Copy Markdown</button>
                                         </div>
                                     @endforeach
                                 </div>
@@ -180,6 +181,18 @@
         </div>
     </div>
 </div>
+
+<script>
+function copyToClipboard(elementId) {
+    const codeElement = document.getElementById(elementId);
+    const text = codeElement.textContent || codeElement.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        // alert('Markdown copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
+}
+</script>
 
 @endsection
 
