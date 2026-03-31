@@ -39,10 +39,11 @@ class GameController extends Controller
     {
         $game = Game::findOrFail($id);
         $comments = $game->comments()->with('user')->latest()->paginate(5);
+        $reviews = $game->reviews()->with('user')->latest()->paginate(5);
 
         $backUrl = request()->input('back_url') ?? $this->fallbackBackUrl('shop');
 
-        return view('games.view', compact('game', 'comments', 'backUrl'));
+        return view('games.view', compact('game', 'comments', 'reviews', 'backUrl')); // Pass reviews to the view
     }
 
     public function confirmRemoval(int $id)
