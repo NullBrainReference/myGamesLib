@@ -254,12 +254,11 @@ function clearReviewForm() {
 }
 </script>
 
-@endsection
-
-@section('comments')
 <div class="row justify-content-center mt-4">
     <div class="col-md-8">
         <x-comment-section :object="$game" type="game" :comments="$comments" />
     </div>
 </div>
+
 @endsection
+
