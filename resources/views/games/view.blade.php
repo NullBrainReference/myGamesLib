@@ -17,42 +17,55 @@
 @endif
 
 <div class="row justify-content-center">
-    <div class="col-md-8 mt-3 w-25">
-        <div class="card border rounded p-3">
+    <div class="col-md-6 col-lg-4 mt-3"> <div class="card h-100 border-0 shadow-sm">
             <img src="{{ $game->img_src }}" class="card-img-top" alt="{{ $game->title }}">
-            <div class="card-body">
-                <h5 class="card-title">{{ $game->title }}</h5>
-                <p class="card-text">{{ $game->description }}</p>
 
-                @auth
-                @if(Auth::user()->games->contains($game->game_id))
-                    <span class="badge bg-success">In Your Library</span>
-                    <form action="{{ route('library.remove', $game->game_id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Удалить из библиотеки">
-                            Delete from my Library
-                        </button>
-                    </form>
-                @else
-                    <form action="{{ route('library.add', ['id' => $game->game_id]) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-primary">Add to Library</button>
-                    </form>
-                @endif
-                @if(Auth::user()->isAdmin())
-                    <a href="{{ route('games.edit', ['id' => $game->game_id]) }}"
-                        class="btn btn-warning mt-1">
-                        Edit Game
-                    </a>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title fw-bold text-truncate">{{ $game->title }}</h5>
+                <p class="card-text text-muted small mb-4">{{ $game->description }}</p>
 
-                    <form action="{{ route('games.remove', ['id' => $game->game_id]) }}" method="GET" class="mt-1">
-                            <input type="hidden" name="back_url" value="{{ $backUrl }}">
-                            <button type="submit" class="btn btn-danger">Delete Game</button>
-                        </form>
-                @endif
-                @endauth
+                <div class="mt-auto"> @auth
+                        @if(Auth::user()->games->contains($game->game_id))
+                            <div class="d-grid gap-2">
+                                <span class="badge bg-success-subtle text-success border border-success mb-2 p-2">
+                                    <i class="bi bi-check-circle"></i> In Your Library
+                                </span>
+                                <form action="{{ route('library.remove', $game->game_id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                        Remove from Library
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            <form action="{{ route('library.add', ['id' => $game->game_id]) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-primary w-100 py-2">
+                                    <i class="bi bi-plus-lg"></i> Add to Library
+                                </button>
+                            </form>
+                        @endif
+                    @endauth
+                </div>
             </div>
+
+            @auth
+                @if(Auth::user()->isAdmin())
+                    <div class="card-footer bg-light d-flex justify-content-between align-items-center py-2">
+                        <small class="text-uppercase fw-bold text-muted" style="font-size: 0.7rem;">Admin Tools</small>
+                        <div class="btn-group border-0">
+                            <a href="{{ route('games.edit', ['id' => $game->game_id]) }}" class="btn btn-sm btn-outline-warning">Edit</a>
+
+                            <form action="{{ route('games.remove', ['id' => $game->game_id]) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                @endif
+            @endauth
         </div>
     </div>
 </div>
@@ -62,31 +75,50 @@
     <div class="col-md-8">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center">
-                <h5 class="text-muted">Average Rating:
-                    <div class="star-rating d-inline-block">
+                <h6 class="text-muted mb-2 text-uppercase fw-bold" style="letter-spacing: 1px;">Community Score</h6>
+                <div class="d-flex align-items-center justify-content-center mb-3">
+                    <div class="star-rating me-2">
                         <div class="back-stars">★★★★★★★★★★</div>
                         <div class="front-stars" style="width: {{ ($game->average_rating / 10) * 100 }}%">★★★★★★★★★★</div>
                     </div>
-                    ({{ $game->average_rating }}/10, {{ $game->ratings->count() }} ratings)
-                </h5>
+                    <span class="fw-bold h5 mb-0">{{ number_format($game->average_rating, 1) }}</span>
+                    <span class="text-muted ms-1 small">({{ $game->ratings->count() }} reviews)</span>
+                </div>
 
-                @if(Auth::check())
+                @auth
+                    <hr class="my-4 opacity-25">
+
                     @php $userRating = $game->ratings->where('user_id', Auth::id())->first(); @endphp
-                    <hr class="my-3">
-                    <form action="{{ route('rating.store', $game->game_id) }}" method="POST" class="d-inline">
+
+                    <p class="text-muted mb-2 small fw-bold text-uppercase">
+                        {{ $userRating ? 'Your Rating' : 'Rate this game' }}
+                    </p>
+
+                    <form action="{{ route('rating.store', $game->game_id) }}" method="POST" id="rating-form">
                         @csrf
-                        <label for="rating" class="me-2 text-muted">Your Rating (1-10):</label>
-                        <select name="rating" id="rating" class="form-select form-select-sm d-inline w-auto me-2" required>
-                            <option value="">Select</option>
-                            @for($i = 1; $i <= 10; $i++)
-                                <option value="{{ $i }}" {{ ($userRating->rating ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                        <div class="rating-wrapper mb-3">
+                            @for($i = 10; $i >= 1; $i--)
+                                <input type="radio"
+                                       id="star{{ $i }}"
+                                       name="rating"
+                                       value="{{ $i }}"
+                                       {{ ($userRating && $userRating->rating == $i) ? 'checked' : '' }}
+                                       onchange="document.getElementById('rating-form').submit();">
+                                <label for="star{{ $i }}" title="{{ $i }} stars">★</label>
                             @endfor
-                        </select>
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">Rate</button>
+                        </div>
+
+                        @if($userRating)
+                             <div class="small text-muted">You rated this a <strong>{{ $userRating->rating }}</strong>/10</div>
+                        @endif
                     </form>
                 @else
-                    <p class="text-muted mt-2"><a href="{{ route('login') }}" class="text-decoration-none">Log in to rate</a></p>
-                @endif
+                    <div class="py-2">
+                        <a href="{{ route('login') }}" class="btn btn-sm btn-outline-primary rounded-pill px-4">
+                            Log in to rate
+                        </a>
+                    </div>
+                @endauth
             </div>
         </div>
     </div>

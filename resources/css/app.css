@@ -20,3 +20,45 @@
   overflow: hidden;
   white-space: nowrap;
 }
+
+
+/* Rating style */
+.rating-wrapper {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 2px;
+}
+
+/* Hide the actual radio buttons */
+.rating-wrapper input {
+    display: none;
+}
+
+/* The stars */
+.rating-wrapper label {
+    cursor: pointer;
+    font-size: 1.8rem;
+    color: #e9ecef; /* Light gray for empty stars */
+    transition: color 0.2s ease-in-out, transform 0.1s ease;
+}
+
+/* Hover & Checked Logic */
+/* Highlighting stars to the left of the hovered/checked one */
+.rating-wrapper label:hover,
+.rating-wrapper label:hover ~ label,
+.rating-wrapper input:checked ~ label {
+    color: #ffca08; /* Gold color */
+}
+
+/* Simple scale effect on click */
+.rating-wrapper label:active {
+    transform: scale(1.3);
+}
+
+.current-rating-text {
+    font-weight: bold;
+    color: #ffca08;
+    min-width: 25px;
+    display: inline-block;
+}
