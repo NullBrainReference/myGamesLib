@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             GameSeeder::class,
             BlogSeeder::class,
             CommentSeeder::class,
+            TagSeeder::class,
         ]);
     }
 }
