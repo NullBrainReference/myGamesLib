@@ -81,6 +81,14 @@ Route::middleware('role.guard:admin')->group(function () {
     Route::post('/games/{id}/update', [GameController::class, 'update'])
         ->where('id', '[0-9]+')
         ->name('games.update');
+
+    Route::post('/games/{id}/tags/attach', [GameController::class, 'attachTag'])
+        ->where('id', '[0-9]+')
+        ->name('games.tags.attach');
+
+    Route::delete('/games/{game_id}/tags/{tag_id}/detach', [GameController::class, 'detachTag'])
+        ->where(['game_id' => '[0-9]+', 'tag_id' => '[0-9]+'])
+        ->name('games.tags.detach');
 });
 
 Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {

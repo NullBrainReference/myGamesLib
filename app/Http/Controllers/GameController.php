@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Game;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -44,12 +45,19 @@ class GameController extends Controller
 
         $backUrl = request()->input('back_url') ?? $this->fallbackBackUrl('shop');
 
+        $allTags = null;
+
         $userReview = null;
         if (Auth::check()) {
             $userReview = $game->reviews()->where('user_id', Auth::id())->first();
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            if ($user && $user->isAdmin()) {
+                $allTags = Tag::all();
+            }
         }
 
-        return view('games.view', compact('game', 'comments', 'reviews', 'backUrl', 'userReview'));
+        return view('games.view', compact('game', 'comments', 'reviews', 'backUrl', 'userReview', 'allTags'));
     }
 
     public function confirmRemoval(int $id)
@@ -146,6 +154,28 @@ class GameController extends Controller
         $redirect = $request->input('back_url', route('shop'));
 
         return redirect($redirect)->with('success', 'Game updated successfully!');
+    }
+
+    public function attachTag(Request $request, int $id)
+    {
+        $request->validate([
+            'tag_id' => 'required|exists:tags,tag_id',
+        ]);
+
+        $game = Game::findOrFail($id);
+
+        // syncWithoutDetaching prevents duplicate entries in the pivot table
+        $game->tags()->syncWithoutDetaching([$request->input('tag_id')]);
+
+        return redirect()->back()->with('success', 'Tag added to game successfully!');
+    }
+
+    public function detachTag(int $gameId, int $tagId)
+    {
+        $game = Game::findOrFail($gameId);
+        $game->tags()->detach($tagId);
+
+        return redirect()->back()->with('success', 'Tag removed from game successfully!');
     }
 
     private function fallbackBackUrl(string $defaultRoute)

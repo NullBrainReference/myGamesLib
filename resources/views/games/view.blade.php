@@ -72,6 +72,10 @@
                     <div class="card-footer bg-light d-flex justify-content-between align-items-center py-2">
                         <small class="text-uppercase fw-bold text-muted" style="font-size: 0.7rem;">Admin Tools</small>
                         <div class="btn-group border-0">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#manageTagsModal">
+                                <i class="bi bi-tags"></i> Tags
+                            </button>
+
                             <a href="{{ route('games.edit', ['id' => $game->game_id]) }}" class="btn btn-sm btn-outline-warning">Edit</a>
 
                             <form action="{{ route('games.remove', ['id' => $game->game_id]) }}" method="POST" class="d-inline">
@@ -301,6 +305,26 @@ function clearReviewForm() {
     localStorage.removeItem('review_title');
     localStorage.removeItem('review_content');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('tagSearchInput');
+    const tagRows = document.querySelectorAll('.tag-item-row');
+
+    searchInput?.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+
+        tagRows.forEach(row => {
+            const tagTitle = row.getAttribute('data-title');
+            if (tagTitle.includes(query)) {
+                row.classList.set('d-flex', true);
+                row.style.display = ''; // Shows the element matches
+            } else {
+                row.classList.remove('d-flex');
+                row.style.display = 'none'; // Hides mismatches
+            }
+        });
+    });
+});
 </script>
 
 <div class="row justify-content-center mt-4">
@@ -308,6 +332,72 @@ function clearReviewForm() {
         <x-comment-section :object="$game" type="game" :comments="$comments" />
     </div>
 </div>
+
+{{-- Admin Tags Management Modal --}}
+@auth
+    @if(Auth::user()->isAdmin())
+        <div class="modal fade" id="manageTagsModal" tabindex="-1" aria-labelledby="manageTagsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="manageTagsModalLabel">Manage Game Tags</h5>
+                        <button type="button" class="btn-close" data-bs-shadow="none" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        {{-- Look Up Search Row --}}
+                        <div class="input-group mb-3 shadow-sm rounded">
+                            <span class="input-group-text bg-white border-end-0 text-muted">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" id="tagSearchInput" class="form-control border-start-0 ps-0" placeholder="Type to filter tags...">
+                        </div>
+
+                        {{-- Selection List View --}}
+                        <div class="list-group" id="tagListGroup">
+                            @if($allTags)
+                            @foreach($allTags as $tag)
+                                @php
+                                    $hasTag = $game->tags->contains('tag_id', $tag->tag_id);
+                                @endphp
+                                <div class="list-group-item d-flex justify-content-between align-items-center tag-item-row" data-title="{{ strtolower($tag->title) }}">
+                                    <div>
+                                        <span class="fw-bold d-block">
+                                            {{ $tag->title }}
+                                            @if($tag->is_r18)
+                                                <span class="badge bg-danger ms-1" style="font-size:0.65rem">18+</span>
+                                            @endif
+                                        </span>
+                                        <small class="text-muted text-wrap d-block" style="font-size: 0.8rem;">{{ $tag->description }}</small>
+                                    </div>
+
+                                    <div>
+                                        @if($hasTag)
+                                            {{-- Detach form --}}
+                                            <form action="{{ route('games.tags.detach', ['game_id' => $game->game_id, 'tag_id' => $tag->tag_id]) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger px-3 rounded-pill">Remove</button>
+                                            </form>
+                                        @else
+                                            {{-- Attach form --}}
+                                            <form action="{{ route('games.tags.attach', $game->game_id) }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="tag_id" value="{{ $tag->tag_id }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-success px-3 rounded-pill">Add</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+@endauth
 
 @endsection
 
