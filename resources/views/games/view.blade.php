@@ -22,6 +22,23 @@
 
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title fw-bold text-truncate">{{ $game->title }}</h5>
+
+                {{-- Game Tags Section --}}
+                @if($game->tags->isNotEmpty())
+                    <div class="mb-3 d-flex flex-wrap gap-1">
+                        @foreach($game->tags as $tag)
+                            <span class="badge {{ $tag->is_r18 ? 'bg-danger text-white' : 'bg-secondary-subtle text-secondary border border-secondary' }}"
+                                static-bs-toggle="tooltip"
+                                title="{{ $tag->description }}">
+                                @if($tag->is_r18)
+                                    <i class="bi bi-exclamation-triangle-fill small"></i> 18+
+                                @endif
+                                {{ $tag->title }}
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
+
                 <p class="card-text text-muted small mb-4">{{ $game->description }}</p>
 
                 <div class="mt-auto"> @auth

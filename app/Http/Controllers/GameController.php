@@ -37,7 +37,8 @@ class GameController extends Controller
 
     public function view(int $id)
     {
-        $game = Game::findOrFail($id);
+        $game = Game::with('tags')->findOrFail($id);
+
         $comments = $game->comments()->with('user')->latest()->paginate(5);
         $reviews = $game->reviews()->with('user')->latest()->paginate(5);
 
