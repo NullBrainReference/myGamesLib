@@ -47,4 +47,9 @@ class Game extends Model
         return round($this->ratings()->avg('rating'), 1) ?? 0; // Rounded to 1 decimal
     }
 
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class, 'game_tag', 'game_id', 'tag_id');
+    }
+
 }
