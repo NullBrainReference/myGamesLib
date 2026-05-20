@@ -346,11 +346,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     <div class="modal-body">
                         {{-- Look Up Search Row --}}
-                        <div class="input-group mb-3 shadow-sm rounded">
-                            <span class="input-group-text bg-white border-end-0 text-muted">
+                        <div class="input-group mb-3 shadow-sm rounded border-2 overflow-hidden">
+                            <span class="input-group-text bg-white border-end-0 text-muted rounded-start">
                                 <i class="bi bi-search"></i>
                             </span>
-                            <input type="text" id="tagSearchInput" class="form-control border-start-0 ps-0" placeholder="Type to filter tags...">
+                            <input type="text" id="tagSearchInput"
+                                class="form-control border-0 ps-0 rounded-end"
+                                placeholder="Type to filter tags...">
                         </div>
 
                         {{-- Selection List View --}}

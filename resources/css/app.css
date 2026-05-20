@@ -62,3 +62,11 @@
     min-width: 25px;
     display: inline-block;
 }
+
+/* Lookup Input */
+#tagSearchInput:focus {
+    box-shadow: none;
+}
+.input-group:focus-within {
+    box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.25);
+}
