@@ -12,6 +12,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\TagController;
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
@@ -82,13 +83,15 @@ Route::middleware('role.guard:admin')->group(function () {
         ->where('id', '[0-9]+')
         ->name('games.update');
 
-    Route::post('/games/{id}/tags/attach', [GameController::class, 'attachTag'])
+    Route::post('/games/{id}/tags/attach', [TagController::class, 'attach'])
         ->where('id', '[0-9]+')
         ->name('games.tags.attach');
 
-    Route::delete('/games/{game_id}/tags/{tag_id}/detach', [GameController::class, 'detachTag'])
+    Route::delete('/games/{game_id}/tags/{tag_id}/detach', [TagController::class, 'detach'])
         ->where(['game_id' => '[0-9]+', 'tag_id' => '[0-9]+'])
         ->name('games.tags.detach');
+
+    Route::post('/tags/store', [TagController::class, 'store'])->name('tags.store');
 });
 
 Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {

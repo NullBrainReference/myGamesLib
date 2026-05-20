@@ -355,6 +355,17 @@ document.addEventListener('DOMContentLoaded', function() {
                                 placeholder="Type to filter tags...">
                         </div>
 
+                        <button type="button"
+                            class="btn btn-primary text-nowrap shadow-sm
+                                d-flex align-items-center gap-1
+                                mb-1"
+                            data-bs-toggle="modal"
+                            data-bs-target="#createTagModal"
+                            >
+
+                            <i class="bi bi-plus-lg"></i> New Tag
+                        </button>
+
                         {{-- Selection List View --}}
                         <div class="list-group" id="tagListGroup">
                             @if($allTags)
@@ -395,6 +406,49 @@ document.addEventListener('DOMContentLoaded', function() {
                             @endif
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    @endif
+@endauth
+
+{{-- Admin Create New Tag Secondary Modal --}}
+@auth
+    @if(Auth::user()->isAdmin())
+        <div class="modal fade" id="createTagModal" tabindex="-1" aria-labelledby="createTagModalLabel" aria-hidden="true" style="background: rgba(0,0,0,0.3);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title fw-bold" id="createTagModalLabel"><i class="bi bi-tag-fill"></i> Create Global Tag</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <form action="{{ route('tags.store') }}" method="POST">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="new_tag_title" class="form-label fw-semibold">Tag Name</label>
+                                <input type="text" name="title" id="new_tag_title" class="form-control" placeholder="e.g., RPG, Sandbox, Strategy" required maxlength="255">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="new_tag_description" class="form-label fw-semibold">Description</label>
+                                <textarea name="description" id="new_tag_description" class="form-wrap form-control" rows="3" placeholder="Briefly explain what this tag means..." maxlength="1000"></textarea>
+                            </div>
+
+                            <div class="form-check form-switch p-2 ps-5 border rounded bg-light">
+                                <input class="form-check-input ms-3 float-end" type="checkbox" role="switch" id="new_tag_r18" name="is_r18" value="1">
+                                <label class="form-check-label fw-semibold text-danger" for="new_tag_r18">
+                                    <i class="bi bi-exclamation-circle-fill"></i> Restrict Tag as 18+ (R-18)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer bg-light border-top">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#manageTagsModal">Back to List</button>
+                            <button type="submit" class="btn btn-primary btn-sm px-4">Save Tag</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

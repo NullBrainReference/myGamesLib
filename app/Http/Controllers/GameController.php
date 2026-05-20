@@ -156,28 +156,6 @@ class GameController extends Controller
         return redirect($redirect)->with('success', 'Game updated successfully!');
     }
 
-    public function attachTag(Request $request, int $id)
-    {
-        $request->validate([
-            'tag_id' => 'required|exists:tags,tag_id',
-        ]);
-
-        $game = Game::findOrFail($id);
-
-        // syncWithoutDetaching prevents duplicate entries in the pivot table
-        $game->tags()->syncWithoutDetaching([$request->input('tag_id')]);
-
-        return redirect()->back()->with('success', 'Tag added to game successfully!');
-    }
-
-    public function detachTag(int $gameId, int $tagId)
-    {
-        $game = Game::findOrFail($gameId);
-        $game->tags()->detach($tagId);
-
-        return redirect()->back()->with('success', 'Tag removed from game successfully!');
-    }
-
     private function fallbackBackUrl(string $defaultRoute)
     {
         $referer = request()->headers->get('referer');
