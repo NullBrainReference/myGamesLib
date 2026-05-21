@@ -1,17 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url('css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url('css/style.css') }}">
-    <title>Shop</title>
-</head>
-<body>
-    <header>
-        <x-navbar />
-    </header>
-    <main class="">
+@extends('layouts.app')
+
+@section('title', 'Shop')
+
+@section('content')
     <x-callback-message />
 
     {{-- Search --}}
@@ -36,13 +27,6 @@
     @endforeach
 
     <div class="d-flex flex-column align-items-center gap-2">
-        {{-- {{ $games->links('pagination::bootstrap-5') }} --}}
         {{ $games->links('pagination::simple-bootstrap-5') }}
     </div>
-    
-
-    </main>
-
-    <script src="{{ url('js/bootstrap.bundle.min.js') }}"></script>
-</body>
-</html>
+@endsection

@@ -19,3 +19,29 @@ body,
 .footer p {
     margin: 0;
 }
+
+/* Smooth interaction animations */
+.hover-lift {
+    transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+.card-link-wrapper:hover .hover-lift {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
+    border-color: #cbd5e1 !important; /* gray-300 */
+}
+
+/* Subtle zoom effect on card images on hover */
+.hover-scale {
+    transition: transform 0.4s ease !important;
+}
+.card-link-wrapper:hover .hover-scale {
+    transform: scale(1.04);
+}
+
+/* Fallback multi-line ellipsis clipping helper if Tailwind clamp isn't global */
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
