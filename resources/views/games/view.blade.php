@@ -310,20 +310,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('tagSearchInput');
     const tagRows = document.querySelectorAll('.tag-item-row');
 
-    searchInput?.addEventListener('input', function() {
-        const query = this.value.toLowerCase().trim();
-
+    // Helper to show/hide tags without removing them from DOM
+    function filterTags(query) {
         tagRows.forEach(row => {
             const tagTitle = row.getAttribute('data-title');
-            if (tagTitle.includes(query)) {
-                row.classList.set('d-flex', true);
-                row.style.display = ''; // Shows the element matches
+            if (!query || tagTitle.includes(query)) {
+                row.style.display = '';
+                row.classList.add('d-flex');
             } else {
+                row.style.display = 'none';
                 row.classList.remove('d-flex');
-                row.style.display = 'none'; // Hides mismatches
             }
         });
+    }
+
+    searchInput?.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+        filterTags(query);
     });
+
+    // On modal open, reset filter and show all tags
+    const manageTagsModal = document.getElementById('manageTagsModal');
+    if (manageTagsModal) {
+        manageTagsModal.addEventListener('show.bs.modal', function() {
+            if (searchInput) searchInput.value = '';
+            filterTags('');
+        });
+    }
 });
 </script>
 
