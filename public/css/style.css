@@ -45,3 +45,30 @@ body,
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+/* Micro button utility additions for crisp management rows */
+.btn-xs {
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
+}
+.text-xs {
+    font-size: 0.75rem !important;
+}
+
+/* Polymorphic source title adjustments */
+.style-title-link:hover {
+    color: #2563eb !important; /* blue-600 shift on hover */
+    text-decoration: underline !important;
+}
+
+/* Custom subtle color palettes matching standard Tailwind components */
+.bg-purple-subtle {
+    background-color: #f3e8ff !important; /* purple-100 */
+}
+.text-purple {
+    color: #6b21a8 !important; /* purple-800 */
+}
+.border-purple-subtle {
+    border-color: #e9d5ff !important; /* purple-200 */
+}
