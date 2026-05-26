@@ -52,4 +52,9 @@ class Game extends Model
         return $this->belongsToMany(Tag::class, 'game_tag', 'game_id', 'tag_id');
     }
 
+    public function mechanics(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Mechanic::class, 'game_mechanic', 'game_id', 'mechanic_id');
+    }
+
 }
