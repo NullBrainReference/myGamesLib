@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Shop')
+@section('title', 'Games')
 
 @section('content')
     <x-callback-message />

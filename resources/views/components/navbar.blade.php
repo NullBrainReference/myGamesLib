@@ -7,9 +7,9 @@
                     MyGamesLib
                 </a>
 
-                <ul class="hidden lg:flex space-x-6 items-center m-0 p-0 list-none">
+                <ul class="hidden lg:flex space-x-6 items-center m-0 ms-1 p-0 list-none">
                     <li>
-                        <a class="text-sm font-medium text-gray-600 hover:text-gray-900 transition" href="{{ route('shop') }}">Shop</a>
+                        <a class="text-sm font-medium text-gray-600 hover:text-gray-900 transition" href="{{ route('shop') }}">Games</a>
                     </li>
                     <li>
                         <a class="text-sm font-medium text-gray-600 hover:text-gray-900 transition" href="{{ route('blog.index') }}">Posts</a>
@@ -98,7 +98,7 @@
          class="lg:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 px-4 pt-2 pb-4 space-y-1 z-40 shadow-lg">
 
         <a class="block text-gray-950 font-semibold px-3 py-2 rounded-md hover:bg-gray-100 transition" href="{{ route('index') }}">Home</a>
-        <a class="block text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 transition" href="{{ route('shop') }}">Shop</a>
+        <a class="block text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 transition" href="{{ route('shop') }}">Games</a>
         <a class="block text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 transition" href="{{ route('blog.index') }}">Posts</a>
 
 
