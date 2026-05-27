@@ -13,9 +13,30 @@ class Game extends Model
     protected $table = 'games'; // Explicitly define table name
     protected $primaryKey = 'game_id'; // Define custom primary key
 
-    protected $fillable = ['title', 'description', 'img_src']; // Fillable columns
+    protected $fillable = [
+        'title',
+        'description',
+        'img_src',
+        'average_rating',
+        'ratings_count'
+    ]; // Fillable columns
+
+    protected $casts = [
+        'average_rating' => 'float',
+        'ratings_count' => 'integer'
+    ];
 
     public $incrementing = false; // If game_id is non-incrementing
+
+    public function getAverageRatingAttribute($value)
+    {
+        if (!is_null($value) && $value !== 0) {
+            return round($value, 1);
+        }
+
+        $avg = $this->ratings()->avg('rating');
+        return round($avg ?? 0, 1);
+    }
 
     public function users(): BelongsToMany
     {
@@ -40,11 +61,6 @@ class Game extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class, 'game_id', 'game_id');
-    }
-
-    public function getAverageRatingAttribute()
-    {
-        return round($this->ratings()->avg('rating'), 1) ?? 0; // Rounded to 1 decimal
     }
 
     public function tags(): BelongsToMany
