@@ -13,6 +13,7 @@ use App\Http\Controllers\ImageController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\ThreadController;
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
@@ -161,6 +162,11 @@ Route::middleware(['auth', 'logout.banned'])->group(function () {
         ->name('library.add');
     Route::delete('/library/remove/{game}', [LibraryController::class, 'remove'])->name('library.remove');
 });
+
+Route::get('/forum', [ThreadController::class, 'forum'])->name('forum');
+Route::get('/forum/thread/{id}', [ThreadController::class, 'view'])
+    ->where('id', '[0-9]+')
+    ->name('forum.thread');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);

@@ -31,6 +31,7 @@ class Comment extends Model
         return match (true) {
             $this->commentable instanceof \App\Models\Game => route('game.view', $this->commentable->game_id),
             $this->commentable instanceof \App\Models\Blog => route('blog.view', $this->commentable->id),
+            $this->commentable instanceof \App\Models\Thread => route('forum.thread', $this->commentable->id),
             default => '#',
         };
     }
