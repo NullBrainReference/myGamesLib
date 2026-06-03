@@ -168,6 +168,11 @@ Route::get('/forum/thread/{id}', [ThreadController::class, 'view'])
     ->where('id', '[0-9]+')
     ->name('forum.thread');
 
+Route::middleware(['auth'])->prefix('forum')->group(function () {
+    Route::get('/create', [ThreadController::class, 'create'])->name('forum.threads.create');
+    Route::post('/store', [ThreadController::class, 'store'])->name('forum.threads.store');
+});
+
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

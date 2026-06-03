@@ -36,4 +36,34 @@ class ThreadController extends Controller
         return view('forum.view', compact('thread', 'comments'));
     }
 
+    public function create()
+    {
+        return view('forum.create');
+    }
+
+    /**
+     * Store a newly created thread in storage.
+     */
+    public function store(Request $request)
+    {
+        // Validate the incoming text data
+        $request->validate([
+            'title'   => 'required|string|max:255|min:5',
+            'content' => 'required|string|min:10',
+        ]);
+
+        // Create the record tied to the authenticated user
+        $thread = Thread::create([
+            'user_id'   => Auth::id(),
+            'title'     => $request->input('title'),
+            'content'   => $request->input('content'),
+            'is_locked' => false,
+            'is_pinned' => false, // Default to normal state; let admins pin later
+        ]);
+
+        // Redirect directly to the newly created thread view page
+        return redirect()->route('forum.thread', $thread->id)
+                        ->with('success', 'Your thread has been posted successfully!');
+    }
+
 }
