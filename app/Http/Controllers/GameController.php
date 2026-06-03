@@ -6,22 +6,44 @@ use App\Models\Game;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Strategies\EntityListBehavior\GameListProcessor;
 
 class GameController extends Controller
 {
-    //
+
     public function shop(Request $request)
     {
         $query = Game::query();
 
-        if ($search = $request->input('search')) {
-            $query->where('title', 'like', "%{$search}%");
-        }
+        // 1. Instantiate our concrete Game List Strategy
+        $processor = new GameListProcessor();
 
-        $games = $query->paginate(2);
+        // 2. Run the query builder through the processing pipeline
+        $query = $processor->search($query, $request->input('search'));
+        $query = $processor->applyExtraFilters($query, $request);
+        $query = $processor->initialOrder($query, $request->input('sort', 'latest'));
 
+        // 3. Paginate the structural results (keeping your limit of 2 items per page)
+        // .withQueryString() prevents losing your search/sort filters when hitting page 2
+        $games = $query->paginate(2)->withQueryString();
+
+        // 4. Safely hand it over to your shop view
         return view('games.shop', compact('games'));
     }
+
+    //
+    // public function shop(Request $request)
+    // {
+    //     $query = Game::query();
+
+    //     if ($search = $request->input('search')) {
+    //         $query->where('title', 'like', "%{$search}%");
+    //     }
+
+    //     $games = $query->paginate(2);
+
+    //     return view('games.shop', compact('games'));
+    // }
 
     public function dashboard(Request $request)
     {
