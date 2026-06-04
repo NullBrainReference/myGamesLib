@@ -17,6 +17,9 @@
                     <li>
                         <a class="text-sm font-medium text-gray-600 hover:text-gray-900 transition" href="{{ route('forum') }}">Forum</a>
                     </li>
+                    <li>
+                        <a class="text-sm font-medium text-gray-600 hover:text-gray-900 transition" href="{{ route('projects') }}">Projects</a>
+                    </li>
                 </ul>
             </div>
 
@@ -104,6 +107,7 @@
         <a class="block text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 transition" href="{{ route('shop') }}">Games</a>
         <a class="block text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 transition" href="{{ route('blog.index') }}">Posts</a>
         <a class="block text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 transition" href="{{ route('forum') }}">Forum</a>
+        <a class="block text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 transition" href="{{ route('projects') }}">Projects</a>
 
 
         <div class="border-t border-gray-200 mt-2 pt-2">

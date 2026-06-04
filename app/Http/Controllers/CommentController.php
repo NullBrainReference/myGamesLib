@@ -22,6 +22,8 @@ class CommentController extends Controller
         $modelClass = match ($type) {
             'game' => \App\Models\Game::class,
             'blog' => \App\Models\Blog::class,
+            'thread' => \App\Models\Thread::class,
+
             default => throw new \InvalidArgumentException('Type mismatch'),
         };
 
@@ -59,20 +61,20 @@ class CommentController extends Controller
                     $subQuery
                         ->where(function ($qGame) use ($objectTitle) {
                             $qGame->where('commentable_type', \App\Models\Game::class)
-                                ->whereHasMorph('commentable', [\App\Models\Game::class], fn ($g) => 
+                                ->whereHasMorph('commentable', [\App\Models\Game::class], fn ($g) =>
                                     $g->where('title', 'like', "%{$objectTitle}%")
                                 );
                         })
                         ->orWhere(function ($qPost) use ($objectTitle) {
                             $qPost->where('commentable_type', \App\Models\Blog::class)
-                                ->whereHasMorph('commentable', [\App\Models\Blog::class], fn ($p) => 
+                                ->whereHasMorph('commentable', [\App\Models\Blog::class], fn ($p) =>
                                     $p->where('title', 'like', "%{$objectTitle}%")
                                 );
                         });
                 });
             })
-            ->when($userName, fn ($q) => 
-                $q->whereHas('user', fn ($u) => 
+            ->when($userName, fn ($q) =>
+                $q->whereHas('user', fn ($u) =>
                     $u->where('name', 'like', "%{$userName}%")
                 )
             )

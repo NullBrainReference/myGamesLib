@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TagController;
@@ -172,6 +173,11 @@ Route::middleware(['auth'])->prefix('forum')->group(function () {
     Route::get('/create', [ThreadController::class, 'create'])->name('forum.threads.create');
     Route::post('/store', [ThreadController::class, 'store'])->name('forum.threads.store');
 });
+
+Route::get('/projects', [ProjectController::class, 'index'])->name('projects');
+Route::get('/projects/{id}', [ThreadController::class, 'view'])
+    ->where('id', '[0-9]+')
+    ->name('projects.index');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
