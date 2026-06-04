@@ -174,10 +174,29 @@ Route::middleware(['auth'])->prefix('forum')->group(function () {
     Route::post('/store', [ThreadController::class, 'store'])->name('forum.threads.store');
 });
 
+// Projects
 Route::get('/projects', [ProjectController::class, 'index'])->name('projects');
-Route::get('/projects/{id}', [ThreadController::class, 'view'])
+Route::get('/projects/{id}', [ProjectController::class, 'view'])
     ->where('id', '[0-9]+')
-    ->name('projects.index');
+    ->name('projects.view');
+
+
+Route::middleware(['auth'])->group(function () {
+    // Standard Project actions...
+    Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
+    Route::post('/projects/store', [ProjectController::class, 'store'])->name('projects.store');
+    Route::get('/projects/{id}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
+    Route::put('/projects/{id}/update', [ProjectController::class, 'update'])->name('projects.update');
+    Route::delete('/projects/{id}/delete', [ProjectController::class, 'destroy'])->name('projects.delete');
+
+    // Dynamic Lookup Team Management Endpoints
+    Route::prefix('projects/{project_id}')->group(function () {
+        Route::post('/editors/attach', [ProjectController::class, 'attachEditor'])->name('projects.editors.attach');
+        Route::delete('/editors/detach/{user_id}', [ProjectController::class, 'detachEditor'])->name('projects.editors.detach');
+        Route::post('/participants/attach', [ProjectController::class, 'attachParticipant'])->name('projects.participants.attach');
+        Route::delete('/participants/detach/{user_id}', [ProjectController::class, 'detachParticipant'])->name('projects.participants.detach');
+    });
+});
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
