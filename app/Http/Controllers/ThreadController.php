@@ -29,9 +29,10 @@ class ThreadController extends Controller
         $thread = Thread::with('user')->findOrFail($id);
 
         $comments = $thread->comments()
-                        ->with('user')
-                        ->latest()
-                        ->paginate(10);
+            ->whereNull('parent_id')
+            ->with(['user', 'replies.user'])
+            ->latest()
+            ->paginate(10);
 
         return view('forum.view', compact('thread', 'comments'));
     }

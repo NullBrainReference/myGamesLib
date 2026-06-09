@@ -9,7 +9,7 @@ class Comment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'content'];
+    protected $fillable = ['user_id', 'content', 'parent_id'];
 
     public function user()
     {
@@ -41,5 +41,17 @@ class Comment extends Model
         return $this->commentable->title ?? 'Unknown';
     }
 
+    public function parent()
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
+    }
+
+    /**
+     * Get all nested replies for this comment.
+     */
+    public function replies()
+    {
+        return $this->hasMany(Comment::class, 'parent_id')->with('user')->latest();
+    }
 
 }

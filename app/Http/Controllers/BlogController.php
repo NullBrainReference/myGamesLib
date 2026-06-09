@@ -39,9 +39,9 @@ class BlogController extends Controller
     public function show(int $id)
     {
         $blog = Blog::with('images')->findOrFail($id);
-
         $comments = $blog->comments()
-            ->with('user')
+            ->whereNull('parent_id')
+            ->with(['user', 'replies.user'])
             ->latest()
             ->paginate(5);
 
@@ -193,5 +193,5 @@ class BlogController extends Controller
 
         return view('dashboard.posts', compact('blogs', 'title', 'author'));
     }
- 
+
 }

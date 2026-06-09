@@ -62,7 +62,12 @@ class GameController extends Controller
     {
         $game = Game::with('tags')->findOrFail($id);
 
-        $comments = $game->comments()->with('user')->latest()->paginate(5);
+        // $comments = $game->comments()->with('user')->latest()->paginate(5);
+        $comments = $game->comments()
+            ->whereNull('parent_id')
+            ->with(['user', 'replies.user'])
+            ->latest()
+            ->paginate(5);
         $reviews = $game->reviews()->with('user')->latest()->paginate(5);
 
         $backUrl = request()->input('back_url') ?? $this->fallbackBackUrl('shop');
