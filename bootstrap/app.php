@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
+        $middleware->web(append: [
+            \App\Http\Middleware\TrackActiveUsers::class,
+        ]);
+
         $middleware->alias([
             'role.guard' => \App\Http\Middleware\RoleGuard::class,
             'logout.banned' => \App\Http\Middleware\LogoutBannedUser::class,
