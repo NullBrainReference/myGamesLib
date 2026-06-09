@@ -39,7 +39,7 @@
 .rating-wrapper label {
     cursor: pointer;
     font-size: 1.8rem;
-    color: #e9ecef; /* Light gray for empty stars */
+    color: #ccced1; /* Light gray for empty stars */
     transition: color 0.2s ease-in-out, transform 0.1s ease;
 }
 

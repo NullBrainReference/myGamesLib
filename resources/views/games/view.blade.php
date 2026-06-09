@@ -3,35 +3,98 @@
 @section('title', $game->title)
 
 @section('content')
+<div class="container py-4">
 
-@if(session('success'))
-    <div class="alert alert-success text-center">
-        {{ session('success') }}
-    </div>
-@endif
+    @if(session('success'))
+        <div class="alert alert-success border-0 shadow-sm text-center mb-4 font-medium small rounded-lg">
+            <i class="bi bi-check-circle-fill me-1.5"></i> {{ session('success') }}
+        </div>
+    @endif
 
-@if(session('error'))
-    <div class="alert alert-danger text-center">
-        {{ session('error') }}
-    </div>
-@endif
+    @if(session('error'))
+        <div class="alert alert-danger border-0 shadow-sm text-center mb-4 font-medium small rounded-lg">
+            <i class="bi bi-exclamation-triangle-fill me-1.5"></i> {{ session('error') }}
+        </div>
+    @endif
 
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4 mt-3"> <div class="card h-100 border-0 shadow-sm">
-            <img src="{{ $game->img_src }}" class="card-img-top" alt="{{ $game->title }}">
+    <div class="row g-4">
 
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title fw-bold text-truncate">{{ $game->title }}</h5>
+        <div class="col-12 col-md-4 col-lg-3">
+            <div class="card border border-gray-200 shadow-sm bg-white rounded-lg overflow-hidden sticky-md-top" style="top: 24px; z-index: 10;">
+                <div class="ratio ratio-4x3 bg-light border-bottom border-gray-100">
+                    <img src="{{ asset($game->img_src) }}" class="object-fit-cover w-100 h-100" alt="{{ $game->title }} catalog preview artwork">
+                </div>
 
-                {{-- Game Tags Section --}}
+                <div class="card-body p-3">
+                    @auth
+                        @if(Auth::user()->games->contains($game->game_id))
+                            <div class="d-flex flex-column gap-2">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle py-2.5 px-3 rounded text-xs font-semibold d-flex align-items-center justify-content-center gap-1.5 shadow-none">
+                                    <i class="bi bi-check-circle-fill"></i> In Your Library
+                                </span>
+                                <form action="{{ route('library.remove', $game->game_id) }}" method="POST" class="m-0">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100 font-medium py-1.5 rounded shadow-sm text-xs">
+                                        Remove from Library
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            <form action="{{ route('library.add', ['id' => $game->game_id]) }}" method="POST" class="m-0">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-primary w-100 py-2.5 font-semibold text-xs rounded shadow-sm d-flex align-items-center justify-content-center gap-1.5">
+                                    <i class="bi bi-plus-lg text-sm"></i> Add to Library
+                                </button>
+                            </form>
+                        @endif
+                    @else
+                        <div class="text-center py-1">
+                            <a href="{{ route('login') }}" class="btn btn-sm btn-outline-secondary w-100 font-medium py-2 rounded text-xs">
+                                Log in to Access Library
+                            </a>
+                        </div>
+                    @endauth
+                </div>
+
+                @auth
+                    @if(Auth::user()->isAdmin())
+                        <div class="card-footer bg-gray-50 border-top border-gray-200 py-2.5 px-3 d-flex justify-content-between align-items-center">
+                            <small class="text-uppercase font-bold text-gray-500 tracking-wider" style="font-size: 0.65rem;">Admin Tools</small>
+                            <div class="btn-group shadow-sm bg-white border border-gray-200 rounded">
+                                <button type="button" class="btn btn-xs btn-outline-secondary font-medium px-2 py-1 text-xs d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#manageTagsModal">
+                                    <i class="bi bi-tags"></i> Tags
+                                </button>
+                                <a href="{{ route('games.edit', ['id' => $game->game_id]) }}" class="btn btn-xs btn-outline-warning font-medium px-2 py-1 text-xs text-decoration-none">
+                                    Edit
+                                </a>
+                                <form action="{{ route('games.remove', ['id' => $game->game_id]) }}" method="POST" class="d-inline m-0">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-xs btn-outline-danger font-medium px-2 py-1 text-xs" onclick="return confirm('Completely purge this item record and metadata array from index catalogs?')">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
+                @endauth
+            </div>
+        </div>
+
+        <div class="col-12 col-md-8 col-lg-9">
+
+            <div class="card border border-gray-200 shadow-sm bg-white rounded-lg p-4 p-md-5 mb-4">
+                <h1 class="h2 fw-bold text-gray-900 tracking-tight mb-2">{{ $game->title }}</h1>
+
                 @if($game->tags->isNotEmpty())
-                    <div class="mb-3 d-flex flex-wrap gap-1">
+                    <div class="mb-4 d-flex flex-wrap gap-1.5">
                         @foreach($game->tags as $tag)
-                            <span class="badge {{ $tag->is_r18 ? 'bg-danger text-white' : 'bg-secondary-subtle text-secondary border border-secondary' }}"
-                                static-bs-toggle="tooltip"
-                                title="{{ $tag->description }}">
+                            <span class="badge {{ $tag->is_r18 ? 'bg-danger text-white' : 'bg-gray-100 text-gray-700 border border-gray-200' }} px-2.5 py-1.5 font-medium rounded text-xs d-inline-flex align-items-center gap-1"
+                                  static-bs-toggle="tooltip"
+                                  title="{{ $tag->description }}">
                                 @if($tag->is_r18)
-                                    <i class="bi bi-exclamation-triangle-fill small"></i> 18+
+                                    <i class="bi bi-exclamation-triangle-fill"></i> 18+
                                 @endif
                                 {{ $tag->title }}
                             </span>
@@ -39,85 +102,34 @@
                     </div>
                 @endif
 
-                <p class="card-text text-muted small mb-4">{{ $game->description }}</p>
+                <hr class="my-4 opacity-10">
 
-                <div class="mt-auto"> @auth
-                        @if(Auth::user()->games->contains($game->game_id))
-                            <div class="d-grid gap-2">
-                                <span class="badge bg-success-subtle text-success border border-success mb-2 p-2">
-                                    <i class="bi bi-check-circle"></i> In Your Library
-                                </span>
-                                <form action="{{ route('library.remove', $game->game_id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
-                                        Remove from Library
-                                    </button>
-                                </form>
-                            </div>
-                        @else
-                            <form action="{{ route('library.add', ['id' => $game->game_id]) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn btn-primary w-100 py-2">
-                                    <i class="bi bi-plus-lg"></i> Add to Library
-                                </button>
-                            </form>
-                        @endif
-                    @endauth
-                </div>
+                <h3 class="h6 text-uppercase tracking-wider fw-bold text-gray-500 mb-2.5">Catalog Entry Overview Description</h3>
+                <p class="text-gray-700 leading-relaxed text-sm mb-0 style-textarea-rendered" style="white-space: pre-line;">{{ $game->description }}</p>
             </div>
 
-            @auth
-                @if(Auth::user()->isAdmin())
-                    <div class="card-footer bg-light d-flex justify-content-between align-items-center py-2">
-                        <small class="text-uppercase fw-bold text-muted" style="font-size: 0.7rem;">Admin Tools</small>
-                        <div class="btn-group border-0">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#manageTagsModal">
-                                <i class="bi bi-tags"></i> Tags
-                            </button>
-
-                            <a href="{{ route('games.edit', ['id' => $game->game_id]) }}" class="btn btn-sm btn-outline-warning">Edit</a>
-
-                            <form action="{{ route('games.remove', ['id' => $game->game_id]) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                            </form>
-                        </div>
-                    </div>
-                @endif
-            @endauth
-        </div>
-    </div>
-</div>
-
-{{-- Ratings Section --}}
-<div class="row justify-content-center mt-4">
-    <div class="col-md-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-                <h6 class="text-muted mb-2 text-uppercase fw-bold" style="letter-spacing: 1px;">Community Score</h6>
-                <div class="d-flex align-items-center justify-content-center mb-3">
-                    <div class="star-rating me-2">
+            <div class="card border border-gray-200 shadow-sm bg-white rounded-lg p-4 mb-4 text-center">
+                <h6 class="text-gray-500 mb-2 text-uppercase tracking-wider fw-bold small">Global Community Metrics</h6>
+                <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                    <div class="star-rating fs-4">
                         <div class="back-stars">★★★★★★★★★★</div>
                         <div class="front-stars" style="width: {{ ($game->average_rating / 10) * 100 }}%">★★★★★★★★★★</div>
                     </div>
-                    <span class="fw-bold h5 mb-0">{{ number_format($game->average_rating, 1) }}</span>
-                    <span class="text-muted ms-1 small">({{ $game->ratings->count() }} reviews)</span>
+                    <span class="fw-bold h4 text-gray-900 mb-0">{{ number_format($game->average_rating, 1) }}</span>
+                    <span class="text-gray-400 small">({{ $game->ratings->count() }} evaluations indexed)</span>
                 </div>
 
                 @auth
-                    <hr class="my-4 opacity-25">
-
+                    <hr class="my-3 opacity-10">
                     @php $userRating = $game->ratings->where('user_id', Auth::id())->first(); @endphp
 
-                    <p class="text-muted mb-2 small fw-bold text-uppercase">
-                        {{ $userRating ? 'Your Rating' : 'Rate this game' }}
+                    <p class="text-gray-500 mb-1.5 text-xs text-uppercase tracking-wider font-semibold">
+                        {{ $userRating ? 'Your Established Input Score' : 'Log Rating Score Evaluation Parameters' }}
                     </p>
 
-                    <form action="{{ route('rating.store', $game->game_id) }}" method="POST" id="rating-form">
+                    <form action="{{ route('rating.store', $game->game_id) }}" method="POST" id="rating-form" class="m-0">
                         @csrf
-                        <div class="rating-wrapper mb-3">
+                        <div class="rating-wrapper mb-2">
                             @for($i = 10; $i >= 1; $i--)
                                 <input type="radio"
                                        id="star{{ $i }}"
@@ -130,133 +142,275 @@
                         </div>
 
                         @if($userRating)
-                             <div class="small text-muted">You rated this a <strong>{{ $userRating->rating }}</strong>/10</div>
+                             <div class="small text-gray-500 font-medium">You configured this record valuation index target parameters to <strong class="text-amber-500">{{ $userRating->rating }}</strong>/10</div>
                         @endif
                     </form>
                 @else
-                    <div class="py-2">
-                        <a href="{{ route('login') }}" class="btn btn-sm btn-outline-primary rounded-pill px-4">
-                            Log in to rate
+                    <div class="pt-2">
+                        <a href="{{ route('login') }}" class="btn btn-xs btn-outline-primary px-3 rounded-pill font-medium text-xs">
+                            Log in to write an evaluation score parameters card
                         </a>
                     </div>
                 @endauth
             </div>
-        </div>
-    </div>
-</div>
 
-{{-- Reviews Section --}}
-<div class="row justify-content-center mt-4">
-    <div class="col-md-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Reviews</h5>
-            </div>
-            <div class="card-body">
+            <div class="card border border-gray-200 shadow-sm bg-white rounded-lg overflow-hidden mb-4">
+                <div class="card-header bg-gray-50 border-bottom border-gray-200 py-3 px-4">
+                    <h3 class="h5 fw-bold text-gray-900 mb-0">Editorial Content Breakdowns & Reviews</h3>
+                </div>
 
-                @auth
-                    @if(!$userReview)
-                        {{-- image upload + keep review text --}}
-                        <div class="card mb-4 p-3">
-                            <h6>Upload Images for Review</h6>
-                            <form action="{{ route('image.upload-temp') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <input type="hidden" name="title" value="{{ old('title') }}">
-                                <input type="hidden" name="content" value="{{ old('content') }}">
-                                <div class="mb-3">
-                                    <label for="review_image" class="form-label">Choose image</label>
-                                    <input type="file" class="form-control" id="review_image" name="image" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Upload</button>
-                            </form>
+                <div class="card-body p-4">
+                    @auth
+                        @if(!$userReview)
+                            <div class="card border border-gray-200 rounded-lg p-3 bg-gray-50 mb-4">
+                                <h6 class="font-semibold text-gray-800 text-sm mb-2 d-flex align-items-center gap-1.5">
+                                    <i class="bi bi-image text-gray-500"></i> Stage Review Embed Markdown Asset File Upload
+                                </h6>
+                                <form action="{{ route('image.upload-temp') }}" method="POST" enctype="multipart/form-data" class="row g-2 align-items-end m-0">
+                                    @csrf
+                                    <input type="hidden" name="title" value="{{ old('title') }}">
+                                    <input type="hidden" name="content" value="{{ old('content') }}">
+                                    <div class="col-12 col-sm-9">
+                                        <input type="file" class="form-control form-control-sm bg-white" id="review_image" name="image" required>
+                                    </div>
+                                    <div class="col-12 col-sm-3 d-grid">
+                                        <button type="submit" class="btn btn-sm btn-secondary font-medium">Upload File</button>
+                                    </div>
+                                </form>
 
-                            @if(session('pending_images'))
-                                <div class="mt-3">
-                                    <h6>🖼️ Uploaded Images</h6>
-                                    <form action="{{ route('image.clear-temp') }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-danger mb-2">Clear All Images</button>
-                                    </form>
-                                    <div class="row gx-2 gy-2">
-                                        @foreach(session('pending_images') as $index => $imgPath)
-                                            <div class="col-6 col-md-4">
-                                                <div class="ratio ratio-4x3 overflow-hidden rounded border">
-                                                    <img src="{{ asset($imgPath) }}" class="w-100 h-100 object-fit-cover" alt="Uploaded preview">
+                                @if(session('pending_images'))
+                                    <div class="mt-4 border-top border-gray-200 pt-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="font-semibold text-gray-800 text-xs text-uppercase tracking-wider mb-0">Staged Review Assets</h6>
+                                            <form action="{{ route('image.clear-temp') }}" method="POST" class="m-0">
+                                                @csrf
+                                                <button type="submit" class="btn btn-xs btn-outline-danger font-medium py-1">Clear Assets Batch</button>
+                                            </form>
+                                        </div>
+                                        <div class="row g-2">
+                                            @foreach(session('pending_images') as $index => $imgPath)
+                                                <div class="col-6 col-sm-4 col-md-3">
+                                                    <div class="card border border-gray-200 rounded overflow-hidden bg-white p-1 shadow-sm">
+                                                        <div class="ratio ratio-4x3 overflow-hidden rounded border border-gray-100">
+                                                            <img src="{{ asset($imgPath) }}" class="w-100 h-100 object-fit-cover" alt="Temporary upload asset tracking node thumbnail">
+                                                        </div>
+                                                        <div class="p-1.5 d-flex flex-column gap-1">
+                                                            <button type="button" class="btn btn-xs btn-light border border-gray-200 text-gray-700 font-medium w-100 py-1 text-xs" onclick="copyToClipboard('markdown-{{ $index }}')">
+                                                                Copy Link Syntax
+                                                            </button>
+                                                            <form action="{{ route('image.delete-temp', $index) }}" method="POST" class="m-0">
+                                                                @csrf
+                                                                <button type="submit" class="btn btn-xs btn-outline-danger w-100 py-1 text-xs">Wipe</button>
+                                                            </form>
+                                                        </div>
+                                                        <pre style="display:none"><code id="markdown-{{ $index }}">![Embedded View Graphics Asset]({{ asset($imgPath) }})</code></pre>
+                                                    </div>
                                                 </div>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary btn-block mt-2 w-100" onclick="copyToClipboard('markdown-{{ $index }}')">
-                                                    Copy
-                                                </button>
-                                                <form action="{{ route('image.delete-temp', $index) }}" method="POST" class="d-inline mt-1">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">Delete</button>
-                                                </form>
-                                                <pre style="display:none"><code id="markdown-{{ $index }}">![Alt text]({{ asset($imgPath) }})</code></pre>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <form action="{{ route('review.store', $game->game_id) }}" method="POST" class="mb-5 pb-4 border-bottom border-gray-100">
+                                @csrf
+                                <div class="mb-3">
+                                    <label for="review_title" class="form-label fw-semibold text-gray-700 small">Review Headline</label>
+                                    <input type="text" name="title" id="review_title" class="form-control" placeholder="Summarize core execution takeaways, balance properties, or performance..." value="{{ old('title') }}" required maxlength="255">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="review_content" class="form-label fw-semibold text-gray-700 small">Review Body Narrative Text <span class="text-muted font-normal">(Markdown typography rules syntax supported)</span></label>
+                                    <textarea name="content" id="review_content" class="form-control" rows="7" placeholder="Provide clear granular breakdowns of gameplay patterns, balance logic systems, design concepts, or art presentation workflows..." required>{{ old('content') }}</textarea>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="submit" class="btn btn-sm btn-primary font-medium px-4 py-2 shadow-sm">Publish Entry</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary font-medium px-3 py-2" onclick="clearReviewForm()">Reset Form</button>
+                                </div>
+                            </form>
+                        @else
+                            <div class="alert alert-info border-0 shadow-sm rounded-lg d-flex align-items-center justify-content-between p-3 mb-4 text-sm">
+                                <span class="text-gray-800 font-medium">
+                                    <i class="bi bi-info-circle-fill text-blue-600 me-1.5"></i> You have logged an explicit review entry for this catalog title index node.
+                                </span>
+                                <a href="#user-review" class="btn btn-xs btn-primary font-medium shadow-sm px-3 py-1.5 text-decoration-none">Focus Entry View</a>
+                            </div>
+                        @endif
+                    @else
+                        <div class="p-4 rounded-lg border border-dashed border-gray-200 text-center bg-gray-50 mb-4">
+                            <p class="text-gray-500 text-sm mb-2.5">Want to construct an analytical breakdown write-up or map graphics capture embeds?</p>
+                            <a href="{{ route('login') }}" class="btn btn-sm btn-primary font-medium px-4 py-2 shadow-sm text-decoration-none text-xs">Log in to write a review</a>
+                        </div>
+                    @endauth
+
+                    @if($reviews->count() > 0)
+                        <div class="d-flex flex-column gap-3.5">
+                            @foreach($reviews as $review)
+                                <div class="card border border-gray-200 rounded-lg bg-white p-4 shadow-sm" @if(Auth::check() && Auth::id() === $review->user_id) id="user-review" @endif>
+                                    <div class="d-flex justify-content-between align-items-start gap-3 mb-2.5">
+                                        <div>
+                                            <h5 class="h6 fw-bold text-gray-900 mb-0.5">{{ $review->title }}</h5>
+                                            <div class="text-xs text-gray-400 font-medium">
+                                                By <span class="text-gray-600 font-semibold">{{ $review->user->name }}</span> — Logged on {{ $review->created_at->format('M d, Y') }}
                                             </div>
-                                        @endforeach
+                                        </div>
+
+                                        @if(Auth::check() && (Auth::id() === $review->user_id || Auth::user()->isAdmin()))
+                                            <div class="btn-group shadow-sm bg-white border border-gray-200 rounded">
+                                                <button class="btn btn-xs btn-outline-secondary font-medium px-2.5 py-1 text-xs" onclick="editReview({{ $review->id }}, '{{ addslashes($review->title) }}', '{{ addslashes($review->content) }}')">Modify</button>
+                                                <form action="{{ route('review.delete', $review->id) }}" method="POST" class="d-inline m-0">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-xs btn-outline-danger font-medium px-2.5 py-1 text-xs" onclick="return confirm('Permanently wipe this specific documentation text data node?')">Delete</button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="text-gray-700 text-sm leading-relaxed review-rendered-markdown-output pt-1">
+                                        {!! Parsedown::instance()->text($review->content) !!}
                                     </div>
                                 </div>
-                            @endif
+                            @endforeach
                         </div>
 
-                        {{-- review form --}}
-                        <form action="{{ route('review.store', $game->game_id) }}" method="POST" class="mb-4">
-                            @csrf
-                            <div class="mb-3">
-                                <label for="review_title" class="form-label">Review Title</label>
-                                <input type="text" name="title" id="review_title" class="form-control" value="{{ old('title') }}" required maxlength="255">
-                            </div>
-                            <div class="mb-3">
-                                <label for="review_content" class="form-label">Review Content (Markdown supported)</label>
-                                <textarea name="content" id="review_content" class="form-control" rows="8" required>{{ old('content') }}</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Submit Review</button>
-                            <button type="button" class="btn btn-secondary ms-2" onclick="clearReviewForm()">Clear</button>
-                        </form>
+                        <div class="mt-4 px-1">
+                            {{ $reviews->links() }}
+                        </div>
                     @else
-                        <div class="alert alert-info">
-                            You have already submitted a review for this game. <a href="#user-review" class="alert-link">Edit your review</a>.
+                        <div class="text-center py-5 text-gray-400 text-sm border border-dashed border-gray-100 rounded-lg">
+                            <i class="bi bi-chat-left-quote d-block fs-2 mb-2 text-gray-300"></i>
+                            No comprehensive reviews have been documented yet. Be the first to catalog your tracking feedback!
                         </div>
                     @endif
-                @else
-                    <p class="text-muted"><a href="{{ route('login') }}">Log in to write a review</a></p>
-                @endauth
-
-                @if($reviews->count() > 0)
-                    @foreach($reviews as $review)
-                        <div class="review-item mb-3 p-3 border rounded">
-                            <h6>{{ $review->title }}</h6>
-                            {{-- Render content as Markdown --}}
-                            <div>{!! Parsedown::instance()->text($review->content) !!}</div>
-                            <small class="text-muted">By {{ $review->user->name }} on {{ $review->created_at->format('M d, Y') }}</small>
-                            @if(Auth::check() && (Auth::id() === $review->user_id || Auth::user()->isAdmin()))
-                                <div class="mt-2">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="editReview({{ $review->id }}, '{{ $review->title }}', '{{ addslashes($review->content) }}')">Edit</button>
-                                    <form action="{{ route('review.delete', $review->id) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this review?')">Delete</button>
-                                    </form>
-                                </div>
-                            @endif
-                        </div>
-                    @endforeach
-                    {{ $reviews->links() }}
-                @else
-                    <p class="text-muted">No reviews yet. Be the first to review!</p>
-                @endif
+                </div>
             </div>
+
+            <div class="card border border-gray-200 shadow-sm bg-white rounded-lg p-3 p-md-4">
+                <x-comment-section :object="$game" type="game" :comments="$comments" />
+            </div>
+
         </div>
     </div>
 </div>
+
+@auth
+    @if(Auth::user()->isAdmin())
+        <div class="modal fade" id="manageTagsModal" tabindex="-1" aria-labelledby="manageTagsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg bg-white rounded-lg">
+                    <div class="modal-header border-bottom border-gray-100 py-3 px-4">
+                        <h5 class="modal-title fw-bold text-gray-900 h6" id="manageTagsModalLabel">Configure Classification Links</h5>
+                        <button type="button" class="btn-close shadow-none text-xs" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body p-4">
+                        <div class="input-group mb-3 shadow-sm rounded border border-gray-300 overflow-hidden bg-white">
+                            <span class="input-group-text bg-white border-0 text-gray-400 pe-1">
+                                <i class="bi bi-search text-xs"></i>
+                            </span>
+                            <input type="text" id="tagSearchInput"
+                                class="form-control border-0 ps-1 text-sm bg-white form-control-sm"
+                                placeholder="Type to filter global catalog items...">
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-gray-100 pb-2">
+                            <span class="text-xs font-bold text-gray-400 text-uppercase tracking-wider">Indexed Identifiers</span>
+                            <button type="button" class="btn btn-xs btn-primary font-medium shadow-sm px-2.5 py-1 text-xs d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#createTagModal">
+                                <i class="bi bi-plus-lg"></i> Create Global Tag
+                            </button>
+                        </div>
+
+                        <div class="list-group list-group-flush border rounded border-gray-200 overflow-hidden max-h-60" id="tagListGroup" style="max-height: 320px;">
+                            @if($allTags)
+                                @foreach($allTags as $tag)
+                                    @php $hasTag = $game->tags->contains('tag_id', $tag->tag_id); @endphp
+                                    <div class="list-group-item d-flex justify-content-between align-items-center tag-item-row bg-white p-2.5 border-bottom border-gray-100 text-sm" data-title="{{ strtolower($tag->title) }}">
+                                        <div class="pe-2 text-truncate" style="max-width: 280px;">
+                                            <span class="fw-bold text-gray-900 d-inline-flex align-items-center gap-1">
+                                                {{ $tag->title }}
+                                                @if($tag->is_r18)
+                                                    <span class="badge bg-danger rounded-sm py-0.5 px-1 font-semibold" style="font-size:0.6rem">18+</span>
+                                                @endif
+                                            </span>
+                                            <small class="text-gray-400 text-truncate d-block text-xs font-normal" title="{{ $tag->description }}">{{ $tag->description }}</small>
+                                        </div>
+
+                                        <div>
+                                            @if($hasTag)
+                                                <form action="{{ route('games.tags.detach', ['game_id' => $game->game_id, 'tag_id' => $tag->tag_id]) }}" method="POST" class="m-0">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-xs btn-danger px-2.5 py-1 rounded text-xs font-medium shadow-sm">Remove</button>
+                                                </form>
+                                            @else
+                                                <form action="{{ route('games.tags.attach', $game->game_id) }}" method="POST" class="m-0">
+                                                    @csrf
+                                                    <input type="hidden" name="tag_id" value="{{ $tag->tag_id }}">
+                                                    <button type="submit" class="btn btn-xs btn-outline-success px-3 py-1 rounded text-xs font-medium shadow-sm">Add</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="createTagModal" tabindex="-1" aria-labelledby="createTagModalLabel" aria-hidden="true" style="background: rgba(17, 24, 39, 0.45); backdrop-filter: blur(2px);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border border-gray-200 shadow-xl bg-white rounded-lg overflow-hidden">
+                    <div class="modal-header bg-gray-900 border-0 py-3 px-4 text-white">
+                        <h5 class="modal-title fw-bold h6 d-flex align-items-center gap-1.5 text-white" id="createTagModalLabel">
+                            <i class="bi bi-tag-fill text-blue-400"></i> Append Global Platform Classification Tag
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white shadow-none text-xs" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <form action="{{ route('tags.store') }}" method="POST" class="m-0">
+                        @csrf
+                        <div class="modal-body p-4">
+                            <div class="mb-3">
+                                <label for="new_tag_title" class="form-label fw-semibold text-gray-700 small">Tag Label title</label>
+                                <input type="text" name="title" id="new_tag_title" class="form-control" placeholder="e.g., Tactical RPG, Roguelite, Open World" required maxlength="255">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="new_tag_description" class="form-label fw-semibold text-gray-700 small">System Metric Context Definition Description</label>
+                                <textarea name="description" id="new_tag_description" class="form-control" rows="3" placeholder="Provide context explanations regarding bounds of content matching this classification tag..." maxlength="1000"></textarea>
+                            </div>
+
+                            <div class="form-check form-switch p-2.5 ps-5 border border-gray-200 rounded bg-gray-50 mt-4 d-flex align-items-center justify-content-between">
+                                <label class="form-check-label fw-semibold text-danger small cursor-pointer" for="new_tag_r18">
+                                    <i class="bi bi-exclamation-circle-fill me-1"></i> Restrict Index Scope as Mature Audiences 18+ (R-18)
+                                </label>
+                                <input class="form-check-input ms-0 cursor-pointer shadow-none relative" style="right: 12px;" type="checkbox" role="switch" id="new_tag_r18" name="is_r18" value="1">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer bg-gray-50 border-top border-gray-100 py-2.5 px-4 d-flex justify-content-between align-items-center">
+                            <button type="button" class="btn btn-xs btn-outline-secondary font-medium px-3 py-1.5 rounded" data-bs-toggle="modal" data-bs-target="#manageTagsModal">Return to Grid</button>
+                            <button type="submit" class="btn btn-xs btn-primary font-semibold px-4 py-1.5 shadow-sm rounded">Save Tag Configuration</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+@endauth
+
 <script>
+// Link Copier Utility Execution
 function copyToClipboard(elementId) {
     const codeElement = document.getElementById(elementId);
     const text = codeElement.textContent || codeElement.innerText;
     navigator.clipboard.writeText(text).catch(err => {
-        console.error('Failed to copy: ', err);
+        console.error('Failed to copy asset tracking reference block line: ', err);
     });
 }
 
+// Inline Form Local Data Persistence Management Layer Loop
 document.addEventListener('DOMContentLoaded', function() {
     const uploadForm = document.querySelector('form[action*="image.upload-temp"]');
     const reviewTitle = document.getElementById('review_title');
@@ -306,19 +460,19 @@ function clearReviewForm() {
     localStorage.removeItem('review_content');
 }
 
+// Real-time Text Filter Execution Node
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('tagSearchInput');
     const tagRows = document.querySelectorAll('.tag-item-row');
 
-    // Helper to show/hide tags without removing them from DOM
     function filterTags(query) {
         tagRows.forEach(row => {
             const tagTitle = row.getAttribute('data-title');
             if (!query || tagTitle.includes(query)) {
-                row.style.display = '';
+                row.style.setProperty('display', '', 'important');
                 row.classList.add('d-flex');
             } else {
-                row.style.display = 'none';
+                row.style.setProperty('display', 'none', 'important');
                 row.classList.remove('d-flex');
             }
         });
@@ -329,7 +483,6 @@ document.addEventListener('DOMContentLoaded', function() {
         filterTags(query);
     });
 
-    // On modal open, reset filter and show all tags
     const manageTagsModal = document.getElementById('manageTagsModal');
     if (manageTagsModal) {
         manageTagsModal.addEventListener('show.bs.modal', function() {
@@ -339,134 +492,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
-<div class="row justify-content-center mt-4">
-    <div class="col-md-8">
-        <x-comment-section :object="$game" type="game" :comments="$comments" />
-    </div>
-</div>
-
-{{-- Admin Tags Management Modal --}}
-@auth
-    @if(Auth::user()->isAdmin())
-        <div class="modal fade" id="manageTagsModal" tabindex="-1" aria-labelledby="manageTagsModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-scrollable">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="manageTagsModalLabel">Manage Game Tags</h5>
-                        <button type="button" class="btn-close" data-bs-shadow="none" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <div class="modal-body">
-                        {{-- Look Up Search Row --}}
-                        <div class="input-group mb-3 shadow-sm rounded border-2 overflow-hidden">
-                            <span class="input-group-text bg-white border-end-0 text-muted rounded-start">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text" id="tagSearchInput"
-                                class="form-control border-0 ps-0 rounded-end"
-                                placeholder="Type to filter tags...">
-                        </div>
-
-                        <button type="button"
-                            class="btn btn-primary text-nowrap shadow-sm
-                                d-flex align-items-center gap-1
-                                mb-1"
-                            data-bs-toggle="modal"
-                            data-bs-target="#createTagModal"
-                            >
-
-                            <i class="bi bi-plus-lg"></i> New Tag
-                        </button>
-
-                        {{-- Selection List View --}}
-                        <div class="list-group" id="tagListGroup">
-                            @if($allTags)
-                            @foreach($allTags as $tag)
-                                @php
-                                    $hasTag = $game->tags->contains('tag_id', $tag->tag_id);
-                                @endphp
-                                <div class="list-group-item d-flex justify-content-between align-items-center tag-item-row" data-title="{{ strtolower($tag->title) }}">
-                                    <div>
-                                        <span class="fw-bold d-block">
-                                            {{ $tag->title }}
-                                            @if($tag->is_r18)
-                                                <span class="badge bg-danger ms-1" style="font-size:0.65rem">18+</span>
-                                            @endif
-                                        </span>
-                                        <small class="text-muted text-wrap d-block" style="font-size: 0.8rem;">{{ $tag->description }}</small>
-                                    </div>
-
-                                    <div>
-                                        @if($hasTag)
-                                            {{-- Detach form --}}
-                                            <form action="{{ route('games.tags.detach', ['game_id' => $game->game_id, 'tag_id' => $tag->tag_id]) }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger px-3 rounded-pill">Remove</button>
-                                            </form>
-                                        @else
-                                            {{-- Attach form --}}
-                                            <form action="{{ route('games.tags.attach', $game->game_id) }}" method="POST">
-                                                @csrf
-                                                <input type="hidden" name="tag_id" value="{{ $tag->tag_id }}">
-                                                <button type="submit" class="btn btn-sm btn-outline-success px-3 rounded-pill">Add</button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-@endauth
-
-{{-- Admin Create New Tag Secondary Modal --}}
-@auth
-    @if(Auth::user()->isAdmin())
-        <div class="modal fade" id="createTagModal" tabindex="-1" aria-labelledby="createTagModalLabel" aria-hidden="true" style="background: rgba(0,0,0,0.3);">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title fw-bold" id="createTagModalLabel"><i class="bi bi-tag-fill"></i> Create Global Tag</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <form action="{{ route('tags.store') }}" method="POST">
-                        @csrf
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="new_tag_title" class="form-label fw-semibold">Tag Name</label>
-                                <input type="text" name="title" id="new_tag_title" class="form-control" placeholder="e.g., RPG, Sandbox, Strategy" required maxlength="255">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="new_tag_description" class="form-label fw-semibold">Description</label>
-                                <textarea name="description" id="new_tag_description" class="form-wrap form-control" rows="3" placeholder="Briefly explain what this tag means..." maxlength="1000"></textarea>
-                            </div>
-
-                            <div class="form-check form-switch p-2 ps-5 border rounded bg-light">
-                                <input class="form-check-input ms-3 float-end" type="checkbox" role="switch" id="new_tag_r18" name="is_r18" value="1">
-                                <label class="form-check-label fw-semibold text-danger" for="new_tag_r18">
-                                    <i class="bi bi-exclamation-circle-fill"></i> Restrict Tag as 18+ (R-18)
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="modal-footer bg-light border-top">
-                            <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#manageTagsModal">Back to List</button>
-                            <button type="submit" class="btn btn-primary btn-sm px-4">Save Tag</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    @endif
-@endauth
-
 @endsection
-
