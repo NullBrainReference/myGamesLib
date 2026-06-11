@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Game;
+use App\Models\Mechanic;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -63,6 +64,7 @@ class GameController extends Controller
         $game = Game::with('tags')->findOrFail($id);
 
         // $comments = $game->comments()->with('user')->latest()->paginate(5);
+        $mechanics = $game->mechanics()->paginate(10);
         $comments = $game->comments()
             ->whereNull('parent_id')
             ->with(['user', 'replies.user'])
@@ -84,7 +86,14 @@ class GameController extends Controller
             }
         }
 
-        return view('games.view', compact('game', 'comments', 'reviews', 'backUrl', 'userReview', 'allTags'));
+        return view('games.view',
+            compact('game',
+            'comments',
+            'reviews',
+            'backUrl',
+            'userReview',
+            'allTags',
+            'mechanics'));
     }
 
     public function confirmRemoval(int $id)
@@ -135,17 +144,6 @@ class GameController extends Controller
         ]);
 
         return redirect($this->fallbackBackUrl('shop'))->with('success', 'Game created successfully!');
-
-        // $validated = $request->validate([
-        //     'title' => 'required|string|max:255',
-        //     'description' => 'required|string|max:1000',
-        //     'img_src' => 'required|url',
-        // ]);
-
-        // Game::create($validated);
-
-        // return redirect($this->fallbackBackUrl('shop'))->with('success', 'Game created successfully!');
-        // return redirect()->route('shop')->with('success', 'Game created successfully!');
     }
 
     public function edit(int $id)
@@ -187,7 +185,6 @@ class GameController extends Controller
     {
         $referer = request()->headers->get('referer');
 
-        // Безопасная проверка пути
         if ($referer && str_contains($referer, '/dashboard')) {
             return route('dashboard.games');
         }

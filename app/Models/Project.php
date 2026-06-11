@@ -43,4 +43,9 @@ class Project extends Model
         return $this->belongsToMany(User::class, 'project_participants')
                     ->withTimestamps();
     }
+
+    public function mechanics(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Mechanic::class, 'project_mechanic', 'project_id', 'mechanic_id');
+    }
 }

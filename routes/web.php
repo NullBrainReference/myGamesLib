@@ -10,26 +10,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\MechanicController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\ThreadController;
 
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
-// Route::get('/profile/{id?}', function ($id = null) {
-//     $id = $id ?? Auth::id();
-//     return app(\App\Http\Controllers\ProfileController::class)->view($id);
-// })->middleware('auth')->name('profile.view');
-
-// Route::middleware('auth')->group(function () {
-//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-// });
 
 Route::get('/profile', function () {
     return app(\App\Http\Controllers\ProfileController::class)->view(Auth::id());
@@ -196,6 +183,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/participants/attach', [ProjectController::class, 'attachParticipant'])->name('projects.participants.attach');
         Route::delete('/participants/detach/{user_id}', [ProjectController::class, 'detachParticipant'])->name('projects.participants.detach');
     });
+});
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::post('/games/{game_id}/mechanics', [MechanicController::class, 'store'])
+        ->name('mechanics.store');
+    Route::put('/mechanics/{mechanic_id}', [MechanicController::class, 'update'])
+        ->name('mechanics.update');
+    Route::delete('/mechanics/{mechanic_id}', [MechanicController::class, 'destroy'])
+        ->name('mechanics.destroy');
 });
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

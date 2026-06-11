@@ -284,6 +284,8 @@
                 </div>
             </div>
 
+            <x-game-mechanics :game="$game" />
+
             <div class="card border border-gray-200 shadow-sm bg-white rounded-lg p-3 p-md-4">
                 <x-comment-section :object="$game" type="game" :comments="$comments" />
             </div>
@@ -397,7 +399,64 @@
                 </div>
             </div>
         </div>
+
+        {{-- Mechanics dialog --}}
+        <div id="mechanicModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen p-4 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm transition-opacity" onclick="closeMechanicModal()"></div>
+
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200">
+
+                    <div class="bg-gray-900 px-4 py-3 sm:px-6 flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-white tracking-wide uppercase flex items-center gap-2" id="mechanicModalTitle">
+                            Setup Mechanic Parameters
+                        </h3>
+                        <button type="button" class="text-gray-400 hover:text-white text-lg focus:outline-none" onclick="closeMechanicModal()">
+                            &times;
+                        </button>
+                    </div>
+
+                    <form id="mechanicForm" method="POST" class="m-0">
+                        @csrf
+                        <div id="mechanicFormMethod"></div>
+
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="mechanic_title" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Mechanic Title Label</label>
+                                    <input type="text" name="title" id="mechanic_title"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 p-2.5 text-sm"
+                                           placeholder="e.g., Worker Placement, Deck Building" required maxlength="255">
+                                </div>
+
+                                <div>
+                                    <label for="mechanic_content" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">System Rule Logic Description</label>
+                                    <textarea name="content" id="mechanic_content" rows="4"
+                                              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 p-2.5 text-sm"
+                                              placeholder="Define exactly how this dynamic architectural mechanic constraints execution behaviors..." required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-between items-center border-t border-gray-100">
+                            <button type="button"
+                                    class="px-4 py-2 bg-white border border-gray-300 rounded text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none"
+                                    onclick="closeMechanicModal()">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-semibold shadow-md hover:bg-blue-700 focus:outline-none">
+                                Save Structural Configuration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     @endif
+
 @endauth
 
 <script>

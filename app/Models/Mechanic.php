@@ -24,4 +24,12 @@ class Mechanic extends Model
     {
         return $this->belongsToMany(Game::class, 'game_mechanic', 'mechanic_id', 'game_id');
     }
+
+    /**
+     * 💡 Get the projects associated with this mechanic.
+     */
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'project_mechanic', 'mechanic_id', 'project_id');
+    }
 }
