@@ -15,6 +15,7 @@ class Mechanic extends Model
     protected $fillable = [
         'title',
         'content',
+        'approved',
     ];
 
     /**

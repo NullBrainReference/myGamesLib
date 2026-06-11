@@ -11,8 +11,10 @@ class MechanicController extends Controller
 {
     public function store(Request $request, $game_id)
     {
+        $approved = true;
         if (!Auth::user()->isAdmin()) {
-            abort(403);
+            $approved = false;
+            // abort(403);
         }
 
         $validated = $request->validate([
@@ -23,6 +25,7 @@ class MechanicController extends Controller
         $mechanic = Mechanic::create([
             'title'   => $validated['title'],
             'content' => $validated['content'],
+            'approved' => $approved,
         ]);
 
         $game = Game::findOrFail($game_id);

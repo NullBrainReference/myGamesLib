@@ -64,7 +64,12 @@ class GameController extends Controller
         $game = Game::with('tags')->findOrFail($id);
 
         // $comments = $game->comments()->with('user')->latest()->paginate(5);
-        $mechanics = $game->mechanics()->paginate(10);
+        $mechanicsQuery = $game->mechanics();
+        if (!Auth::check() || !Auth::user()->isAdmin()){
+            $mechanicsQuery = $mechanicsQuery->where('approved', true);
+        }
+        $mechanics = $mechanicsQuery->paginate(10);
+
         $comments = $game->comments()
             ->whereNull('parent_id')
             ->with(['user', 'replies.user'])
