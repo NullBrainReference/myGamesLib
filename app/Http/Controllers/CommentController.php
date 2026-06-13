@@ -71,6 +71,12 @@ class CommentController extends Controller
                                 ->whereHasMorph('commentable', [\App\Models\Blog::class], fn ($p) =>
                                     $p->where('title', 'like', "%{$objectTitle}%")
                                 );
+                        })
+                        ->orWhere(function ($qThread) use ($objectTitle) {
+                            $qThread->where('commentable_type', \App\Models\Thread::class)
+                                ->whereHasMorph('commentable', [\App\Models\Thread::class], fn ($th) =>
+                                    $th->where('title', 'like', "%{$objectTitle}%")
+                                );
                         });
                 });
             })
