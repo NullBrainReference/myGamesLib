@@ -36,10 +36,10 @@
 
                     <div class="p-4 sm:p-6 space-y-4">
                         <div>
-                            <label for="thread_title" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                            <label for="title" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
                                 Thread Subject Title
                             </label>
-                            <input type="text" name="title" id="thread_title"
+                            <input type="text" name="title" id="title"
                                    value="{{ old('title') }}"
                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 p-2.5 text-sm @error('title') border-red-500 ring ring-red-100 @enderror"
                                    placeholder="Summarize your observation concisely..." required maxlength="255" autofocus>
@@ -50,14 +50,14 @@
                         </div>
 
                         <div>
-                            <label for="thread_body" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                            <label for="content" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
                                 Discussion Content Description
                             </label>
-                            <textarea name="body" id="thread_body" rows="8"
+                            <textarea name="content" id="content" rows="8"
                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 p-2.5 text-sm @error('body') border-red-500 ring ring-red-100 @enderror"
                                       placeholder="Elaborate on your topic thread. Provide references, architectural details, or background information..." required>{{ old('body') }}</textarea>
 
-                            @error('body')
+                            @error('content')
                                 <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
                             @enderror
                         </div>

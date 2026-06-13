@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\Thread;
 use Illuminate\Http\Request;
 use App\Strategies\EntityListBehavior\ThreadListProcessor;
@@ -64,7 +65,7 @@ class ThreadController extends Controller
 
         // Redirect directly to the newly created thread view page
         return redirect()->route('forum.thread', $thread->id)
-                        ->with('success', 'Your thread has been posted successfully!');
+            ->with('success', 'Your thread has been posted successfully!');
     }
 
 }
