@@ -84,7 +84,7 @@
                                                 {{ $comment->commentable->title }}
                                             </a>
                                         @elseif($comment->commentable instanceof \App\Models\Thread)
-                                            <span class="badge bg-purple-subtle text-purple border border-purple-subtle px-2 py-0.5 rounded text-xs font-semibold">Thread</span>
+                                            <span class="badge bg-purple-300-subtle text-purple border border-purple-subtle px-2 py-0.5 rounded text-xs font-semibold">Thread</span>
                                             <a href="{{ route('forum.thread', $comment->commentable->id) }}" class="text-decoration-none text-gray-900 font-medium text-truncate d-inline-block style-title-link" style="max-width: 180px;" title="{{ $comment->commentable->title }}">
                                                 {{ $comment->commentable->title }}
                                             </a>
