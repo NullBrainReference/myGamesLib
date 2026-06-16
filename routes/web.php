@@ -16,6 +16,7 @@ use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\ThreadController;
+use App\Http\Controllers\Auth\SocialiteController;
 
 
 Route::get('/profile', function () {
@@ -31,6 +32,15 @@ Route::middleware('auth')->prefix('profile')->group(function () {
     Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::middleware('guest')->group(function () {
+    // 💡 Redirect the user to the external GitHub API authorization screen
+    Route::get('auth/github', [SocialiteController::class, 'redirectToProvider'])->name('auth.github');
+
+    // 💡 Capture the returning API data stream payload from GitHub
+    Route::get('auth/github/callback', [SocialiteController::class, 'handleProviderCallback']);
+});
+
 Route::get('/profile/{id}/comments', [ProfileController::class, 'comments'])->name('profile.comments');
 
 Route::middleware('role.guard:admin')->group(function () {
