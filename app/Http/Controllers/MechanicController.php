@@ -14,7 +14,6 @@ class MechanicController extends Controller
         $approved = true;
         if (!Auth::user()->isAdmin()) {
             $approved = false;
-            // abort(403);
         }
 
         $validated = $request->validate([
@@ -34,7 +33,6 @@ class MechanicController extends Controller
         return redirect()->back()->with('success', 'Gameplay mechanic created and linked successfully!');
     }
 
-    // 2. Locate your update method:
     public function update(Request $request, $mechanic_id)
     {
         if (!Auth::user()->isAdmin()) {

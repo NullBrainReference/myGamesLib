@@ -48,7 +48,6 @@ class ImageController extends Controller
 
     public function clearTempImages()
     {
-        // dd('cleared');
         session()->forget('pending_images');
         return back();
     }

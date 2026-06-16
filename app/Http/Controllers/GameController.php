@@ -16,35 +16,16 @@ class GameController extends Controller
     {
         $query = Game::query();
 
-        // 1. Instantiate our concrete Game List Strategy
         $processor = new GameListProcessor();
 
-        // 2. Run the query builder through the processing pipeline
         $query = $processor->search($query, $request->input('search'));
         $query = $processor->applyExtraFilters($query, $request);
         $query = $processor->initialOrder($query, $request->input('sort', 'latest'));
 
-        // 3. Paginate the structural results (keeping your limit of 2 items per page)
-        // .withQueryString() prevents losing your search/sort filters when hitting page 2
         $games = $query->paginate(2)->withQueryString();
 
-        // 4. Safely hand it over to your shop view
         return view('games.shop', compact('games'));
     }
-
-    //
-    // public function shop(Request $request)
-    // {
-    //     $query = Game::query();
-
-    //     if ($search = $request->input('search')) {
-    //         $query->where('title', 'like', "%{$search}%");
-    //     }
-
-    //     $games = $query->paginate(2);
-
-    //     return view('games.shop', compact('games'));
-    // }
 
     public function dashboard(Request $request)
     {
@@ -63,7 +44,6 @@ class GameController extends Controller
     {
         $game = Game::with('tags')->findOrFail($id);
 
-        // $comments = $game->comments()->with('user')->latest()->paginate(5);
         $mechanicsQuery = $game->mechanics();
         if (!Auth::check() || !Auth::user()->isAdmin()){
             $mechanicsQuery = $mechanicsQuery->where('approved', true);
@@ -105,7 +85,6 @@ class GameController extends Controller
     {
         $game = Game::findOrFail($id);
 
-        // $backUrl = request()->headers->get('referer') ?? route('shop');
         $backUrl = request()->input('back_url') ?? $this->fallbackBackUrl('shop');
 
         return view('games.confirm_remove', compact('game', 'backUrl'));
@@ -116,13 +95,9 @@ class GameController extends Controller
         $game = Game::findOrFail($id);
         $game->delete();
 
-        // $redirectUrl = $this->fallbackBackUrl('shop');
-
         $redirect = $request->input('back_url', route('shop'));
 
         return redirect($redirect)->with('success', 'Game deleted successfully!');
-
-        // return redirect($redirectUrl)->with('success', 'Game deleted successfully!');
     }
 
     public function create()

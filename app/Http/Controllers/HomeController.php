@@ -12,6 +12,5 @@ class HomeController extends Controller
     {
         $latestGame = Game::orderBy('created_at', 'desc')->first();
         return view('index', compact('latestGame'));
-        // return view('index');
     }
 }

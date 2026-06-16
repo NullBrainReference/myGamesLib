@@ -17,7 +17,7 @@ class CommentController extends Controller
 
         $request->validate([
             'content' => 'required|string|max:1000',
-            'parent_id' => 'nullable|exists:comments,id', // Added validation
+            'parent_id' => 'nullable|exists:comments,id',
         ]);
 
         $modelClass = match ($type) {
@@ -32,7 +32,7 @@ class CommentController extends Controller
         $commentable->comments()->create([
             'content' => $request->content,
             'user_id' => auth()->id(),
-            'parent_id' => $request->parent_id, // Attached the parent hierarchy node
+            'parent_id' => $request->parent_id,
         ]);
 
         return redirect()->back()->with('success', 'Comment posted!');

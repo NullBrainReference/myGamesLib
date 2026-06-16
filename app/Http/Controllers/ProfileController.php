@@ -23,9 +23,6 @@ class ProfileController extends Controller
         return view('profile.view', compact('user', 'profile', 'games', 'isSelf'));
     }
 
-    /**
-     * Display the user's profile form.
-     */
     public function edit(Request $request): View
     {
         $profile = $request->user()->profile;
@@ -35,9 +32,6 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
     public function update(Request $request): RedirectResponse
     {
         $user = $request->user();
