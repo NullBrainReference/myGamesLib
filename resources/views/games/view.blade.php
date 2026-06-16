@@ -407,7 +407,7 @@
 
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200">
+                <div class="inline-block bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200">
 
                     <div class="bg-gray-900 px-4 py-3 sm:px-6 flex items-center justify-between">
                         <h3 class="text-sm font-bold text-white tracking-wide uppercase flex items-center gap-2" id="mechanicModalTitle">
