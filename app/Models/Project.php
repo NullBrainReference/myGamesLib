@@ -15,7 +15,13 @@ class Project extends Model
         'is_public',
         'icon_big',
         'icon_small',
+        'comment_id',
     ];
+
+    public function comment()
+    {
+        return $this->belongsTo(Comment::class);
+    }
 
     /**
      * Owners of the project

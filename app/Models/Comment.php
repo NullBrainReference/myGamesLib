@@ -16,6 +16,11 @@ class Comment extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function project()
+    {
+        return $this->hasOne(Project::class);
+    }
+
     // public function game()
     // {
     //     return $this->belongsTo(Game::class, 'game_id', 'game_id');
