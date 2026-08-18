@@ -1,3 +1,7 @@
+@php
+    $canCreateProject = $canCreateProject ?? true;
+@endphp
+
 <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4 shadow-sm {{ $comment->parent_id ? 'ml-6 md:ml-12 border-l-4 border-l-blue-500' : '' }}">
 
     <div class="flex items-center gap-2 mb-2">
@@ -15,6 +19,28 @@
 
     <p class="text-gray-700 mb-3 text-sm leading-relaxed" style="white-space: pre-line;">{{ $comment->content }}</p>
 
+    @if($comment->project)
+        <div class="my-3 p-3 bg-blue-50/50 border border-blue-200 rounded-lg shadow-sm">
+            <div class="flex items-center justify-between mb-1">
+                <h4 class="text-sm font-semibold text-blue-900 flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                    {{ $comment->project->title }}
+                </h4>
+                <span class="text-[10px] font-medium px-2 py-0.5 rounded {{ $comment->project->is_public ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' }}">
+                    {{ $comment->project->is_public ? 'Public' : 'Private' }}
+                </span>
+            </div>
+            <p class="text-xs text-gray-600 mb-2">
+                {{ Str::limit($comment->project->content, 120) }}
+            </p>
+            <a href="{{ route('projects.view', $comment->project->id) }}" class="inline-flex items-center text-xs text-blue-600 font-semibold hover:text-blue-800 hover:underline">
+                View Project &rarr;
+            </a>
+        </div>
+    @endif
+
     <div class="flex items-center gap-4 text-xs text-gray-400">
         <span>{{ $comment->created_at->diffForHumans() }}</span>
 
@@ -24,6 +50,13 @@
                     onclick="toggleTailwindReplyForm(event, {{ $comment->id }})">
                 Reply
             </button>
+
+            @if($canCreateProject && !$comment->project)
+                <a href="{{ route('projects.create', ['comment_id' => $comment->id]) }}"
+                   class="text-emerald-600 hover:text-emerald-800 font-medium hover:underline">
+                    + Create Project
+                </a>
+            @endif
 
             @if(auth()->id() === $comment->user_id || auth()->user()->isAdmin())
                 <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="inline">
@@ -70,7 +103,8 @@
             @include('partials.comment', [
                 'comment' => $reply,
                 'type' => $type,
-                'object' => $object
+                'object' => $object,
+                'canCreateProject' => $canCreateProject
             ])
         @endforeach
     </div>

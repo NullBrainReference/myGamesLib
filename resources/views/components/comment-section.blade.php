@@ -1,3 +1,7 @@
+@php
+    $canCreateProject = $canCreateProject ?? true;
+@endphp
+
 <div class="mt-4">
     <h5>Comments ({{ $object->comments()->count() }})</h5>
 
@@ -10,7 +14,12 @@
     @endauth
 
     @forelse ($comments as $comment)
-        @include('partials.comment', ['comment' => $comment])
+        @include('partials.comment', [
+            'comment' => $comment,
+            'type' => $type,
+            'object' => $object,
+            'canCreateProject' => $canCreateProject
+        ])
     @empty
         <p class="text-muted">No comments yet. Be the first!</p>
     @endforelse

@@ -34,33 +34,64 @@ class ProjectController extends Controller
         return view('projects.view', compact('project', 'allUsers'));
     }
 
-    public function create()
+    // public function create()
+    // {
+    //     $users = User::orderBy('name', 'asc')->get();
+    //     return view('projects.create', compact('users'));
+    // }
+
+    public function create(Request $request)
     {
         $users = User::orderBy('name', 'asc')->get();
-        return view('projects.create', compact('users'));
+        $commentId = $request->query('comment_id');
+
+        return view('projects.create', compact('users', 'commentId'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'title'   => 'required|string|max:255|min:3',
-            'content' => 'required|string',
+            'title'      => 'required|string|max:255|min:3',
+            'content'    => 'required|string',
+            'comment_id' => 'nullable|exists:comments,id',
         ]);
 
         $project = Project::create([
-            'title'     => $request->input('title'),
-            'content'   => $request->input('content'),
-            'is_public' => $request->has('is_public'),
+            'title'      => $request->input('title'),
+            'content'    => $request->input('content'),
+            'is_public'  => $request->has('is_public'),
+            'comment_id' => $request->input('comment_id'),
         ]);
 
         $project->owners()->attach(Auth::id());
-
         $project->editors()->sync($request->input('editors', []));
         $project->participants()->sync($request->input('participants', []));
 
         return redirect()->route('projects.view', $project->id)
-                         ->with('success', 'Project workspace created successfully!');
+                        ->with('success', 'Project workspace created successfully!');
     }
+
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'title'   => 'required|string|max:255|min:3',
+    //         'content' => 'required|string',
+    //     ]);
+
+    //     $project = Project::create([
+    //         'title'     => $request->input('title'),
+    //         'content'   => $request->input('content'),
+    //         'is_public' => $request->has('is_public'),
+    //     ]);
+
+    //     $project->owners()->attach(Auth::id());
+
+    //     $project->editors()->sync($request->input('editors', []));
+    //     $project->participants()->sync($request->input('participants', []));
+
+    //     return redirect()->route('projects.view', $project->id)
+    //                      ->with('success', 'Project workspace created successfully!');
+    // }
 
     public function edit(int $id)
     {

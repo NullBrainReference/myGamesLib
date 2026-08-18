@@ -15,6 +15,9 @@
                 <div class="card-body p-4 bg-white">
                     <form method="POST" action="{{ route('projects.store') }}">
                         @csrf
+                        @if(isset($commentId))
+                            <input type="hidden" name="comment_id" value="{{ $commentId }}">
+                        @endif
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-gray-700">Project Title</label>

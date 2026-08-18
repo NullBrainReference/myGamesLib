@@ -31,7 +31,12 @@ class ThreadController extends Controller
 
         $comments = $thread->comments()
             ->whereNull('parent_id')
-            ->with(['user', 'replies.user'])
+            ->with([
+                'user',
+                'project',
+                'replies.user',
+                'replies.project',
+            ])
             ->latest()
             ->paginate(10);
 
