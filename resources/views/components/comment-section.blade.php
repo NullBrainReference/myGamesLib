@@ -1,6 +1,9 @@
-@php
-    $canCreateProject = $canCreateProject ?? true;
-@endphp
+@props([
+    'object',
+    'type',
+    'comments',
+    'canCreateProject' => true
+])
 
 <div class="mt-4">
     <h5>Comments ({{ $object->comments()->count() }})</h5>

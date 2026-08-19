@@ -40,7 +40,9 @@ class ThreadController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('forum.view', compact('thread', 'comments'));
+        $canCreateProject = true;
+
+        return view('forum.view', compact('thread', 'comments', 'canCreateProject'));
     }
 
     public function create()

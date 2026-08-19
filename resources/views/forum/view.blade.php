@@ -75,7 +75,11 @@
         @endif
 
         {{-- Injecting your existing polymorphic comment section layout --}}
-        <x-comment-section :object="$thread" type="thread" :comments="$comments" />
+        <x-comment-section
+            :object="$thread"
+            type="thread"
+            :comments="$comments"
+            :can-create-project="$canCreateProject" />
     </div>
 </div>
 
