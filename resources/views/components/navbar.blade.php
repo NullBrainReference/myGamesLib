@@ -60,6 +60,8 @@
                             class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50 list-none m-0 p-0">
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('profile') }}">Profile</a></li>
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('library') }}">My Library</a></li>
+                            <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('messages.index') }}">Messages</a></li>
+
 
                             @if (Auth::user()->isAdmin())
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('dashboard') }}">Dashboard</a></li>
@@ -115,6 +117,8 @@
                 <div class="px-3 py-1 text-xs font-bold uppercase tracking-wider text-gray-400">User: {{ Auth::user()->name }}</div>
                 <a class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition" href="{{ route('profile') }}">Profile</a>
                 <a class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition" href="{{ route('library') }}">My Library</a>
+                <a class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition" href="{{ route('messages.index') }}">Messages</a>
+
                 @if (Auth::user()->isAdmin())
                     <a class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition" href="{{ route('dashboard') }}">Dashboard</a>
                 @endif
