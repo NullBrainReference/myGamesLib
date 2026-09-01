@@ -46,6 +46,15 @@
                                 {{ $isSelf ? 'To your library' : "To $user->name's library" }}
                             </a>
                         </div>
+                        @auth
+                            @if(!$isSelf)
+                                <div class="mt-2">
+                                    <a href="{{ route('messages.index', $user->id) }}" class="btn btn-outline-primary btn-sm w-100 mb-2">
+                                        <i class="bi bi-envelope"></i> Send Message
+                                    </a>
+                                </div>
+                            @endif
+                        @endauth
 
                         {{-- Dynamic Friend System Buttons --}}
                         @auth
@@ -87,7 +96,7 @@
                     <div>
                         <h3 class="mb-1">
                             {{ $user->name }}
-                            <a href="{{ $isSelf ? route('friends.index') : route('friends.show', $user->id) }}"
+                            <a href="{{ $isSelf ? route('friends.index') : route('friends.view', $user->id) }}"
                                 class="badge bg-secondary fs-6 ms-2 text-decoration-none">
                                 {{ $user->friends->count() }} {{ Str::plural('Friend', $user->friends->count()) }}
                             </a>

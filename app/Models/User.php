@@ -135,4 +135,26 @@ class User extends Authenticatable
         return $this->pendingFriendsReceived->contains('id', $user->id);
     }
 
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    // Get all unique users this user has messaged with
+    public function conversations()
+    {
+        $sentIds = $this->sentMessages()->pluck('receiver_id');
+        $receivedIds = $this->receivedMessages()->pluck('sender_id');
+
+        return User::whereIn('id', $sentIds->merge($receivedIds)->unique())
+            ->where('id', '!=', $this->id)
+            ->get();
+    }
+
 }

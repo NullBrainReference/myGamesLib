@@ -18,7 +18,7 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\FriendController;
-
+use App\Http\Controllers\MessageController;
 
 
 Route::get('/profile', function () {
@@ -211,6 +211,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/friends/send/{user}', [FriendController::class, 'sendRequest'])->name('friends.send');
     Route::post('/friends/accept/{user}', [FriendController::class, 'acceptRequest'])->name('friends.accept');
     Route::delete('/friends/remove/{user}', [FriendController::class, 'removeFriend'])->name('friends.remove');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/messages/{user?}', [MessageController::class, 'index'])->name('messages.index');
+    Route::post('/messages/{user}', [MessageController::class, 'store'])->name('messages.store');
 });
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
