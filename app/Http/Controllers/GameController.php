@@ -71,14 +71,20 @@ class GameController extends Controller
             }
         }
 
+        $canCreateProject = false;
+
         return view('games.view',
-            compact('game',
-            'comments',
-            'reviews',
-            'backUrl',
-            'userReview',
-            'allTags',
-            'mechanics'));
+            compact(
+                'game',
+                'comments',
+                'reviews',
+                'backUrl',
+                'userReview',
+                'allTags',
+                'mechanics',
+                'canCreateProject'
+            )
+        );
     }
 
     public function confirmRemoval(int $id)

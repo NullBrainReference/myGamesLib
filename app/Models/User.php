@@ -83,4 +83,56 @@ class User extends Authenticatable
         return $this->hasOne(Profile::class);
     }
 
+    public function friendsOfThisUser(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'friendships', 'user_id', 'friend_id')
+            ->wherePivot('status', 'accepted')
+            ->withTimestamps();
+    }
+
+    public function thisUserFriendOf(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'friendships', 'friend_id', 'user_id')
+            ->wherePivot('status', 'accepted')
+            ->withTimestamps();
+    }
+
+    // Combined collection of all accepted friends
+    public function getFriendsAttribute()
+    {
+        return $this->friendsOfThisUser->merge($this->thisUserFriendOf);
+    }
+
+    // Sent requests pending approval
+    public function pendingFriendsSent(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'friendships', 'user_id', 'friend_id')
+            ->wherePivot('status', 'pending')
+            ->withTimestamps();
+    }
+
+    // Received requests pending my approval
+    public function pendingFriendsReceived(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'friendships', 'friend_id', 'user_id')
+            ->wherePivot('status', 'pending')
+            ->withTimestamps();
+    }
+
+    // Status Check Helpers
+    public function isFriendsWith(User $user): bool
+    {
+        return $this->friends->contains('id', $user->id);
+    }
+
+    public function hasPendingRequestTo(User $user): bool
+    {
+        return $this->pendingFriendsSent->contains('id', $user->id);
+    }
+
+    public function hasPendingRequestFrom(User $user): bool
+    {
+        return $this->pendingFriendsReceived->contains('id', $user->id);
+    }
+
 }

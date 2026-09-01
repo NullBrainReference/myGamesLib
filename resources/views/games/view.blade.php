@@ -287,7 +287,10 @@
             <x-game-mechanics :game="$game" />
 
             <div class="card border border-gray-200 shadow-sm bg-white rounded-lg p-3 p-md-4">
-                <x-comment-section :object="$game" type="game" :comments="$comments" />
+                <x-comment-section
+                    :object="$game" type="game"
+                    :comments="$comments"
+                    :can-create-project="$canCreateProject"/>
             </div>
 
         </div>

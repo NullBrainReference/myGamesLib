@@ -45,7 +45,9 @@ class BlogController extends Controller
             ->latest()
             ->paginate(5);
 
-        return view('blog.view', compact('blog', 'comments'));
+        $canCreateProject = false;
+
+        return view('blog.view', compact('blog', 'comments', 'canCreateProject'));
     }
 
     public function create()

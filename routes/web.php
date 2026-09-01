@@ -17,6 +17,8 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\FriendController;
+
 
 
 Route::get('/profile', function () {
@@ -34,10 +36,8 @@ Route::middleware('auth')->prefix('profile')->group(function () {
 });
 
 Route::middleware('guest')->group(function () {
-    // 💡 Redirect the user to the external GitHub API authorization screen
     Route::get('auth/github', [SocialiteController::class, 'redirectToProvider'])->name('auth.github');
 
-    // 💡 Capture the returning API data stream payload from GitHub
     Route::get('auth/github/callback', [SocialiteController::class, 'handleProviderCallback']);
 });
 
@@ -203,6 +203,12 @@ Route::middleware(['auth'])->group(function () {
         ->name('mechanics.update');
     Route::delete('/mechanics/{mechanic_id}', [MechanicController::class, 'destroy'])
         ->name('mechanics.destroy');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/friends/send/{user}', [FriendController::class, 'sendRequest'])->name('friends.send');
+    Route::post('/friends/accept/{user}', [FriendController::class, 'acceptRequest'])->name('friends.accept');
+    Route::delete('/friends/remove/{user}', [FriendController::class, 'removeFriend'])->name('friends.remove');
 });
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

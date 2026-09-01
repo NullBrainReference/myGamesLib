@@ -1,3 +1,5 @@
+
+
 @extends('layouts.app')
 
 @push('styles')
@@ -21,12 +23,12 @@
                 <h2 class="mb-3">{{ $blog->title }}</h2>
 
                 <div class="text-muted mb-2">
-                    By 
+                    By
                     <strong>
                         <a href="{{ route('profile.view', ['id' => $blog->user->id]) }}">
                             {{ $blog->user->name }}
                         </a>
-                    </strong> 
+                    </strong>
                     • Posted {{ $blog->created_at->diffForHumans() }}
                 </div>
 
@@ -38,7 +40,7 @@
 
                 <div class="mt-4 d-flex justify-content-between align-items-center">
                     <a href="{{ route('blog.index') }}" class="btn btn-outline-secondary btn-sm">← To posts</a>
-                    
+
                     @if(auth()->check() && (auth()->id() === $blog->user_id || auth()->user()->isAdmin()))
                         <div class="d-flex gap-2">
                             <a href="{{ route('blog.edit', $blog->id) }}" class="btn btn-outline-warning btn-sm">Edit</a>
@@ -57,7 +59,10 @@
 <div class="row justify-content-center mt-4">
     <div class="col-md-8">
 
-        <x-comment-section :object="$blog" type="blog" :comments="$comments" />
+        <x-comment-section
+            :object="$blog" type="blog"
+            :comments="$comments"
+            :can-create-project="$canCreateProject"/>
 
     </div>
 </div>
