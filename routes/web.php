@@ -206,6 +206,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
+    Route::get('/users/{user}/friends', [FriendController::class, 'view'])->name('friends.view');
     Route::post('/friends/send/{user}', [FriendController::class, 'sendRequest'])->name('friends.send');
     Route::post('/friends/accept/{user}', [FriendController::class, 'acceptRequest'])->name('friends.accept');
     Route::delete('/friends/remove/{user}', [FriendController::class, 'removeFriend'])->name('friends.remove');

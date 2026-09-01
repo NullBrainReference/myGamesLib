@@ -7,6 +7,25 @@ use Illuminate\Support\Facades\Auth;
 
 class FriendController extends Controller
 {
+
+    public function index()
+    {
+        $user = auth()->user();
+
+        $friends = $user->friends;
+        $incomingRequests = $user->pendingFriendsReceived()->with('profile')->get();
+        $sentRequests = $user->pendingFriendsSent()->with('profile')->get();
+
+        return view('friends.index', compact('friends', 'incomingRequests', 'sentRequests'));
+    }
+
+    public function view(User $user)
+    {
+        $friends = $user->friends;
+
+        return view('friends.view', compact('user', 'friends'));
+    }
+
     public function sendRequest(User $user)
     {
         $authUser = Auth::user();

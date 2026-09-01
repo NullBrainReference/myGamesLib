@@ -87,9 +87,10 @@
                     <div>
                         <h3 class="mb-1">
                             {{ $user->name }}
-                            <span class="badge bg-secondary fs-6 ms-2">
+                            <a href="{{ $isSelf ? route('friends.index') : route('friends.show', $user->id) }}"
+                                class="badge bg-secondary fs-6 ms-2 text-decoration-none">
                                 {{ $user->friends->count() }} {{ Str::plural('Friend', $user->friends->count()) }}
-                            </span>
+                            </a>
                         </h3>
                         <div class="mb-2">
                             <strong>Gender:</strong>
