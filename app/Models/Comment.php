@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Comment extends Model
 {
@@ -21,10 +23,27 @@ class Comment extends Model
         return $this->hasOne(Project::class);
     }
 
-    // public function game()
-    // {
-    //     return $this->belongsTo(Game::class, 'game_id', 'game_id');
-    // }
+    public function votes(): MorphMany
+    {
+        return $this->morphMany(Vote::class, 'voteable');
+    }
+
+    public function mechanic(): HasOne
+    {
+        return $this->hasOne(Mechanic::class, 'comment_id', 'id');
+    }
+
+    public function getScoreAttribute(): int
+    {
+        return $this->votes()->sum('vote');
+    }
+
+    public function getUserVoteAttribute(): ?int
+    {
+        if (!auth()->check()) return null;
+        return $this->votes()->where('user_id', auth()->id())->value('vote');
+    }
+
 
     public function commentable()
     {

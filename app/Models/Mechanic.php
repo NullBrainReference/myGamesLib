@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Mechanic extends Model
@@ -16,19 +17,25 @@ class Mechanic extends Model
         'title',
         'content',
         'approved',
+        'user_id',
+        'comment_id',
     ];
 
-    /**
-     * Get the games associated with this mechanic.
-     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function comment(): BelongsTo
+    {
+        return $this->belongsTo(Comment::class);
+    }
+
     public function games(): BelongsToMany
     {
         return $this->belongsToMany(Game::class, 'game_mechanic', 'mechanic_id', 'game_id');
     }
 
-    /**
-     * 💡 Get the projects associated with this mechanic.
-     */
     public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'project_mechanic', 'mechanic_id', 'project_id');

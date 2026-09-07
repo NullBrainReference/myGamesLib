@@ -39,9 +39,13 @@
                 {{-- Header Core Banner --}}
                 <div class="card-body p-4 border-bottom bg-white d-flex align-items-center gap-4 flex-wrap flex-sm-nowrap">
                     <div class="flex-shrink-0 mx-auto mx-sm-0">
-                        <div class="bg-light rounded-lg shadow-sm border d-flex align-items-center justify-content-center text-primary" style="width: 80px; height: 80px; font-size: 2rem;">
-                            <i class="bi bi-boxes"></i>
-                        </div>
+                        @if($project->icon_big)
+                            <img src="{{ asset('storage/' . $project->icon_big) }}" alt="{{ $project->title }}" class="rounded-lg shadow-sm border object-fit-cover" style="width: 80px; height: 80px;">
+                        @else
+                            <div class="bg-light rounded-lg shadow-sm border d-flex align-items-center justify-content-center text-primary" style="width: 80px; height: 80px; font-size: 2rem;">
+                                <i class="bi bi-boxes"></i>
+                            </div>
+                        @endif
                     </div>
                     <div class="flex-grow-1 text-center text-sm-start">
                         <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2 mb-1">
@@ -57,10 +61,12 @@
                 {{-- Split Operational Grid --}}
                 <div class="card-body p-4 row g-4">
 
-                    {{-- Left Side: Briefing Text --}}
+                    {{-- Left Side: Briefing Text (Markdown Rendered) --}}
                     <div class="col-md-7 border-end border-gray-100 pe-md-4">
                         <h5 class="fw-bold text-gray-900 mb-3"><i class="bi bi-file-earmark-text text-muted"></i> Operational Briefing</h5>
-                        <div class="text-gray-800" style="white-space: pre-wrap; line-height: 1.7;">{{ $project->content }}</div>
+                        <div class="text-gray-800 review-rendered-markdown-output pt-1" style="line-height: 1.7;">
+                            {!! Parsedown::instance()->text($project->content) !!}
+                        </div>
                     </div>
 
                     {{-- Right Side: Dynamic Access Directory Lookup Menus --}}
@@ -131,9 +137,7 @@
     </div>
 </div>
 
-{{-- ========================================== --}}
-{{--        LOOKUP DIALOG MODAL: EDITORS        --}}
-{{-- ========================================== --}}
+{{-- MODALS --}}
 @if(Auth::check() && $project->owners->contains(Auth::id()))
 <div class="modal fade" id="manageEditorsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
@@ -143,7 +147,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                {{-- Search Filters Input --}}
                 <div class="input-group mb-3 shadow-sm rounded border">
                     <span class="input-group-text bg-white border-0 text-muted"><i class="bi bi-search"></i></span>
                     <input type="text" id="editorSearchInput" class="form-control border-0 ps-0" placeholder="Type name to lookup editor...">
@@ -179,9 +182,6 @@
     </div>
 </div>
 
-{{-- ========================================== --}}
-{{--      LOOKUP DIALOG MODAL: PARTICIPANTS     --}}
-{{-- ========================================== --}}
 <div class="modal fade" id="manageParticipantsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
@@ -190,7 +190,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                {{-- Search Filters Input --}}
                 <div class="input-group mb-3 shadow-sm rounded border">
                     <span class="input-group-text bg-white border-0 text-muted"><i class="bi bi-search"></i></span>
                     <input type="text" id="participantSearchInput" class="form-control border-0 ps-0" placeholder="Type name to lookup participant...">
@@ -227,10 +226,8 @@
 </div>
 @endif
 
-{{-- Client-Side JavaScript Live Filters --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Setup Editor Live Search Lookup
     const editorSearch = document.getElementById('editorSearchInput');
     const editorRows = document.querySelectorAll('.editor-item-row');
 
@@ -242,7 +239,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Setup Participant Live Search Lookup
     const participantSearch = document.getElementById('participantSearchInput');
     const participantRows = document.querySelectorAll('.participant-item-row');
 

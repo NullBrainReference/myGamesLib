@@ -36,7 +36,7 @@
                             {{-- Project Small Icon Slot --}}
                             <div class="flex-shrink-0">
                                 @if($project->icon_small)
-                                    <img src="{{ asset($project->icon_small) }}" alt="Icon" class="rounded border" style="width: 48px; height: 48px; object-fit: cover;">
+                                    <img src="{{ asset('storage/' . $project->icon_small) }}" alt="Icon" class="rounded border" style="width: 48px; height: 48px; object-fit: cover;">
                                 @else
                                     <div class="bg-light rounded border d-flex align-items-center justify-content-center text-secondary font-bold" style="width: 48px; height: 48px;">
                                         <i class="bi bi-kanban"></i>
@@ -56,7 +56,7 @@
                                 </div>
 
                                 <p class="card-text text-gray-600 small line-clamp-2 mb-2">
-                                    {{ $project->content }}
+                                    {{ Str::limit(strip_tags($project->content), 120) }}
                                 </p>
 
                                 {{-- Mini team counter summary badges --}}

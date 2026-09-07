@@ -42,4 +42,32 @@
         <p>No comments yet.</p>
     @endif
 </div>
+
+<script>
+// Open modal and bind form actions dynamically
+function openCreateMechanicModal(actionUrl, commentId = null, title = 'Propose Mechanic') {
+    const modal = document.getElementById('mechanicModal');
+    const form = document.getElementById('mechanicModalForm');
+    const modalTitle = document.getElementById('mechanicModalTitle');
+    const commentInput = document.getElementById('mechanicModalCommentId');
+
+    if (form && modal) {
+        form.action = actionUrl;
+        if (modalTitle) modalTitle.innerHTML = `<span class="p-1.5 bg-amber-100 text-amber-700 rounded-lg">⚙️</span> ${title}`;
+        if (commentInput) commentInput.value = commentId || '';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+// Close modal
+function closeCreateMechanicModal() {
+    const modal = document.getElementById('mechanicModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+</script>
+
 @endsection

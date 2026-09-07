@@ -4,7 +4,7 @@
     <div class="bg-gray-50 border-b border-gray-200 py-3 px-4 flex items-center justify-between">
         <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 00-2 2v12a2 2 0 002 2h7M13 4h7a2 2 0 012 2v12a2 2 0 01-2 2h-7M11 4v16"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 00-2 2v12a2 2 0 022 2h7M13 4h7a2 2 0 012 2v12a2 2 0 01-2 2h-7M11 4v16"></path>
             </svg>
             Core Gameplay Mechanics
         </h3>
@@ -14,7 +14,7 @@
                 @if(Auth::user()->isAdmin())
                     <button type="button"
                             class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow-sm transition-colors"
-                            onclick="openCreateMechanicModal('{{ route('mechanics.store', ['game_id' => $game->game_id]) }}')">
+                            onclick="openCreateMechanicModal('{{ route('games.mechanics.store', ['game_id' => $game->game_id]) }}')">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
                         Add Global System
                     </button>
@@ -59,7 +59,7 @@
                                         @endif
                                     @endauth
                                 </div>
-                                <p class="text-xs text-gray-600 leading-relaxed" style="white-space: pre-line;">
+                                <p class="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
                                     {{ $mechanic->content }}
                                 </p>
                             </div>
@@ -76,7 +76,7 @@
 </div>
 
 @auth
-    @if(Auth::user()->isAdmin())
+    @if(Auth::user()->isAdmin() || Auth::check())
         @push('scripts')
         <script>
             window.MechanicManager = {
@@ -84,26 +84,35 @@
                 form: document.getElementById('mechanicForm'),
                 titleText: document.getElementById('mechanicModalTitle'),
                 methodContainer: document.getElementById('mechanicFormMethod'),
+                extraFieldsContainer: document.getElementById('mechanicFormExtraFields'),
                 inputTitle: document.getElementById('mechanic_title'),
                 inputContent: document.getElementById('mechanic_content'),
 
-                openCreate(actionRoute) {
+                openCreate(actionRoute, commentId = null, title = "Append System Mechanic") {
                     if (!this.modal) return;
                     this.form.reset();
                     this.form.action = actionRoute;
-                    this.titleText.innerText = "Append Global Platform Classification Mechanic";
-                    this.methodContainer.innerHTML = "";
+                    if (this.titleText) this.titleText.innerText = title;
+                    if (this.methodContainer) this.methodContainer.innerHTML = "";
+                    
+                    if (this.extraFieldsContainer) {
+                        this.extraFieldsContainer.innerHTML = commentId 
+                            ? `<input type="hidden" name="comment_id" value="${commentId}">` 
+                            : "";
+                    }
+
                     this.modal.classList.remove('hidden');
                 },
 
                 openEdit(actionRoute, currentTitle, currentContent) {
                     if (!this.modal) return;
                     this.form.action = actionRoute;
-                    this.titleText.innerText = "Modify Operational System Parameters";
-                    this.methodContainer.innerHTML = `<input type="hidden" name="_method" value="PUT">`;
+                    if (this.titleText) this.titleText.innerText = "Modify System Parameters";
+                    if (this.methodContainer) this.methodContainer.innerHTML = `<input type="hidden" name="_method" value="PUT">`;
+                    if (this.extraFieldsContainer) this.extraFieldsContainer.innerHTML = "";
 
-                    this.inputTitle.value = currentTitle;
-                    this.inputContent.value = currentContent;
+                    if (this.inputTitle) this.inputTitle.value = currentTitle;
+                    if (this.inputContent) this.inputContent.value = currentContent;
                     this.modal.classList.remove('hidden');
                 },
 
@@ -113,9 +122,8 @@
                 }
             };
 
-            // 💡 Global bridges: This connects your existing HTML onclick triggers to the Manager methods
-            window.openCreateMechanicModal = function(actionRoute) {
-                window.MechanicManager.openCreate(actionRoute);
+            window.openCreateMechanicModal = function(actionRoute, commentId = null, title = "Append System Mechanic") {
+                window.MechanicManager.openCreate(actionRoute, commentId, title);
             };
 
             window.openEditMechanicModal = function(actionRoute, title, content) {

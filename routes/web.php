@@ -19,6 +19,7 @@ use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\VoteController;
 
 
 Route::get('/profile', function () {
@@ -196,13 +197,23 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-
-    Route::post('/games/{game_id}/mechanics', [MechanicController::class, 'store'])
-        ->name('mechanics.store');
+    Route::post('/projects/{project_id}/mechanics', [MechanicController::class, 'storeForProject'])
+        ->name('projects.mechanics.store');
+    Route::post('/games/{game_id}/mechanics', [MechanicController::class, 'storeForGame'])
+        ->name('games.mechanics.store');
+    Route::post('/forum/comments/{comment}/propose-mechanic', [MechanicController::class, 'storeProposedFromComment'])
+        ->name('forum.comments.mechanic.store');
     Route::put('/mechanics/{mechanic_id}', [MechanicController::class, 'update'])
         ->name('mechanics.update');
     Route::delete('/mechanics/{mechanic_id}', [MechanicController::class, 'destroy'])
         ->name('mechanics.destroy');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/projects/{project}/mechanics', [MechanicController::class, 'store'])
+        ->name('projects.mechanics.store');
+    Route::post('/comments/{comment}/vote', [VoteController::class, 'voteComment'])
+        ->name('comments.vote');
 });
 
 Route::middleware(['auth'])->group(function () {

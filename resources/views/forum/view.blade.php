@@ -21,6 +21,7 @@
 </div>
 
 {{-- Main Thread Component --}}
+@include('partials.mechanic-modal')
 <div class="row justify-content-center">
     <div class="col-md-10 col-lg-8">
         <div class="card border-0 shadow-sm rounded-lg overflow-hidden">
@@ -82,5 +83,34 @@
             :can-create-project="$canCreateProject" />
     </div>
 </div>
+
+{{-- <script>
+
+window.openCreateMechanicModal = function(actionUrl, commentId = null, title = 'Propose Mechanic') {
+    const modal = document.getElementById('mechanicModal');
+    const form = document.getElementById('mechanicModalForm');
+    const modalTitle = document.getElementById('mechanicModalTitle');
+    const commentInput = document.getElementById('mechanicModalCommentId');
+
+    if (form && modal) {
+        form.action = actionUrl;
+        if (modalTitle) modalTitle.innerHTML = `<span class="p-1.5 bg-amber-100 text-amber-700 rounded-lg">⚙️</span> ${title}`;
+        if (commentInput) commentInput.value = commentId || '';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    } else {
+        console.error('Modal or Form element not found in DOM');
+    }
+};
+
+window.closeCreateMechanicModal = function() {
+    const modal = document.getElementById('mechanicModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+</script> --}}
 
 @endsection
