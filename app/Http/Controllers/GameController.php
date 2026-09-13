@@ -43,11 +43,23 @@ class GameController extends Controller
     public function view(int $id)
     {
         $game = Game::with('tags')->findOrFail($id);
+        $gameId = $game->getKey();
 
-        $mechanicsQuery = $game->mechanics();
-        if (!Auth::check() || !Auth::user()->isAdmin()){
-            $mechanicsQuery = $mechanicsQuery->where('approved', true);
+        // Запрос выбирает:
+        // 1. Механики с прямым game_id
+        // 2. Generic-механики, привязанные к этой игре через pivot-таблицу ($game->mechanics)
+        $mechanicsQuery = Mechanic::query()
+            ->with('game')
+            ->where(function ($q) use ($game, $gameId) {
+                $q->where('game_id', $gameId)
+                ->orWhereIn('mechanic_id', $game->mechanics()->select('mechanics.mechanic_id'));
+            })
+            ->latest();
+
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            $mechanicsQuery->where('approved', true);
         }
+
         $mechanics = $mechanicsQuery->paginate(10);
 
         $comments = $game->comments()
@@ -55,13 +67,13 @@ class GameController extends Controller
             ->with(['user', 'replies.user'])
             ->latest()
             ->paginate(5);
-        $reviews = $game->reviews()->with('user')->latest()->paginate(5);
 
+        $reviews = $game->reviews()->with('user')->latest()->paginate(5);
         $backUrl = request()->input('back_url') ?? $this->fallbackBackUrl('shop');
 
         $allTags = null;
-
         $userReview = null;
+
         if (Auth::check()) {
             $userReview = $game->reviews()->where('user_id', Auth::id())->first();
             /** @var \App\Models\User $user */
@@ -73,18 +85,16 @@ class GameController extends Controller
 
         $canCreateProject = false;
 
-        return view('games.view',
-            compact(
-                'game',
-                'comments',
-                'reviews',
-                'backUrl',
-                'userReview',
-                'allTags',
-                'mechanics',
-                'canCreateProject'
-            )
-        );
+        return view('games.view', compact(
+            'game',
+            'comments',
+            'reviews',
+            'backUrl',
+            'userReview',
+            'allTags',
+            'mechanics',
+            'canCreateProject'
+        ));
     }
 
     public function confirmRemoval(int $id)

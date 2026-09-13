@@ -284,7 +284,7 @@
                 </div>
             </div>
 
-            <x-game-mechanics :game="$game" />
+            <x-game-mechanics :game="$game" :mechanics="$mechanics" />
 
             <div class="card border border-gray-200 shadow-sm bg-white rounded-lg p-3 p-md-4">
                 <x-comment-section

@@ -13,6 +13,34 @@ use Illuminate\Http\JsonResponse;
 
 class MechanicController extends Controller
 {
+    public function storeForGame(Request $request, $game_id)
+    {
+        $game = Game::where('game_id', $game_id)->firstOrFail();
+
+        $validated = $request->validate([
+            'title'      => 'required|string|max:255',
+            'content'    => 'required|string',
+            'parent_id'  => 'nullable|exists:mechanics,mechanic_id',
+            'comment_id' => 'nullable|exists:comments,id',
+        ]);
+
+        $approved = Auth::user()->isAdmin();
+
+        DB::transaction(function () use ($validated, $game, $approved) {
+            Mechanic::create([
+                'title'      => $validated['title'],
+                'content'    => $validated['content'],
+                'game_id'    => $game->game_id, // Прямая привязка к игре
+                'parent_id'  => $validated['parent_id'] ?? null, // Если создается вариант
+                'comment_id' => $validated['comment_id'] ?? null,
+                'approved'   => $approved,
+                'user_id'    => Auth::id(),
+            ]);
+        });
+
+        return redirect()->back()->with('success', 'Game mechanic submitted successfully!');
+    }
+
     public function storeForProject(Request $request, $project_id)
     {
         $project = Project::findOrFail($project_id);
@@ -20,71 +48,53 @@ class MechanicController extends Controller
         $validated = $request->validate([
             'title'      => 'required|string|max:255',
             'content'    => 'required|string',
-            'comment_id' => 'required|exists:comments,id',
+            'parent_id'  => 'nullable|exists:mechanics,mechanic_id',
+            'comment_id' => 'nullable|exists:comments,id',
         ]);
 
         $approved = Auth::user()->isAdmin();
 
         DB::transaction(function () use ($validated, $project, $approved) {
-            $mechanic = Mechanic::create([
+            Mechanic::create([
                 'title'      => $validated['title'],
                 'content'    => $validated['content'],
+                'project_id' => $project->id, // Прямая привязка к проекту
+                'parent_id'  => $validated['parent_id'] ?? null,
+                'comment_id' => $validated['comment_id'] ?? null,
                 'approved'   => $approved,
                 'user_id'    => Auth::id(),
-                'comment_id' => $validated['comment_id'],
             ]);
-
-            $project->mechanics()->attach($mechanic->mechanic_id);
         });
 
-        return redirect()->back()->with('success', 'Mechanic proposal successfully submitted!');
-    }
-
-    public function storeForGame(Request $request, $game_id)
-    {
-        $game = Game::where('game_id', $game_id)->firstOrFail();
-
-        $validated = $request->validate([
-            'title'   => 'required|string|max:255',
-            'content' => 'required|string',
-        ]);
-
-        $approved = Auth::user()->isAdmin();
-
-        DB::transaction(function () use ($validated, $game, $approved) {
-            $mechanic = Mechanic::create([
-                'title'    => $validated['title'],
-                'content'  => $validated['content'],
-                'approved' => $approved,
-                'user_id'  => Auth::id(),
-            ]);
-
-            $game->mechanics()->attach($mechanic->mechanic_id);
-        });
-
-        return redirect()->back()->with('success', 'Game mechanic created successfully!');
+        return redirect()->back()->with('success', 'Project mechanic proposal successfully submitted!');
     }
 
     public function storeProposedFromComment(Request $request, Comment $comment)
     {
-        // dd($request->all(), $comment);
-
         $validated = $request->validate([
-            'mechanic_title' => ['required', 'string', 'max:255'],
-            'content'        => ['required', 'string', 'max:3000'],
+            'title'      => 'required|string|max:255',
+            'content'    => 'required|string|max:3000',
+            'parent_id'  => 'nullable|exists:mechanics,mechanic_id',
+            'game_id'    => 'nullable|exists:games,game_id',
+            'project_id' => 'nullable|exists:projects,id',
         ]);
 
-        DB::transaction(function () use ($validated, $comment) {
+        $approved = Auth::user()->isAdmin();
+
+        DB::transaction(function () use ($validated, $comment, $approved) {
             $mechanic = Mechanic::create([
-                'title'       => $validated['mechanic_title'],
-                'content' => $validated['content'],
-                'user_id'     => auth()->id(),
-                'comment_id'  => $comment->id,
-                'status'      => 'proposed',
+                'title'      => $validated['title'],
+                'content'    => $validated['content'],
+                'user_id'    => Auth::id(),
+                'comment_id' => $comment->id,
+                'parent_id'  => $validated['parent_id'] ?? null,
+                'game_id'    => $validated['game_id'] ?? null,
+                'project_id' => $validated['project_id'] ?? null,
+                'approved'   => $approved,
             ]);
 
             Comment::create([
-                'user_id'          => auth()->id(),
+                'user_id'          => Auth::id(),
                 'content'          => "⚙️ **Proposed Mechanic: {$mechanic->title}**\n\n{$validated['content']}",
                 'commentable_type' => $comment->commentable_type,
                 'commentable_id'   => $comment->commentable_id,
@@ -133,7 +143,7 @@ class MechanicController extends Controller
         $query = Mechanic::query()
             ->approved()
             ->canonical()
-            ->with('game:game_id,title'); // Подгружаем связанную игру для бэйджа
+            ->with('game:game_id,title');
 
         if ($projectId) {
             $query->where('project_id', $projectId);
@@ -141,7 +151,6 @@ class MechanicController extends Controller
 
         if ($rawQuery !== '') {
             if (str_contains($rawQuery, ':')) {
-                // Разделяем запрос по синтаксису mechanic:game
                 [$mechanicTerm, $gameTerm] = array_map('trim', explode(':', $rawQuery, 2));
 
                 if ($mechanicTerm !== '') {
@@ -154,12 +163,11 @@ class MechanicController extends Controller
                     });
                 }
             } else {
-                // Обычный поиск по названию механики ИЛИ игры
                 $query->where(function ($q) use ($rawQuery) {
                     $q->where('title', 'LIKE', "%{$rawQuery}%")
-                    ->orWhereHas('game', function ($g) use ($rawQuery) {
-                        $g->where('title', 'LIKE', "%{$rawQuery}%");
-                    });
+                      ->orWhereHas('game', function ($g) use ($rawQuery) {
+                          $g->where('title', 'LIKE', "%{$rawQuery}%");
+                      });
                 });
             }
         }

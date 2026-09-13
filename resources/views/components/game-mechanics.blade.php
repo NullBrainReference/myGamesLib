@@ -1,4 +1,9 @@
-@props(['game'])
+@props(['game', 'mechanics' => null])
+
+@php
+    $mechanicsList = $mechanics ?? $game->mechanics;
+    $totalCount = method_exists($mechanicsList, 'total') ? $mechanicsList->total() : $mechanicsList->count();
+@endphp
 
 <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-6">
     <div class="bg-gray-50 border-b border-gray-200 py-3 px-4 flex items-center justify-between">
@@ -14,22 +19,22 @@
                 @if(Auth::user()->isAdmin())
                     <button type="button"
                             class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow-sm transition-colors"
-                            onclick="openCreateMechanicModal('{{ route('games.mechanics.store', ['game_id' => $game->game_id]) }}')">
+                            onclick="openCreateMechanicModal('{{ route('games.mechanics.store', ['game_id' => $game->getKey()]) }}')">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
                         Add Global System
                     </button>
                 @endif
             @endauth
             <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                {{ $game->mechanics->count() }} Systems Registered
+                {{ $totalCount }} Systems Registered
             </span>
         </div>
     </div>
 
     <div class="p-4">
-        @if($game->mechanics->isNotEmpty())
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                @foreach($game->mechanics as $mechanic)
+        @if(count($mechanicsList) > 0)
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                @foreach($mechanicsList as $mechanic)
                     <div class="group border border-gray-100 bg-gray-50 hover:bg-white hover:border-blue-200 rounded-lg p-3.5 transition-all duration-200 shadow-none hover:shadow-sm flex flex-col justify-between">
                         <div class="flex items-start gap-2.5">
                             <span class="mt-1 flex h-2 w-2 relative top-0.5 shrink-0 rounded-full bg-blue-500 group-hover:scale-125 transition-transform"></span>
@@ -67,6 +72,12 @@
                     </div>
                 @endforeach
             </div>
+
+            @if(method_exists($mechanicsList, 'links'))
+                <div class="mt-3">
+                    {{ $mechanicsList->links() }}
+                </div>
+            @endif
         @else
             <div class="text-center py-6 text-gray-400 text-xs border border-dashed border-gray-200 rounded-lg bg-gray-50">
                 No structural core gameplay mechanics have been indexed for this record module yet.
