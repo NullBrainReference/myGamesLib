@@ -22,7 +22,7 @@ class GameController extends Controller
         $query = $processor->applyExtraFilters($query, $request);
         $query = $processor->initialOrder($query, $request->input('sort', 'latest'));
 
-        $games = $query->paginate(2)->withQueryString();
+        $games = $query->paginate(20)->withQueryString();
 
         return view('games.shop', compact('games'));
     }
