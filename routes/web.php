@@ -207,11 +207,12 @@ Route::middleware(['auth'])->group(function () {
         ->name('mechanics.update');
     Route::delete('/mechanics/{mechanic_id}', [MechanicController::class, 'destroy'])
         ->name('mechanics.destroy');
+
+    Route::get('/mechanics/search', [MechanicController::class, 'search'])
+        ->name('mechanics.search');
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::post('/projects/{project}/mechanics', [MechanicController::class, 'store'])
-        ->name('projects.mechanics.store');
     Route::post('/comments/{comment}/vote', [VoteController::class, 'voteComment'])
         ->name('comments.vote');
 });

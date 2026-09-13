@@ -9,6 +9,7 @@ use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
 
 class MechanicController extends Controller
 {
@@ -122,5 +123,49 @@ class MechanicController extends Controller
         $mechanic->delete();
 
         return redirect()->back()->with('success', 'Mechanic deleted successfully.');
+    }
+
+    public function search(Request $request): JsonResponse
+    {
+        $rawQuery = trim($request->input('query', ''));
+        $projectId = $request->input('project_id');
+
+        $query = Mechanic::query()
+            ->approved()
+            ->canonical()
+            ->with('game:game_id,title'); // Подгружаем связанную игру для бэйджа
+
+        if ($projectId) {
+            $query->where('project_id', $projectId);
+        }
+
+        if ($rawQuery !== '') {
+            if (str_contains($rawQuery, ':')) {
+                // Разделяем запрос по синтаксису mechanic:game
+                [$mechanicTerm, $gameTerm] = array_map('trim', explode(':', $rawQuery, 2));
+
+                if ($mechanicTerm !== '') {
+                    $query->where('title', 'LIKE', "%{$mechanicTerm}%");
+                }
+
+                if ($gameTerm !== '') {
+                    $query->whereHas('game', function ($g) use ($gameTerm) {
+                        $g->where('title', 'LIKE', "%{$gameTerm}%");
+                    });
+                }
+            } else {
+                // Обычный поиск по названию механики ИЛИ игры
+                $query->where(function ($q) use ($rawQuery) {
+                    $q->where('title', 'LIKE', "%{$rawQuery}%")
+                    ->orWhereHas('game', function ($g) use ($rawQuery) {
+                        $g->where('title', 'LIKE', "%{$rawQuery}%");
+                    });
+                });
+            }
+        }
+
+        $mechanics = $query->limit(15)->get(['mechanic_id', 'title', 'content', 'game_id', 'project_id']);
+
+        return response()->json($mechanics);
     }
 }

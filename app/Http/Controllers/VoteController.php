@@ -8,7 +8,7 @@ use App\Models\Vote;
 
 class VoteController extends Controller
 {
-    protected const APPROVAL_THRESHOLD = 5; 
+    protected const APPROVAL_THRESHOLD = 2; 
 
     public function voteComment(Request $request, Comment $comment)
     {
