@@ -2,11 +2,21 @@
     $canCreateProject = $canCreateProject ?? true;
     $userVote = $comment->user_vote;
     $score = $comment->score;
+    
+    // Counting project mechanics at the voting stage
+    $pendingProjectMechanics = $comment->project && $comment->project->mechanics 
+        ? $comment->project->mechanics->where('approved', false) 
+        : collect();
+        
+    $approvedProjectMechanics = $comment->project && $comment->project->mechanics 
+        ? $comment->project->mechanics->where('approved', true) 
+        : collect();
 @endphp
 
 <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4 shadow-sm transition-all {{ $comment->parent_id ? 'ml-6 md:ml-12 border-l-4 border-l-blue-500' : '' }}">
     <div class="flex gap-3">
         
+        {{-- Vote Controls --}}
         <div class="flex flex-col items-center justify-start pt-1">
             @auth
                 <form action="{{ route('comments.vote', $comment->id) }}" method="POST">
@@ -67,16 +77,17 @@
                     @endif
                 </div>
 
+                {{-- Status of the mechanic associated with the comment --}}
                 @if($comment->mechanic)
-                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full {{ $comment->mechanic->approved ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300' }}">
-                        <i class="bi bi-gear-wide-connected"></i>
-                        {{ $comment->mechanic->approved ? '✓ Mechanic Approved' : '⏳ Mechanic Under Review' }}
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full {{ $comment->mechanic->approved ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300 animate-pulse' }}">
+                        ⚙️ {{ $comment->mechanic->approved ? '✓ Mechanic Approved' : '⏳ Mechanic Under Review' }}
                     </span>
                 @endif
             </div>
 
             <p class="text-gray-700 mb-3 text-sm leading-relaxed whitespace-pre-line">{{ $comment->content }}</p>
 
+            {{-- Proposed mechanic directly in the comment --}}
             @if($comment->mechanic)
                 <div class="my-3 p-3 bg-amber-50/60 border border-amber-200 rounded-lg">
                     <h5 class="text-xs font-bold text-amber-900 uppercase tracking-wider mb-1 flex items-center gap-1.5">
@@ -91,6 +102,7 @@
                 </div>
             @endif
 
+            {{-- Project Card --}}
             @if($comment->project)
                 <div class="my-3 border border-blue-200 rounded-lg bg-blue-50/40 overflow-hidden shadow-sm">
                     <div class="p-3 bg-blue-100/50 flex items-center justify-between gap-2 border-b border-blue-200">
@@ -108,6 +120,13 @@
                         </div>
 
                         <div class="flex items-center gap-2 flex-shrink-0">
+                            {{-- Tag: Mechanics Under Voting --}}
+                            @if($pendingProjectMechanics->isNotEmpty())
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                                    ⏳ Mechanics Voting ({{ $pendingProjectMechanics->count() }})
+                                </span>
+                            @endif
+
                             <span class="text-[10px] font-semibold px-2 py-0.5 rounded {{ $comment->project->is_public ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' }}">
                                 {{ $comment->project->is_public ? 'Public' : 'Private' }}
                             </span>
@@ -139,14 +158,37 @@
                             {!! Parsedown::instance()->text($comment->project->content) !!}
                         </div>
 
-                        @if($comment->project->mechanics && $comment->project->mechanics->where('approved', true)->count() > 0)
+                        {{-- Mechanics Under Voting --}}
+                        @if($pendingProjectMechanics->isNotEmpty())
+                            <div class="mb-3">
+                                <h5 class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Mechanics Under Voting:
+                                </h5>
+                                <ul class="space-y-1 bg-amber-50/70 p-2.5 rounded border border-amber-200 text-xs">
+                                    @foreach($pendingProjectMechanics as $mech)
+                                        <li class="flex items-start justify-between gap-2 text-amber-900">
+                                            <div>
+                                                <strong>{{ $mech->title }}</strong> — {{ Str::limit($mech->content, 80) }}
+                                            </div>
+                                            <span class="shrink-0 text-[10px] font-bold px-1.5 py-0.5 bg-amber-200 text-amber-800 rounded">
+                                                In Review
+                                            </span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        {{-- Approved Mechanics --}}
+                        @if($approvedProjectMechanics->isNotEmpty())
                             <div class="mb-4">
                                 <h5 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2 flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                     Approved Mechanics:
                                 </h5>
                                 <ul class="list-disc list-inside text-xs text-gray-700 space-y-1 bg-emerald-50/50 p-2.5 rounded border border-emerald-200">
-                                    @foreach($comment->project->mechanics->where('approved', true) as $mech)
+                                    @foreach($approvedProjectMechanics as $mech)
                                         <li><strong>{{ $mech->title }}</strong> — {{ Str::limit($mech->content, 80) }}</li>
                                     @endforeach
                                 </ul>
@@ -161,14 +203,6 @@
                     <div class="px-3 py-2 bg-gray-50 border-t border-blue-100 flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             @auth
-                                {{-- <button type="button" 
-                                        onclick="openCreateMechanicModal('{{ route('projects.mechanics.store', $comment->project->id) }}', {{ $comment->id }}, 'Propose Mechanic for Project')"
-                                        class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 shadow-sm transition-colors">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                    </svg>
-                                    Propose Mechanic
-                                </button> --}}
                                 <button type="button" 
                                         onclick="openCreateMechanicModal('{{ route('forum.comments.mechanic.store', $comment->id) }}', {{ $comment->id }}, 'Propose Mechanic')" 
                                         class="text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">

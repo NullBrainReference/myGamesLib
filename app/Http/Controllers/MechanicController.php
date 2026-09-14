@@ -30,8 +30,8 @@ class MechanicController extends Controller
             Mechanic::create([
                 'title'      => $validated['title'],
                 'content'    => $validated['content'],
-                'game_id'    => $game->game_id, // Прямая привязка к игре
-                'parent_id'  => $validated['parent_id'] ?? null, // Если создается вариант
+                'game_id'    => $game->game_id,
+                'parent_id'  => $validated['parent_id'] ?? null,
                 'comment_id' => $validated['comment_id'] ?? null,
                 'approved'   => $approved,
                 'user_id'    => Auth::id(),
@@ -58,7 +58,7 @@ class MechanicController extends Controller
             Mechanic::create([
                 'title'      => $validated['title'],
                 'content'    => $validated['content'],
-                'project_id' => $project->id, // Прямая привязка к проекту
+                'project_id' => $project->id,
                 'parent_id'  => $validated['parent_id'] ?? null,
                 'comment_id' => $validated['comment_id'] ?? null,
                 'approved'   => $approved,
@@ -79,26 +79,30 @@ class MechanicController extends Controller
             'project_id' => 'nullable|exists:projects,id',
         ]);
 
+        $projectId = $validated['project_id'] 
+            ?? $comment->project?->id 
+            ?? ($comment->commentable_type === \App\Models\Project::class ? $comment->commentable_id : null);
+
         $approved = Auth::user()->isAdmin();
 
-        DB::transaction(function () use ($validated, $comment, $approved) {
-            $mechanic = Mechanic::create([
-                'title'      => $validated['title'],
-                'content'    => $validated['content'],
-                'user_id'    => Auth::id(),
-                'comment_id' => $comment->id,
-                'parent_id'  => $validated['parent_id'] ?? null,
-                'game_id'    => $validated['game_id'] ?? null,
-                'project_id' => $validated['project_id'] ?? null,
-                'approved'   => $approved,
-            ]);
-
-            Comment::create([
+        DB::transaction(function () use ($validated, $comment, $approved, $projectId) {
+            $newComment = Comment::create([
                 'user_id'          => Auth::id(),
-                'content'          => "⚙️ **Proposed Mechanic: {$mechanic->title}**\n\n{$validated['content']}",
+                'content'          => "⚙️ **Proposed Mechanic: {$validated['title']}**\n\n{$validated['content']}",
                 'commentable_type' => $comment->commentable_type,
                 'commentable_id'   => $comment->commentable_id,
                 'parent_id'        => $comment->id,
+            ]);
+
+            Mechanic::create([
+                'title'      => $validated['title'],
+                'content'    => $validated['content'],
+                'user_id'    => Auth::id(),
+                'comment_id' => $newComment->id,
+                'parent_id'  => $validated['parent_id'] ?? null,
+                'game_id'    => $validated['game_id'] ?? null,
+                'project_id' => $projectId,
+                'approved'   => $approved,
             ]);
         });
 

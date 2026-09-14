@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
@@ -50,8 +51,8 @@ class Project extends Model
                     ->withTimestamps();
     }
 
-    public function mechanics(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function mechanics(): HasMany
     {
-        return $this->belongsToMany(Mechanic::class, 'project_mechanic', 'project_id', 'mechanic_id');
+        return $this->hasMany(Mechanic::class, 'project_id');
     }
 }

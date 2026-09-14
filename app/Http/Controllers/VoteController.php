@@ -31,9 +31,9 @@ class VoteController extends Controller
             ]);
         }
 
+        $netScore = (int) $comment->votes()->sum('vote');
+
         if ($comment->mechanic) {
-            $netScore = $comment->score;
-            
             if ($netScore >= self::APPROVAL_THRESHOLD && !$comment->mechanic->approved) {
                 $comment->mechanic->update(['approved' => true]);
             } elseif ($netScore < self::APPROVAL_THRESHOLD && $comment->mechanic->approved) {
