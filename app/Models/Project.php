@@ -14,9 +14,15 @@ class Project extends Model
         'title',
         'content',
         'is_public',
+        'is_approved',
         'icon_big',
         'icon_small',
         'comment_id',
+    ];
+
+    protected $casts = [
+        'is_public'   => 'boolean',
+        'is_approved' => 'boolean',
     ];
 
     public function comment()
