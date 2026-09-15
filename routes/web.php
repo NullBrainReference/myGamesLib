@@ -178,6 +178,11 @@ Route::get('/projects/{id}', [ProjectController::class, 'view'])
     ->where('id', '[0-9]+')
     ->name('projects.view');
 
+Route::get('/projects/{id}/contributions',
+        [App\Http\Controllers\ProjectController::class, 'contributions']
+    )
+    ->name('projects.contributions');
+
 
 Route::middleware(['auth'])->group(function () {
     // Standard Project actions...

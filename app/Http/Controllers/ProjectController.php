@@ -14,7 +14,6 @@ class ProjectController extends Controller
     public function index(Request $request)
     {
         $query = Project::query();
-
         $processor = new ProjectListProcessor();
 
         $query = $processor->search($query, $request->input('search'));
@@ -28,10 +27,17 @@ class ProjectController extends Controller
 
     public function view(int $id)
     {
-        $project = Project::with(['owners', 'editors', 'participants'])->findOrFail($id);
+        $project = Project::with(['owners', 'editors', 'participants', 'mechanics'])->findOrFail($id);
         $allUsers = User::orderBy('name', 'asc')->get();
 
         return view('projects.view', compact('project', 'allUsers'));
+    }
+
+    public function contributions(int $id)
+    {
+        $project = Project::with(['owners', 'comment.user', 'comment.replies.user'])->findOrFail($id);
+
+        return view('projects.contributions', compact('project'));
     }
 
     public function create(Request $request)
@@ -79,7 +85,7 @@ class ProjectController extends Controller
 
     public function edit(int $id)
     {
-        $project = Project::with(['owners', 'editors', 'participants'])->findOrFail($id);
+        $project = Project::with(['owners', 'editors', 'participants', 'mechanics'])->findOrFail($id);
 
         if (!$project->owners->contains(Auth::id())) {
             abort(403, 'You are not a registered owner of this workspace blueprint.');
@@ -154,7 +160,6 @@ class ProjectController extends Controller
                          ->with('success', 'Workspace record deleted permanently.');
     }
 
-
     public function attachEditor(Request $request, $projectId)
     {
         $project = Project::findOrFail($projectId);
@@ -166,7 +171,6 @@ class ProjectController extends Controller
 
         return redirect()->back()->with('success', 'Editor privileges assigned.');
     }
-
 
     public function detachEditor($projectId, $userId)
     {
@@ -189,7 +193,6 @@ class ProjectController extends Controller
 
         return redirect()->back()->with('success', 'Participant registered successfully.');
     }
-
 
     public function detachParticipant($projectId, $userId)
     {
