@@ -2,27 +2,27 @@
     $canCreateProject = $canCreateProject ?? true;
     $userVote = $comment->user_vote;
     $score = $comment->score;
-    
+
     // Counting project mechanics at the voting stage
-    $pendingProjectMechanics = $comment->project && $comment->project->mechanics 
-        ? $comment->project->mechanics->where('approved', false) 
+    $pendingProjectMechanics = $comment->project && $comment->project->mechanics
+        ? $comment->project->mechanics->where('approved', false)
         : collect();
-        
-    $approvedProjectMechanics = $comment->project && $comment->project->mechanics 
-        ? $comment->project->mechanics->where('approved', true) 
+
+    $approvedProjectMechanics = $comment->project && $comment->project->mechanics
+        ? $comment->project->mechanics->where('approved', true)
         : collect();
 @endphp
 
 <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4 shadow-sm transition-all {{ $comment->parent_id ? 'ml-6 md:ml-12 border-l-4 border-l-blue-500' : '' }}">
     <div class="flex gap-3">
-        
+
         {{-- Vote Controls --}}
         <div class="flex flex-col items-center justify-start pt-1">
             @auth
                 <form action="{{ route('comments.vote', $comment->id) }}" method="POST">
                     @csrf
                     <input type="hidden" name="type" value="up">
-                    <button type="submit" 
+                    <button type="submit"
                             title="Vote Up"
                             class="p-1 rounded hover:bg-gray-100 transition-colors {{ $userVote === 1 ? 'text-emerald-600 font-bold' : 'text-gray-400' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +46,7 @@
                 <form action="{{ route('comments.vote', $comment->id) }}" method="POST">
                     @csrf
                     <input type="hidden" name="type" value="down">
-                    <button type="submit" 
+                    <button type="submit"
                             title="Vote Down"
                             class="p-1 rounded hover:bg-gray-100 transition-colors {{ $userVote === -1 ? 'text-red-600 font-bold' : 'text-gray-400' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@
                     <a href="{{ route('profile.view', $comment->user->id) }}" class="text-gray-900 font-bold hover:underline text-sm">
                         {{ $comment->user->name }}
                     </a>
-                    
+
                     @if($comment->parent_id)
                         <span class="text-gray-400 text-xs">
                             replied to <span class="font-medium text-gray-600">{{ $comment->parent->user->name }}</span>
@@ -130,8 +130,8 @@
                             <span class="text-[10px] font-semibold px-2 py-0.5 rounded {{ $comment->project->is_public ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700' }}">
                                 {{ $comment->project->is_public ? 'Public' : 'Private' }}
                             </span>
-                            
-                            <button type="button" 
+
+                            <button type="button"
                                     onclick="toggleProjectDetails({{ $comment->project->id }})"
                                     class="text-xs font-semibold text-blue-700 hover:text-blue-900 bg-white border border-blue-300 px-2 py-1 rounded shadow-sm hover:bg-blue-50 transition-colors flex items-center gap-1">
                                 <span id="project-toggle-text-{{ $comment->project->id }}">Expand</span>
@@ -203,11 +203,28 @@
                     <div class="px-3 py-2 bg-gray-50 border-t border-blue-100 flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             @auth
-                                <button type="button" 
-                                        onclick="openCreateMechanicModal('{{ route('forum.comments.mechanic.store', $comment->id) }}', {{ $comment->id }}, 'Propose Mechanic')" 
+                                <button type="button"
+                                        onclick="openCreateMechanicModal('{{ route('forum.comments.mechanic.store', $comment->id) }}', {{ $comment->id }}, 'Propose Mechanic')"
                                         class="text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
                                     <span>⚙️</span> Propose Mechanic
                                 </button>
+                                {{-- Admin Approve Project Button --}}
+                                @if(auth()->user()->isAdmin() && isset($comment->project))
+                                    @if(!$comment->project->is_approved)
+                                        <form action="{{ route('projects.approve', $comment->project->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit"
+                                                    onclick="return confirm('Approve this project and auto-assign participants/editors?');"
+                                                    class="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1 transition">
+                                                <span>✅</span> Approve Project
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="text-xs text-emerald-700 font-semibold flex items-center gap-1 bg-emerald-100 px-2 py-0.5 rounded">
+                                            <span>✓</span> Project Approved
+                                        </span>
+                                    @endif
+                                @endif
                             @endauth
                         </div>
                     </div>

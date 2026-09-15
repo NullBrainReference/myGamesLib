@@ -3,85 +3,83 @@
 @section('title', 'Initialize Project')
 
 @section('content')
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <a href="{{ route('projects') }}" class="btn btn-sm btn-link text-decoration-none text-muted p-0 mb-3">
-                <i class="bi bi-arrow-left"></i> Back to Blueprints
-            </a>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-12">
+    {{-- Navigation Back Link --}}
+    <div class="mb-4">
+        <a href="{{ route('projects') }}" class="inline-flex items-center text-xs font-semibold text-gray-500 hover:text-gray-800 transition">
+            ← Back to Blueprints
+        </a>
+    </div>
 
-            <div class="card border shadow-sm rounded-lg">
-                <div class="card-header bg-white py-3"><h5 class="fw-bold text-gray-900 mb-0">Launch New Project Blueprint</h5></div>
-                <div class="card-body p-4 bg-white">
-                    <form method="POST" action="{{ route('projects.store') }}" enctype="multipart/form-data">
-                        @csrf
-                        @if(isset($commentId))
-                            <input type="hidden" name="comment_id" value="{{ $commentId }}">
-                        @endif
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="border-b border-gray-100 bg-white px-6 py-4">
+            <h5 class="text-base font-bold text-gray-900">Launch New Project Blueprint</h5>
+        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-gray-700">Project Title</label>
-                            <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}" required>
-                            @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
+        <div class="p-6">
+            <form method="POST" action="{{ route('projects.store') }}" enctype="multipart/form-data" class="space-y-6">
+                @csrf
+                @if(isset($commentId))
+                    <input type="hidden" name="comment_id" value="{{ $commentId }}">
+                @endif
 
-                        {{-- Icons Upload Fields --}}
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold text-gray-700">Main Icon (Big)</label>
-                                <input type="file" name="icon_big" class="form-control @error('icon_big') is-invalid @enderror" accept="image/*">
-                                @error('icon_big') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold text-gray-700">Secondary Icon (Small)</label>
-                                <input type="file" name="icon_small" class="form-control @error('icon_small') is-invalid @enderror" accept="image/*">
-                                @error('icon_small') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-gray-700">Operational Content Briefing (Markdown Supported)</label>
-                            <textarea name="content" rows="6" class="form-control @error('content') is-invalid @enderror" required>{{ old('content') }}</textarea>
-                            @error('content') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="form-check form-switch mb-4">
-                            <input class="form-check-input" type="checkbox" name="is_public" id="isPublicSwitch" checked>
-                            <label class="form-check-label fw-semibold text-gray-700" for="isPublicSwitch">Make Project Space Public</label>
-                        </div>
-
-                        <hr>
-
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold text-info"><i class="bi bi-pencil-square"></i> Assign Editors</label>
-                                <select name="editors[]" class="form-select" multiple style="height: 120px;">
-                                    @foreach($users as $user)
-                                        @if($user->id !== Auth::id())
-                                            <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold text-secondary"><i class="bi bi-person"></i> Assign Team Participants</label>
-                                <select name="participants[]" class="form-select" multiple style="height: 120px;">
-                                    @foreach($users as $user)
-                                        @if($user->id !== Auth::id())
-                                            <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-end gap-2 border-top pt-3">
-                            <a href="{{ route('projects') }}" class="btn btn-outline-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-success px-4 shadow-sm">Initialize Workspace</button>
-                        </div>
-                    </form>
+                {{-- Project Title --}}
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Project Title</label>
+                    <input type="text" name="title" value="{{ old('title') }}" required
+                           class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition @error('title') border-red-500 @enderror">
+                    @error('title')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
-            </div>
+
+                {{-- Icons Upload Fields --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Main Icon (Big)</label>
+                        <input type="file" name="icon_big" accept="image/*"
+                               class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition">
+                        @error('icon_big')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Secondary Icon (Small)</label>
+                        <input type="file" name="icon_small" accept="image/*"
+                               class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition">
+                        @error('icon_small')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Content Briefing --}}
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Operational Content Briefing (Markdown Supported)</label>
+                    <textarea name="content" rows="6" required
+                              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition @error('content') border-red-500 @enderror">{{ old('content') }}</textarea>
+                    @error('content')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Public Switch --}}
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" name="is_public" id="isPublicSwitch" checked
+                           class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                    <label for="isPublicSwitch" class="text-xs font-semibold text-gray-700">Make Project Space Public</label>
+                </div>
+
+                {{-- Actions --}}
+                <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                    <a href="{{ route('projects') }}" class="px-4 py-2 border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg hover:bg-gray-50 transition">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+                        Initialize Workspace
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

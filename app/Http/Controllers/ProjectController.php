@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Project;
+use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Strategies\EntityListBehavior\ProjectListProcessor;
+use Illuminate\Support\Facades\Schema;
 
 class ProjectController extends Controller
 {
@@ -42,10 +44,8 @@ class ProjectController extends Controller
 
     public function create(Request $request)
     {
-        $users = User::orderBy('name', 'asc')->get();
         $commentId = $request->query('comment_id');
-
-        return view('projects.create', compact('users', 'commentId'));
+        return view('projects.create', compact('commentId'));
     }
 
     public function store(Request $request)
@@ -75,24 +75,56 @@ class ProjectController extends Controller
 
         $project = Project::create($data);
 
+        // Создатель становится владельцем проекта
         $project->owners()->attach(Auth::id());
-        $project->editors()->sync($request->input('editors', []));
-        $project->participants()->sync($request->input('participants', []));
 
         return redirect()->route('projects.view', $project->id)
-                         ->with('success', 'Project workspace created successfully!');
+                         ->with('success', 'Project workspace created! Approve the project to sync roles.');
+    }
+
+    public function approve(int $id)
+    {
+        $project = Project::with(['owners', 'mechanics'])->findOrFail($id);
+
+        if (!$project->owners->contains(Auth::id())) {
+            abort(403, 'Unauthorized approval request.');
+        }
+
+        $participantIds = $project->owners->pluck('id')->toArray();
+
+        if ($project->comment_id) {
+            $originComment = Comment::with('replies')->find($project->comment_id);
+            if ($originComment) {
+                if ($originComment->user_id) {
+                    $participantIds[] = $originComment->user_id;
+                }
+
+                $replyUserIds = $originComment->replies->pluck('user_id')->filter()->toArray();
+                $participantIds = array_merge($participantIds, $replyUserIds);
+            }
+        }
+
+        $project->participants()->sync(array_unique($participantIds));
+
+        $editorIds = $project->mechanics->pluck('user_id')->filter()->unique()->toArray();
+        $project->editors()->sync($editorIds);
+
+        if (Schema::hasColumn('projects', 'is_approved')) {
+            $project->update(['is_approved' => true]);
+        }
+
+        return redirect()->back()->with('success', 'Project approved! Participants and Editors synced automatically.');
     }
 
     public function edit(int $id)
     {
-        $project = Project::with(['owners', 'editors', 'participants', 'mechanics'])->findOrFail($id);
+        $project = Project::with(['owners'])->findOrFail($id);
 
         if (!$project->owners->contains(Auth::id())) {
             abort(403, 'You are not a registered owner of this workspace blueprint.');
         }
 
-        $users = User::orderBy('name', 'asc')->get();
-        return view('projects.edit', compact('project', 'users'));
+        return view('projects.edit', compact('project'));
     }
 
     public function update(Request $request, int $id)
@@ -100,7 +132,7 @@ class ProjectController extends Controller
         $project = Project::findOrFail($id);
 
         if (!$project->owners->contains(Auth::id())) {
-            abort(403);
+            abort(403, 'Unauthorized.');
         }
 
         $request->validate([
@@ -132,11 +164,8 @@ class ProjectController extends Controller
 
         $project->update($data);
 
-        $project->editors()->sync($request->input('editors', []));
-        $project->participants()->sync($request->input('participants', []));
-
         return redirect()->route('projects.view', $project->id)
-                         ->with('success', 'Project architecture updated.');
+            ->with('success', 'Project architecture updated successfully.');
     }
 
     public function destroy(int $id)

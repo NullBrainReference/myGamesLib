@@ -191,6 +191,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/projects/{id}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
     Route::put('/projects/{id}/update', [ProjectController::class, 'update'])->name('projects.update');
     Route::delete('/projects/{id}/delete', [ProjectController::class, 'destroy'])->name('projects.delete');
+    Route::post('/projects/{id}/approve', [ProjectController::class, 'approve'])->name('projects.approve');
 
     // Dynamic Lookup Team Management Endpoints
     Route::prefix('projects/{project_id}')->group(function () {
