@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Image;
 use App\Models\Blog;
+use Illuminate\Support\Str;
 
 class ImageController extends Controller
 {
@@ -33,14 +34,23 @@ class ImageController extends Controller
             'image' => 'required|image|max:2048'
         ], [
             'image.required' => 'Please upload an image.',
-            'image.image' => 'The file must be a valid image.',
-            'image.max' => 'Max size is 2048',
+            'image.image'    => 'The file must be a valid image.',
+            'image.max'      => 'Max size is 2048',
         ]);
 
-        $filename = time() . '_' . $request->file('image')->getClientOriginalName();
-        $tempPath = 'blog_images/temp/' . $filename;
+        $file = $request->file('image');
 
-        $request->file('image')->move(public_path('blog_images/temp'), $filename);
+        // Extract name and extension separately
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension    = $file->getClientOriginalExtension();
+
+        // Sanitize spaces and symbols into hyphens (e.g., "like this" -> "like-this")
+        $safeName = Str::slug($originalName) . '.' . $extension;
+        $filename = time() . '_' . $safeName;
+
+        // Save using the 'public' disk so Storage::disk('public')->delete() can track it
+        $tempPath = $file->storeAs('blog_images/temp', $filename, 'public');
+
         session()->push('pending_images', $tempPath);
 
         return redirect()->back()->with('image_uploaded', true)->withInput();
