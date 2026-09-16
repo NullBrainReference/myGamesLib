@@ -61,4 +61,9 @@ class Project extends Model
     {
         return $this->hasMany(Mechanic::class, 'project_id');
     }
+
+    public function hirePositions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(HirePosition::class);
+    }
 }

@@ -83,6 +83,11 @@ class User extends Authenticatable
         return $this->hasOne(Profile::class);
     }
 
+    public function positionTickets(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(PositionTicket::class);
+    }
+
     public function friendsOfThisUser(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'friendships', 'user_id', 'friend_id')
