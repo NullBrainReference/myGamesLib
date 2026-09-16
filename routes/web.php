@@ -20,6 +20,7 @@ use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\VoteController;
+use App\Http\Controllers\UserController;
 
 
 Route::get('/profile', function () {
@@ -230,6 +231,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/friends/accept/{user}', [FriendController::class, 'acceptRequest'])->name('friends.accept');
     Route::delete('/friends/remove/{user}', [FriendController::class, 'removeFriend'])->name('friends.remove');
 });
+
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/messages/{user?}', [MessageController::class, 'index'])->name('messages.index');
