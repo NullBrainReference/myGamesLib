@@ -14,12 +14,12 @@ class PositionTicket extends Model
         'position_id',
         'user_id',
         'reason',
-        'expanded',
+        'expired',
         'success',
     ];
 
     protected $casts = [
-        'expanded' => 'boolean',
+        'expired' => 'boolean',
         'success'  => 'boolean',
     ];
 
