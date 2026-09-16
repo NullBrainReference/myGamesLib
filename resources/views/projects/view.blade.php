@@ -16,6 +16,11 @@
             ← Back to Blueprints Repository
         </a>
 
+        <a href="{{ route('projects.vacancies', $project->id) }}"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition shadow-sm">
+                💼 Explore Vacancies ({{ $project->hirePositions()->where('is_open', true)->count() }})
+        </a>
+
         @if($project->comment_id)
             <a href="{{ route('projects.contributions', $project->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold rounded-lg hover:bg-indigo-100 transition">
                 💬 Contributions & Thread Tree →

@@ -21,7 +21,7 @@ use App\Http\Controllers\FriendController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\VoteController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\HirePositionController;
 
 Route::get('/profile', function () {
     return app(\App\Http\Controllers\ProfileController::class)->view(Auth::id());
@@ -202,6 +202,15 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/participants/detach/{user_id}', [ProjectController::class, 'detachParticipant'])->name('projects.participants.detach');
     });
 });
+
+Route::get('/projects/{project}/vacancies', [HirePositionController::class, 'index'])
+    ->name('projects.vacancies');
+Route::post('/positions/{position}/apply', [HirePositionController::class, 'apply'])
+    ->name('positions.apply')
+    ->middleware('auth');
+Route::post('/projects/{project}/debug-vacancies', [HirePositionController::class, 'debugSeed'])
+    ->name('projects.debug-vacancies')
+    ->middleware('auth');
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/projects/{project_id}/mechanics', [MechanicController::class, 'storeForProject'])
