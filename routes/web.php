@@ -205,12 +205,21 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/projects/{project}/vacancies', [HirePositionController::class, 'index'])
     ->name('projects.vacancies');
-Route::post('/positions/{position}/apply', [HirePositionController::class, 'apply'])
-    ->name('positions.apply')
-    ->middleware('auth');
-Route::post('/projects/{project}/debug-vacancies', [HirePositionController::class, 'debugSeed'])
-    ->name('projects.debug-vacancies')
-    ->middleware('auth');
+// Route::post('/positions/{position}/apply', [HirePositionController::class, 'apply'])
+//     ->name('positions.apply')
+//     ->middleware('auth');
+// Route::post('/projects/{project}/debug-vacancies', [HirePositionController::class, 'debugSeed'])
+//     ->name('projects.debug-vacancies')
+//     ->middleware('auth');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/positions/{position}/apply', [HirePositionController::class, 'apply'])
+        ->name('positions.apply');
+    Route::post('/projects/{project}/debug-vacancies', [HirePositionController::class, 'debugSeed'])
+        ->name('projects.debug-vacancies');
+    Route::get('/projects/{project}/vacancies/applicants', [HirePositionController::class, 'applicants'])->name('projects.vacancies.applicants');
+    Route::post('/tickets/{ticket}/review', [HirePositionController::class, 'reviewTicket'])->name('tickets.review');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/projects/{project_id}/mechanics', [MechanicController::class, 'storeForProject'])

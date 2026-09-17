@@ -14,6 +14,15 @@
             <h1 class="text-2xl font-bold text-gray-900">Open Vacancies</h1>
             <p class="text-xs text-gray-500">Apply for positions to join the development team.</p>
         </div>
+        {{-- Review Applicants Button for Owners & Admins --}}
+        @auth
+            @if(auth()->user()->isAdmin() || $project->owners->contains(auth()->id()))
+                <a href="{{ route('projects.vacancies.applicants', $project->id) }}"
+                   class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center gap-1.5">
+                    📋 Review Applicants
+                </a>
+            @endif
+        @endauth
 
         {{-- Debug Admin Action --}}
         @auth

@@ -76,6 +76,24 @@ class HirePositionController extends Controller
         return back()->with('success', 'Application ticket submitted successfully!');
     }
 
+    // List all applicants for a project's positions
+    public function applicants(Project $project)
+    {
+        // Ensure user is project owner or admin
+        if (!auth()->user()->isAdmin() && !$project->owners->contains(auth()->id())) {
+            abort(403, 'Unauthorized to review applicants for this project.');
+        }
+
+        $tickets = PositionTicket::whereHas('position', function ($query) use ($project) {
+                $query->where('project_id', $project->id);
+            })
+            ->with(['position', 'user'])
+            ->latest()
+            ->paginate(15);
+
+        return view('projects.tickets', compact('project', 'tickets'));
+    }
+
     // Mark ticket as expired
     public function expireTicket(PositionTicket $ticket)
     {
@@ -87,13 +105,30 @@ class HirePositionController extends Controller
     // Accept / Reject application ticket
     public function reviewTicket(Request $request, PositionTicket $ticket)
     {
-        $validated = $request->validate([
-            'success' => 'required|boolean',
+        $project = $ticket->position->project;
+
+        if (!auth()->user()->isAdmin() && !$project->owners->contains(auth()->id())) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $request->validate([
+            'action' => 'required|in:accept,decline',
+            'reason' => 'required|string|min:5|max:1000',
         ]);
 
-        $ticket->update(['success' => $validated['success']]);
+        $isAccepted = $request->input('action') === 'accept';
 
-        return back()->with('success', 'Ticket status updated.');
+        $ticket->update([
+            'success' => $isAccepted,
+            'reason'  => $request->input('reason'),
+        ]);
+
+        if ($isAccepted) {
+            $project->participants()->syncWithoutDetaching([$ticket->user_id]);
+        }
+
+        $statusText = $isAccepted ? 'accepted' : 'declined';
+        return back()->with('success', "Application ticket #{$ticket->id} has been {$statusText}.");
     }
 
     // Admin Debug generator: Creates Dev, Artist, Designer (2 tickets each)
