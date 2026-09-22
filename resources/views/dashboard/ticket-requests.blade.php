@@ -3,6 +3,18 @@
 @section('title', 'Admin Dashboard - Position Ticket Requests')
 
 @section('content')
+<style>
+    /* Strip default browser number input spinners for clean alignment */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+
 <div class="container py-4">
     <x-callback-message />
 
@@ -56,7 +68,7 @@
                             <th class="py-3 font-semibold text-center" style="width: 110px;">Requested</th>
                             <th class="py-3 font-semibold" style="width: 35%;">Reason</th>
                             <th class="py-3 font-semibold text-center" style="width: 120px;">Status</th>
-                            <th class="pe-4 py-3 text-end font-semibold" style="width: 260px;">Actions</th>
+                            <th class="pe-4 py-3 text-end font-semibold" style="width: 240px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -109,8 +121,8 @@
                                 {{-- Action Form Buttons --}}
                                 <td class="pe-4 py-2.5 text-end">
                                     @if($ticketReq->status === 'pending')
-                                        <div class="d-inline-flex gap-2 align-items-center justify-content-end">
-                                            {{-- Approve Form with Adjustable Quantity --}}
+                                        <div class="d-inline-flex gap-1.5 align-items-center justify-content-end">
+                                            {{-- Approve Form with Compact Input --}}
                                             <form method="POST" action="{{ route('dashboard.ticket-requests.approve', $ticketReq->id) }}" class="d-inline-flex align-items-center gap-1 m-0">
                                                 @csrf
                                                 <input type="number"
@@ -119,10 +131,12 @@
                                                        min="1"
                                                        required
                                                        title="Adjust granted ticket amount"
-                                                       class="form-control form-control-sm text-center font-bold"
-                                                       style="width: 65px;">
+                                                       class="form-control text-center fw-bold border-gray-300 rounded shadow-none"
+                                                       style="width: 46px; height: 28px; padding: 0 4px; font-size: 0.75rem;">
 
-                                                <button type="submit" class="btn btn-xs btn-success font-medium px-2.5 py-1 shadow-sm rounded text-xs">
+                                                <button type="submit"
+                                                        class="btn btn-success fw-semibold px-2.5 shadow-sm rounded d-inline-flex align-items-center justify-content-center"
+                                                        style="height: 28px; font-size: 0.75rem;">
                                                     Approve
                                                 </button>
                                             </form>
@@ -131,7 +145,8 @@
                                             <form method="POST" action="{{ route('dashboard.ticket-requests.decline', $ticketReq->id) }}" class="m-0">
                                                 @csrf
                                                 <button type="submit"
-                                                        class="btn btn-xs btn-outline-danger font-medium px-2.5 py-1 shadow-sm rounded text-xs"
+                                                        class="btn btn-outline-danger fw-semibold px-2.5 shadow-sm rounded d-inline-flex align-items-center justify-content-center"
+                                                        style="height: 28px; font-size: 0.75rem;"
                                                         onclick="return confirm('Are you sure you want to decline this request?');">
                                                     Decline
                                                 </button>

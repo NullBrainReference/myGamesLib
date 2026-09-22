@@ -59,22 +59,32 @@ class DashboardController extends Controller
 
     public function approveTicketRequest(Request $request, HirePosTicketRequest $ticketRequest)
     {
+        if ($ticketRequest->status !== 'pending') {
+            return back()->with('error', 'This request has already been processed.');
+        }
+
         $validated = $request->validate([
             'granted_quantity' => 'required|integer|min:1',
         ]);
 
         $granted = (int) $validated['granted_quantity'];
-
-        // Increase available slot capacity on the target position
         $position = $ticketRequest->hirePosition;
+
+        // Add granted quantity to total ticket capacity pool
         $position->increment('tickets_amount', $granted);
 
+        // Ensure position is open if it was previously closed
+        if (!$position->is_open) {
+            $position->update(['is_open' => true]);
+        }
+
+        // Mark request as approved
         $ticketRequest->update([
-            'status' => 'approved',
+            'status'           => 'approved',
             'granted_quantity' => $granted,
         ]);
 
-        return back()->with('success', "Request approved! Added {$granted} ticket slots to '{$position->title}'.");
+        return back()->with('success', "Granted +{$granted} extra tickets for position '{$position->title}'. Position is now live for new applicants.");
     }
 
     public function declineTicketRequest(HirePosTicketRequest $ticketRequest)

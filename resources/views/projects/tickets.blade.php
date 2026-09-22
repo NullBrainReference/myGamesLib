@@ -34,9 +34,61 @@
         </div>
     @endif
 
-    {{-- Applicants Table --}}
-    @if($tickets->count() > 0)
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+    {{-- Applicants Main Card --}}
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+
+        {{-- Card Header & Filter Bar (Single Source of Truth) --}}
+        <div class="p-4 border-b border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <h2 class="text-sm font-bold text-gray-800">Submitted Applications</h2>
+                <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 text-indigo-700">
+                    {{ $tickets->total() }} Total
+                </span>
+            </div>
+
+            <form method="GET" action="{{ url()->current() }}" class="flex items-center gap-2 flex-nowrap shrink-0">
+                <label for="filter_position" class="text-xs font-medium text-gray-600 whitespace-nowrap shrink-0">
+                    Filter Position:
+                </label>
+
+                {{-- Zero-Jump Select Wrapper --}}
+                <div class="relative flex items-center shrink-0">
+                    <select id="filter_position"
+                            name="position_id"
+                            onchange="this.form.submit()"
+                            class="appearance-none text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 py-1.5 pl-3 pr-8 bg-white text-gray-700 font-medium shadow-sm outline-none cursor-pointer w-[180px] sm:w-[220px] truncate">
+                        <option value="">All Positions</option>
+                        @foreach($project->hirePositions as $pos)
+                            <option value="{{ $pos->id }}" {{ request('position_id') == $pos->id ? 'selected' : '' }}>
+                                {{ $pos->title }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    {{-- Integrated Absolute Control Icon (No Layout Shifts) --}}
+                    <div class="absolute right-2 flex items-center">
+                        @if(request('position_id'))
+                            <a href="{{ url()->current() }}"
+                               title="Clear position filter"
+                               class="p-0.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-md transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </a>
+                        @else
+                            <div class="pointer-events-none text-gray-400 pr-0.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {{-- Table Content or Empty State --}}
+        @if($tickets->count() > 0)
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -117,17 +169,17 @@
                     </tbody>
                 </table>
             </div>
-        </div>
 
-        <div class="mt-4">
-            {{ $tickets->links() }}
-        </div>
-    @else
-        <div class="bg-white rounded-xl border border-gray-200 p-12 text-center my-8">
-            <h3 class="text-sm font-bold text-gray-800">No applicants yet</h3>
-            <p class="text-xs text-gray-500 mt-1">There are currently no submitted tickets for position vacancies.</p>
-        </div>
-    @endif
+            <div class="p-4 border-t border-gray-100">
+                {{ $tickets->links() }}
+            </div>
+        @else
+            <div class="p-12 text-center">
+                <h3 class="text-sm font-bold text-gray-800">No applicants found</h3>
+                <p class="text-xs text-gray-500 mt-1">There are currently no tickets matching your position filter.</p>
+            </div>
+        @endif
+    </div>
 
     {{-- 1. Review Explanation Dialog / Modal --}}
     <div x-show="openModal"
