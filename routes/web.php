@@ -108,6 +108,15 @@ Route::middleware('role.guard:admin')->prefix('dashboard')->group(function () {
     Route::get('/posts', [BlogController::class, 'dashboard'])->name('dashboard.posts');
 });
 
+Route::middleware('role.guard:admin')->prefix('admin/dashboard')->name('dashboard.')->group(function () {
+    Route::get('/ticket-requests', [DashboardController::class, 'ticketRequests'])
+        ->name('ticket-requests');
+    Route::post('/ticket-requests/{ticketRequest}/approve', [DashboardController::class, 'approveTicketRequest'])
+        ->name('ticket-requests.approve');
+    Route::post('/ticket-requests/{ticketRequest}/decline', [DashboardController::class, 'declineTicketRequest'])
+        ->name('ticket-requests.decline');
+});
+
 Route::post('/games/{gameId}/rate', [RatingController::class, 'store'])->name('rating.store')->middleware('auth');
 
 Route::middleware(['auth', 'logout.banned'])->group(function () {
@@ -185,21 +194,56 @@ Route::get('/projects/{id}/contributions',
     ->name('projects.contributions');
 
 
-Route::middleware(['auth'])->group(function () {
-    // Standard Project actions...
-    Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
-    Route::post('/projects/store', [ProjectController::class, 'store'])->name('projects.store');
-    Route::get('/projects/{id}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
-    Route::put('/projects/{id}/update', [ProjectController::class, 'update'])->name('projects.update');
-    Route::delete('/projects/{id}/delete', [ProjectController::class, 'destroy'])->name('projects.delete');
-    Route::post('/projects/{id}/approve', [ProjectController::class, 'approve'])->name('projects.approve');
+// Route::middleware(['auth'])->group(function () {
+//     // Standard Project actions...
+//     Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
+//     Route::post('/projects/store', [ProjectController::class, 'store'])->name('projects.store');
+//     Route::get('/projects/{id}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
+//     Route::put('/projects/{id}/update', [ProjectController::class, 'update'])->name('projects.update');
+//     Route::delete('/projects/{id}/delete', [ProjectController::class, 'destroy'])->name('projects.delete');
+//     Route::post('/projects/{id}/approve', [ProjectController::class, 'approve'])->name('projects.approve');
 
-    // Dynamic Lookup Team Management Endpoints
-    Route::prefix('projects/{project_id}')->group(function () {
-        Route::post('/editors/attach', [ProjectController::class, 'attachEditor'])->name('projects.editors.attach');
-        Route::delete('/editors/detach/{user_id}', [ProjectController::class, 'detachEditor'])->name('projects.editors.detach');
-        Route::post('/participants/attach', [ProjectController::class, 'attachParticipant'])->name('projects.participants.attach');
-        Route::delete('/participants/detach/{user_id}', [ProjectController::class, 'detachParticipant'])->name('projects.participants.detach');
+//     // Dynamic Lookup Team Management Endpoints
+//     Route::prefix('projects/{project_id}')->group(function () {
+//         Route::post('/editors/attach', [ProjectController::class, 'attachEditor'])->name('projects.editors.attach');
+//         Route::delete('/editors/detach/{user_id}', [ProjectController::class, 'detachEditor'])->name('projects.editors.detach');
+//         Route::post('/participants/attach', [ProjectController::class, 'attachParticipant'])->name('projects.participants.attach');
+//         Route::delete('/participants/detach/{user_id}', [ProjectController::class, 'detachParticipant'])->name('projects.participants.detach');
+//     });
+
+//     Route::post('/projects/{project}/request-tickets', [HirePositionController::class, 'requestMoreTickets'])
+//         ->name('projects.request-tickets');
+// });
+
+Route::middleware(['auth'])->prefix('projects')->name('projects.')->group(function () {
+
+    // Global Project Routes
+    Route::get('/create', [ProjectController::class, 'create'])->name('create');
+    Route::post('/', [ProjectController::class, 'store'])->name('store');
+
+    // Single Project Scoped Routes ({project} Route Model Binding)
+    Route::prefix('{project}')->group(function () {
+
+        // Project Lifecycle & Actions
+        Route::get('/edit', [ProjectController::class, 'edit'])->name('edit');
+        Route::put('/', [ProjectController::class, 'update'])->name('update');
+        Route::delete('/', [ProjectController::class, 'destroy'])->name('delete');
+        Route::post('/approve', [ProjectController::class, 'approve'])->name('approve');
+
+        // Team Management
+        Route::prefix('editors')->name('editors.')->group(function () {
+            Route::post('/attach', [ProjectController::class, 'attachEditor'])->name('attach');
+            Route::delete('/detach/{user}', [ProjectController::class, 'detachEditor'])->name('detach');
+        });
+
+        Route::prefix('participants')->name('participants.')->group(function () {
+            Route::post('/attach', [ProjectController::class, 'attachParticipant'])->name('attach');
+            Route::delete('/detach/{user}', [ProjectController::class, 'detachParticipant'])->name('detach');
+        });
+
+        // Hiring / Tickets
+        Route::post('/request-tickets', [HirePositionController::class, 'requestMoreTickets'])
+            ->name('request-tickets');
     });
 });
 

@@ -40,6 +40,11 @@ class HirePosition extends Model
         return $this->hasMany(PositionTicket::class, 'position_id');
     }
 
+    public function ticketRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(HirePosTicketRequest::class, 'hire_position_id');
+    }
+
     // Helper: Check if position has remaining open slots
     public function acceptedTicketsCount(): int
     {

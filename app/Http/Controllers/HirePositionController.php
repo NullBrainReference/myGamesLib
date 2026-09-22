@@ -7,6 +7,7 @@ use App\Models\PositionSkill;
 use App\Models\PositionTicket;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use App\Models\HirePosTicketRequest;
 
 class HirePositionController extends Controller
 {
@@ -129,6 +130,32 @@ class HirePositionController extends Controller
 
         $statusText = $isAccepted ? 'accepted' : 'declined';
         return back()->with('success', "Application ticket #{$ticket->id} has been {$statusText}.");
+    }
+
+    public function requestMoreTickets(Request $request, Project $project)
+    {
+        // Ensure the current user is an owner of the project or an admin
+        if (!auth()->user()->isAdmin() && !$project->owners->contains(auth()->id())) {
+            abort(403, 'Unauthorized to make ticket requests for this project.');
+        }
+
+        $validated = $request->validate([
+            'hire_position_id' => 'required|exists:hire_positions,id',
+            'quantity'         => 'required|integer|min:1|max:50',
+            'reason'           => 'required|string|min:10|max:1000',
+        ]);
+
+        // Verify position belongs to this project
+        $position = $project->hirePositions()->findOrFail($validated['hire_position_id']);
+
+        HirePosTicketRequest::create([
+            'hire_position_id' => $position->id,
+            'quantity'         => $validated['quantity'],
+            'reason'           => $validated['reason'],
+            'status'           => 'pending',
+        ]);
+
+        return back()->with('success', 'Ticket expansion request submitted successfully to administrators.');
     }
 
     // Admin Debug generator: Creates Dev, Artist, Designer (2 tickets each)

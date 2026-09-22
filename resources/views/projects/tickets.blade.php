@@ -3,15 +3,29 @@
 @section('title', 'Applicant Review - ' . $project->title)
 
 @section('content')
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-12" x-data="{ openModal: false, selectedTicket: null, actionType: '' }">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-12" x-data="{ openModal: false, openRequestModal: false, selectedTicket: null, actionType: '' }">
 
     {{-- Navigation & Header --}}
-    <div class="mb-6">
-        <a href="{{ route('projects.vacancies', $project->id) }}" class="inline-flex items-center text-xs font-semibold text-gray-500 hover:text-gray-800 transition mb-2">
-            ← Back to Vacancies
-        </a>
-        <h1 class="text-2xl font-bold text-gray-900">Applicant Tickets</h1>
-        <p class="text-xs text-gray-500">Review, accept, or decline applications for {{ $project->title }}.</p>
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <a href="{{ route('projects.vacancies', $project->id) }}" class="inline-flex items-center text-xs font-semibold text-gray-500 hover:text-gray-800 transition mb-2">
+                ← Back to Vacancies
+            </a>
+            <h1 class="text-2xl font-bold text-gray-900">Applicant Tickets</h1>
+            <p class="text-xs text-gray-500">Review, accept, or decline applications for {{ $project->title }}.</p>
+        </div>
+
+        {{-- Request Ticket Expansion Button --}}
+        <div>
+            <button type="button"
+                    @click="openRequestModal = true"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Request Slot Extension
+            </button>
+        </div>
     </div>
 
     @if(session('success'))
@@ -115,7 +129,7 @@
         </div>
     @endif
 
-    {{-- Review Explanation Dialog / Modal --}}
+    {{-- 1. Review Explanation Dialog / Modal --}}
     <div x-show="openModal"
         x-cloak
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -142,6 +156,49 @@
                             :class="actionType === 'accept' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'"
                             class="px-4 py-1.5 text-white text-xs font-bold rounded-lg transition"
                             x-text="actionType === 'accept' ? 'Confirm Accept' : 'Confirm Decline'">
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- 2. Request Extension Dialog / Modal --}}
+    <div x-show="openRequestModal"
+        x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        x-transition>
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-gray-200" @click.away="openRequestModal = false">
+            <h3 class="text-sm font-bold text-gray-900 mb-1">Request Ticket Slot Increase</h3>
+            <p class="text-xs text-gray-500 mb-4">Submit a request to admins to expand available slots for a position.</p>
+
+            <form action="{{ route('projects.request-tickets', $project->id) }}" method="POST" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-gray-700 mb-1">Target Position *</label>
+                    <select name="hire_position_id" required class="w-full p-2.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="" disabled selected>Select position...</option>
+                        @foreach($project->hirePositions as $pos)
+                            <option value="{{ $pos->id }}">{{ $pos->title }} (Current Slots: {{ $pos->tickets_amount }})</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-gray-700 mb-1">Additional Slots Requested *</label>
+                    <input type="number" name="quantity" min="1" max="50" value="1" required class="w-full p-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-gray-700 mb-1">Reason for Extension *</label>
+                    <textarea name="reason" rows="3" required placeholder="Explain why more slots are required for this project position..." class="w-full p-2.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button type="button" @click="openRequestModal = false" class="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-lg hover:bg-gray-200 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition">
+                        Submit Request
                     </button>
                 </div>
             </form>

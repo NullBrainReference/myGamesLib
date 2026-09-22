@@ -75,11 +75,11 @@ class ProjectController extends Controller
 
         $project = Project::create($data);
 
-        // Создатель становится владельцем проекта
         $project->owners()->attach(Auth::id());
 
-        return redirect()->route('projects.view', $project->id)
-                         ->with('success', 'Project workspace created! Approve the project to sync roles.');
+        return redirect()
+            ->route('projects.view', $project->id)
+            ->with('success', 'Project workspace created! Approve the project to sync roles.');
     }
 
     public function approve(int $id)
@@ -113,7 +113,9 @@ class ProjectController extends Controller
             $project->update(['is_approved' => true]);
         }
 
-        return redirect()->back()->with('success', 'Project approved! Participants and Editors synced automatically.');
+        return redirect()
+            ->back()
+            ->with('success', 'Project approved! Participants and Editors synced automatically.');
     }
 
     public function edit(int $id)
