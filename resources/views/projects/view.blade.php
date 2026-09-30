@@ -183,7 +183,7 @@
                             <span class="text-[10px] text-gray-400">{{ $user->email }}</span>
                         </div>
                         @if($hasRole)
-                            <form action="{{ route('projects.editors.detach', ['project_id' => $project->id, 'user_id' => $user->id]) }}" method="POST">
+                            <form action="{{ route('projects.editors.detach', ['project' => $project->id, 'user' => $user->id]) }}" method="POST">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="px-2.5 py-1 bg-red-600 text-white rounded-full text-xs font-semibold hover:bg-red-700 transition">Remove</button>
                             </form>
