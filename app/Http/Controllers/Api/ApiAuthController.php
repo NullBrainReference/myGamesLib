@@ -53,26 +53,19 @@ class ApiAuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $email = strtolower(trim($request->email));
+        $password = trim($request->password);
 
-        // Validate credentials
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        $user = User::where('email', $email)->first();
+
+        if (! $user || ! Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials do not match our records.'],
             ]);
         }
 
-        // Preserve your custom ban check
-        if ($user->isBanned()) {
-            return response()->json([
-                'message' => 'Your account has been banned.'
-            ], 403);
-        }
-
-        // Revoke old tokens (optional, enforces single mobile session)
         $user->tokens()->delete();
 
-        // Create new bearer token
         $token = $user->createToken('mobile_app')->plainTextToken;
 
         return response()->json([

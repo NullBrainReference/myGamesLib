@@ -13,8 +13,13 @@ class HirePosition extends Model
         'project_id',
         'title',
         'description',
-        'tickets_amount', // Total ticket quota granted by admins/default
+        'tickets_amount',
         'is_open',
+    ];
+
+    protected $casts = [
+        'is_open' => 'boolean',
+        'tickets_amount' => 'integer',
     ];
 
     public function project(): BelongsTo
