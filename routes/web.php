@@ -22,6 +22,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\VoteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\HirePositionController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/profile', function () {
     return app(\App\Http\Controllers\ProfileController::class)->view(Auth::id());
@@ -277,6 +278,12 @@ Route::get('/users', [UserController::class, 'index'])->name('users.index');
 Route::middleware(['auth'])->group(function () {
     Route::get('/messages/{user?}', [MessageController::class, 'index'])->name('messages.index');
     Route::post('/messages/{user}', [MessageController::class, 'store'])->name('messages.store');
+});
+
+Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::get('/{notification}/read', [NotificationController::class, 'readAndRedirect'])->name('read');
+    Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
 });
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
