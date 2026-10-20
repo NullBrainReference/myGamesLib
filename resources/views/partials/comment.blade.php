@@ -1,14 +1,33 @@
 @php
-    $canCreateProject = $canCreateProject ?? true;
-    $userVote = $comment->user_vote;
-    $score = $comment->score;
+    $canCreateProject =$canCreateProject ?? true;
 
-    // Counting project mechanics at the voting stage
-    $pendingProjectMechanics = $comment->project && $comment->project->mechanics
+
+    if (!isset($branchHasProject)) {$checkTreeForProject = function ($c) use (&$checkTreeForProject) {
+            if ($c->project) {
+                return true;
+            }
+            if ($c->replies) {
+                foreach ($c->replies as $reply) {
+                    if ($checkTreeForProject($reply)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
+
+        $branchHasProject = $checkTreeForProject($comment);
+    }
+
+    $allowProjectCreation = $canCreateProject && !$branchHasProject;
+    $userVote =$comment->user_vote;
+    $score =$comment->score;
+
+    $pendingProjectMechanics = $comment->project &&$comment->project->mechanics
         ? $comment->project->mechanics->where('approved', false)
         : collect();
 
-    $approvedProjectMechanics = $comment->project && $comment->project->mechanics
+    $approvedProjectMechanics = $comment->project &&$comment->project->mechanics
         ? $comment->project->mechanics->where('approved', true)
         : collect();
 @endphp
@@ -39,7 +58,7 @@
             @endauth
 
             <span class="text-xs font-bold my-0.5 {{ $score > 0 ? 'text-emerald-600' : ($score < 0 ? 'text-red-500' : 'text-gray-500') }}">
-                {{ $score > 0 ? '+'.$score : $score }}
+                {{ $score > 0 ? '+'.$score :$score }}
             </span>
 
             @auth
@@ -77,7 +96,6 @@
                     @endif
                 </div>
 
-                {{-- Status of the mechanic associated with the comment --}}
                 @if($comment->mechanic)
                     <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full {{ $comment->mechanic->approved ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300 animate-pulse' }}">
                         ⚙️ {{ $comment->mechanic->approved ? '✓ Mechanic Approved' : '⏳ Mechanic Under Review' }}
@@ -87,7 +105,6 @@
 
             <p class="text-gray-700 mb-3 text-sm leading-relaxed whitespace-pre-line">{{ $comment->content }}</p>
 
-            {{-- Proposed mechanic directly in the comment --}}
             @if($comment->mechanic)
                 <div class="my-3 p-3 bg-amber-50/60 border border-amber-200 rounded-lg">
                     <h5 class="text-xs font-bold text-amber-900 uppercase tracking-wider mb-1 flex items-center gap-1.5">
@@ -102,7 +119,6 @@
                 </div>
             @endif
 
-            {{-- Project Card --}}
             @if($comment->project)
                 <div class="my-3 border border-blue-200 rounded-lg bg-blue-50/40 overflow-hidden shadow-sm">
                     <div class="p-3 bg-blue-100/50 flex items-center justify-between gap-2 border-b border-blue-200">
@@ -120,7 +136,6 @@
                         </div>
 
                         <div class="flex items-center gap-2 flex-shrink-0">
-                            {{-- Tag: Mechanics Under Voting --}}
                             @if($pendingProjectMechanics->isNotEmpty())
                                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
                                     ⏳ Mechanics Voting ({{ $pendingProjectMechanics->count() }})
@@ -158,7 +173,6 @@
                             {!! Parsedown::instance()->text($comment->project->content) !!}
                         </div>
 
-                        {{-- Mechanics Under Voting --}}
                         @if($pendingProjectMechanics->isNotEmpty())
                             <div class="mb-3">
                                 <h5 class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-2 flex items-center gap-1">
@@ -180,7 +194,6 @@
                             </div>
                         @endif
 
-                        {{-- Approved Mechanics --}}
                         @if($approvedProjectMechanics->isNotEmpty())
                             <div class="mb-4">
                                 <h5 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2 flex items-center gap-1">
@@ -204,11 +217,10 @@
                         <div class="flex items-center gap-2">
                             @auth
                                 <button type="button"
-                                        onclick="openCreateMechanicModal('{{ route('forum.comments.mechanic.store', $comment->id) }}', {{ $comment->id }}, 'Propose Mechanic')"
+                                        onclick="openCreateMechanicModal('{{ route('forum.comments.mechanic.store', $comment->id) }}', {{$comment->id }}, 'Propose Mechanic')"
                                         class="text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
                                     <span>⚙️</span> Propose Mechanic
                                 </button>
-                                {{-- Admin Approve Project Button --}}
                                 @if(auth()->user()->isAdmin() && isset($comment->project))
                                     @if(!$comment->project->is_approved)
                                         <form action="{{ route('projects.approve', $comment->project->id) }}" method="POST" class="inline">
@@ -241,7 +253,7 @@
                         Reply
                     </button>
 
-                    @if($canCreateProject && !$comment->project)
+                    @if($allowProjectCreation && !$comment->project)
                         <a href="{{ route('projects.create', ['comment_id' => $comment->id]) }}"
                            class="text-emerald-600 hover:text-emerald-800 font-medium hover:underline">
                             + Create Project
@@ -260,7 +272,7 @@
 
             @auth
                 <div id="replyForm-{{ $comment->id }}" class="hidden mt-4 bg-gray-50 p-4 rounded-md border border-gray-200">
-                    <form action="{{ route('comments.store', ['type' => $type, 'id' => $object->getKey()]) }}" method="POST">
+                    <form action="{{ route('comments.store', ['type' => $type, 'id' =>$object->getKey()]) }}" method="POST">
                         @csrf
                         <input type="hidden" name="parent_id" value="{{ $comment->id }}">
 
@@ -297,7 +309,8 @@
                 'comment' => $reply,
                 'type' => $type,
                 'object' => $object,
-                'canCreateProject' => $canCreateProject
+                'canCreateProject' => $canCreateProject,
+                'branchHasProject' => $branchHasProject
             ])
         @endforeach
     </div>
@@ -330,5 +343,4 @@ function toggleTailwindReplyForm(event, commentId) {
     form.classList.toggle('hidden');
 }
 </script>
-
 @endonce

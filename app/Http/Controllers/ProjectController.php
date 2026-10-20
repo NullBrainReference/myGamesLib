@@ -45,6 +45,15 @@ class ProjectController extends Controller
     public function create(Request $request)
     {
         $commentId = $request->query('comment_id');
+
+        if ($commentId) {
+            $comment = Comment::with(['project', 'parent', 'replies.project'])->findOrFail($commentId);
+
+            if ($comment->branchHasProject()) {
+                return redirect()->back()->with('error', 'A project has already been created for this comment thread.');
+            }
+        }
+
         return view('projects.create', compact('commentId'));
     }
 
@@ -58,6 +67,14 @@ class ProjectController extends Controller
             'icon_small' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:1024',
         ]);
 
+        if ($request->filled('comment_id')) {
+            $comment = Comment::with(['project', 'parent', 'replies.project'])->findOrFail($request->input('comment_id'));
+
+            if ($comment->branchHasProject()) {
+                return redirect()->back()->with('error', 'A project has already been created for this comment thread.');
+            }
+        }
+        
         $data = [
             'title'      => $request->input('title'),
             'content'    => $request->input('content'),

@@ -70,6 +70,34 @@ class Comment extends Model
         return $this->belongsTo(Comment::class, 'parent_id');
     }
 
+    public function getRootComment(): Comment
+    {
+        $current = $this;
+        while ($current->parent) {
+            $current = $current->parent;
+        }
+        return $current;
+    }
+
+    public function branchHasProject(): bool
+    {
+        $root = $this->getRootComment();
+
+        $checkTree = function ($comment) use (&$checkTree) {
+            if ($comment->project) {
+                return true;
+            }
+            foreach ($comment->replies as $reply) {
+                if ($checkTree($reply)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        return $checkTree($root);
+    }
+
     /**
      * Get all nested replies for this comment.
      */
