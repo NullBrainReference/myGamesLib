@@ -62,6 +62,7 @@
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('library') }}">My Library</a></li>
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('messages.index') }}">Messages</a></li>
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('users.index') }}">Users</a></li>
+                            <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('notifications.index') }}">Notifications</a></li>
 
 
                             @if (Auth::user()->isAdmin())

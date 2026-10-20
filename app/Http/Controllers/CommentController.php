@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Comment;
 use App\Models\Game;
+use App\Models\Notification;
+use Illuminate\Support\Str;
 
 class CommentController extends Controller
 {
@@ -29,11 +31,26 @@ class CommentController extends Controller
 
         $commentable = $modelClass::findOrFail($id);
 
-        $commentable->comments()->create([
+        $comment = $commentable->comments()->create([
             'content' => $request->content,
             'user_id' => auth()->id(),
             'parent_id' => $request->parent_id,
         ]);
+
+        // notification
+        if ($comment->parent_id) {
+            $parentComment = Comment::find($comment->parent_id);
+
+            if ($parentComment && $parentComment->user_id !== auth()->id()) {
+                Notification::send(
+                    userId: $parentComment->user_id,
+                    type: 'comment_reply',
+                    title: auth()->user()->name . ' replied to your comment',
+                    message: Str::limit($comment->content, 80),
+                    notifiable: $comment
+                );
+            }
+        }
 
         return redirect()->back()->with('success', 'Comment posted!');
     }
