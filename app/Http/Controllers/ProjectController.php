@@ -6,10 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\Comment;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Strategies\EntityListBehavior\ProjectListProcessor;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class ProjectController extends Controller
 {
@@ -57,6 +59,72 @@ class ProjectController extends Controller
         return view('projects.create', compact('commentId'));
     }
 
+    public function fork(Project $project)
+    {
+        if (!$project->is_approved) {
+            return back()->with('error', 'Only approved projects can be forked.');
+        }
+
+        // Duplicate project icons if present
+        $newIconBig = null;
+        if ($project->icon_big && Storage::disk('public')->exists($project->icon_big)) {
+            $ext = pathinfo($project->icon_big, PATHINFO_EXTENSION);
+            $newIconBig = 'projects/icons/' . Str::random(40) . '.' . $ext;
+            Storage::disk('public')->copy($project->icon_big, $newIconBig);
+        }
+
+        $newIconSmall = null;
+        if ($project->icon_small && Storage::disk('public')->exists($project->icon_small)) {
+            $ext = pathinfo($project->icon_small, PATHINFO_EXTENSION);
+            $newIconSmall = 'projects/icons/' . Str::random(40) . '.' . $ext;
+            Storage::disk('public')->copy($project->icon_small, $newIconSmall);
+        }
+
+        // Create the forked project copy
+        $forkedProject = Project::create([
+            'title'             => $project->title . ' (Fork)',
+            'content'           => $project->content,
+            'is_public'         => true,
+            'is_approved'       => false, // New fork starts as unapproved workspace
+            'icon_big'          => $newIconBig,
+            'icon_small'        => $newIconSmall,
+            'comment_id'        => null,
+            'parent_project_id' => $project->id,
+        ]);
+
+        // Attach current user as the owner of the fork
+        $forkedProject->owners()->attach(auth()->id());
+
+        // Copy approved mechanics from parent project
+        $approvedMechanics = $project->mechanics()->where('approved', true)->get();
+        foreach ($approvedMechanics as $mech) {
+            $forkedProject->mechanics()->create([
+                'title'      => $mech->title,
+                'content'    => $mech->content,
+                'approved'   => true,
+                'user_id'    => auth()->id(),
+                'comment_id' => null,
+            ]);
+        }
+
+        // Notify owners of the original project
+        foreach ($project->owners as $owner) {
+            if ($owner->id !== auth()->id()) {
+                Notification::send(
+                    userId: $owner->id,
+                    type: 'project',
+                    title: 'Project Forked',
+                    message: auth()->user()->name . ' created a fork of your project "' . $project->title . '".',
+                    notifiable: $forkedProject
+                );
+            }
+        }
+
+        return redirect()
+            ->route('projects.view', $forkedProject->id)
+            ->with('success', 'Project forked successfully! You are now the owner of this workspace copy.');
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -74,7 +142,7 @@ class ProjectController extends Controller
                 return redirect()->back()->with('error', 'A project has already been created for this comment thread.');
             }
         }
-        
+
         $data = [
             'title'      => $request->input('title'),
             'content'    => $request->input('content'),

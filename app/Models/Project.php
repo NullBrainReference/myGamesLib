@@ -21,6 +21,7 @@ class Project extends Model
         'icon_big',
         'icon_small',
         'comment_id',
+        'parent_project_id',
     ];
 
     protected $casts = [
@@ -31,6 +32,22 @@ class Project extends Model
     public function comment(): BelongsTo
     {
         return $this->belongsTo(Comment::class);
+    }
+
+    /**
+     * Parent original project (if this project is a fork)
+     */
+    public function parentProject(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'parent_project_id');
+    }
+
+    /**
+     * Child projects forked from this project
+     */
+    public function forks(): HasMany
+    {
+        return $this->hasMany(Project::class, 'parent_project_id');
     }
 
     /**
@@ -78,10 +95,10 @@ class Project extends Model
         return $this->hasManyThrough(
             PositionTicket::class,
             HirePosition::class,
-            'project_id',  // Foreign key on hire_positions table
-            'position_id', // Foreign key on position_tickets table
-            'id',          // Local key on projects table
-            'id'           // Local key on hire_positions table
+            'project_id',
+            'position_id',
+            'id',
+            'id'
         );
     }
 
@@ -93,10 +110,10 @@ class Project extends Model
         return $this->hasManyThrough(
             HirePosTicketRequest::class,
             HirePosition::class,
-            'project_id',       // Foreign key on hire_positions table
-            'hire_position_id', // Foreign key on hire_pos_ticket_requests table
-            'id',               // Local key on projects table
-            'id'                // Local key on hire_positions table
+            'project_id',
+            'hire_position_id',
+            'id',
+            'id'
         );
     }
 }

@@ -208,6 +208,7 @@ Route::middleware(['auth'])->prefix('projects')->name('projects.')->group(functi
         Route::put('/', [ProjectController::class, 'update'])->name('update');
         Route::delete('/', [ProjectController::class, 'destroy'])->name('delete');
         Route::post('/approve', [ProjectController::class, 'approve'])->name('approve');
+        Route::post('/fork', [ProjectController::class, 'fork'])->name('fork'); // Updated to name('fork')
 
         // Team Management
         Route::prefix('editors')->name('editors.')->group(function () {
