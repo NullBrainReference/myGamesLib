@@ -5,10 +5,49 @@ namespace App\Http\Controllers;
 use App\Models\Notification;
 use App\Models\Project;
 use App\Models\ProjectInvitation;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ProjectInvitationController extends Controller
 {
+    // Search community users and show invite interface with pagination
+    public function create(Request $request, Project $project)
+    {
+        if (!auth()->user()->isAdmin() && !$project->owners->contains(auth()->id())) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $search = $request->input('search');
+
+        $users = User::when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->orderBy('name', 'asc')
+            ->paginate(12)
+            ->withQueryString();
+
+        // Team and invite status sets
+        $ownerIds       = $project->owners->pluck('id')->toArray();
+        $editorIds      = $project->editors->pluck('id')->toArray();
+        $participantIds = $project->participants->pluck('id')->toArray();
+
+        $pendingInviteUserIds = $project->invitations()
+            ->where('status', 'pending')
+            ->pluck('user_id')
+            ->toArray();
+
+        return view('projects.invite-search', compact(
+            'project',
+            'users',
+            'search',
+            'ownerIds',
+            'editorIds',
+            'participantIds',
+            'pendingInviteUserIds'
+        ));
+    }
+
     // Send invitation to a user
     public function store(Request $request, Project $project)
     {
@@ -21,14 +60,12 @@ class ProjectInvitationController extends Controller
             'role'    => 'required|in:editor,participant',
         ]);
 
-        // Check if user is already in the project
         if ($project->owners->contains($validated['user_id']) ||
             $project->editors->contains($validated['user_id']) ||
             $project->participants->contains($validated['user_id'])) {
             return back()->with('error', 'User is already a team member of this project.');
         }
 
-        // Check for existing pending invitation
         $existing = ProjectInvitation::where('project_id', $project->id)
             ->where('user_id', $validated['user_id'])
             ->where('status', 'pending')
@@ -46,7 +83,6 @@ class ProjectInvitationController extends Controller
             'status'     => 'pending',
         ]);
 
-        // Notify invited user
         Notification::send(
             userId: $invitation->user_id,
             type: 'project_invitation',
@@ -81,14 +117,12 @@ class ProjectInvitationController extends Controller
 
         $invitation->update(['status' => 'accepted']);
 
-        // Attach user to target role
         if ($invitation->role === 'editor') {
             $invitation->project->editors()->syncWithoutDetaching([auth()->id()]);
         } else {
             $invitation->project->participants()->syncWithoutDetaching([auth()->id()]);
         }
 
-        // Notify inviter
         Notification::send(
             userId: $invitation->inviter_id,
             type: 'project',

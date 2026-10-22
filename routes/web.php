@@ -201,6 +201,12 @@ Route::middleware(['auth'])->prefix('projects')->name('projects.')->group(functi
     Route::get('/create', [ProjectController::class, 'create'])->name('create');
     Route::post('/', [ProjectController::class, 'store'])->name('store');
 
+    Route::prefix('invitations')->name('invitations.')->group(function () {
+        Route::get('/', [ProjectInvitationController::class, 'index'])->name('index');
+        Route::post('/{invitation}/accept', [ProjectInvitationController::class, 'accept'])->name('accept');
+        Route::post('/{invitation}/decline', [ProjectInvitationController::class, 'decline'])->name('decline');
+    });
+
     // Single Project Scoped Routes ({project} Route Model Binding)
     Route::prefix('{project}')->group(function () {
 
@@ -221,6 +227,9 @@ Route::middleware(['auth'])->prefix('projects')->name('projects.')->group(functi
             Route::post('/attach', [ProjectController::class, 'attachParticipant'])->name('attach');
             Route::delete('/detach/{user}', [ProjectController::class, 'detachParticipant'])->name('detach');
         });
+
+        Route::get('/invite', [ProjectInvitationController::class, 'create'])->name('invite.create');
+        Route::post('/invite', [ProjectInvitationController::class, 'store'])->name('invite');
 
         // Hiring / Tickets
         Route::post('/request-tickets', [HirePositionController::class, 'requestMoreTickets'])
@@ -286,22 +295,6 @@ Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->gr
     Route::get('/', [NotificationController::class, 'index'])->name('index');
     Route::get('/{notification}/read', [NotificationController::class, 'readAndRedirect'])->name('read');
     Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
-});
-
-Route::middleware(['auth'])->prefix('projects')->name('projects.')->group(function () {
-
-    // Global Invitations List for Auth User
-    Route::prefix('invitations')->name('invitations.')->group(function () {
-        Route::get('/', [ProjectInvitationController::class, 'index'])->name('index');
-        Route::post('/{invitation}/accept', [ProjectInvitationController::class, 'accept'])->name('accept');
-        Route::post('/{invitation}/decline', [ProjectInvitationController::class, 'decline'])->name('decline');
-    });
-
-    // Single Project Scoped Routes
-    Route::prefix('{project}')->group(function () {
-        Route::post('/invite', [ProjectInvitationController::class, 'store'])->name('invite');
-        // ... other project routes (edit, fork, etc.)
-    });
 });
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
