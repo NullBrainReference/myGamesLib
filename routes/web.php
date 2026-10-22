@@ -23,6 +23,7 @@ use App\Http\Controllers\VoteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\HirePositionController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProjectInvitationController;
 
 Route::get('/profile', function () {
     return app(\App\Http\Controllers\ProfileController::class)->view(Auth::id());
@@ -285,6 +286,22 @@ Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->gr
     Route::get('/', [NotificationController::class, 'index'])->name('index');
     Route::get('/{notification}/read', [NotificationController::class, 'readAndRedirect'])->name('read');
     Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+});
+
+Route::middleware(['auth'])->prefix('projects')->name('projects.')->group(function () {
+
+    // Global Invitations List for Auth User
+    Route::prefix('invitations')->name('invitations.')->group(function () {
+        Route::get('/', [ProjectInvitationController::class, 'index'])->name('index');
+        Route::post('/{invitation}/accept', [ProjectInvitationController::class, 'accept'])->name('accept');
+        Route::post('/{invitation}/decline', [ProjectInvitationController::class, 'decline'])->name('decline');
+    });
+
+    // Single Project Scoped Routes
+    Route::prefix('{project}')->group(function () {
+        Route::post('/invite', [ProjectInvitationController::class, 'store'])->name('invite');
+        // ... other project routes (edit, fork, etc.)
+    });
 });
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

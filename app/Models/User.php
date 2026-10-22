@@ -142,6 +142,15 @@ class User extends Authenticatable
         return $this->pendingFriendsReceived->contains('id', $user->id);
     }
 
+    public function projectInvitations(): HasMany
+    {
+        return $this->hasMany(ProjectInvitation::class)->latest();
+    }
+
+    public function pendingProjectInvitations(): HasMany
+    {
+        return $this->hasMany(ProjectInvitation::class)->where('status', 'pending')->latest();
+    }
 
     public function sentMessages()
     {

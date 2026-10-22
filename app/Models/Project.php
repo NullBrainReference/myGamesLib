@@ -77,6 +77,11 @@ class Project extends Model
                     ->withTimestamps();
     }
 
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(ProjectInvitation::class);
+    }
+
     public function mechanics(): HasMany
     {
         return $this->hasMany(Mechanic::class, 'project_id');

@@ -44,6 +44,64 @@
                     </form>
                 @endif
             @endauth
+            {{-- Add inviteModal state to x-data --}}
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mb-12" x-data="{ editorModal: false, participantModal: false, inviteModal: false }">
+
+                {{-- Invite Member Button for Owners/Admins --}}
+                @auth
+                    @if($project->owners->contains(Auth::id()) || auth()->user()->isAdmin())
+                        <button @click="inviteModal = true" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+                            ✉️ Invite Team Member
+                        </button>
+                    @endif
+                @endauth
+
+                {{-- INVITE TEAM MEMBER MODAL --}}
+                @auth
+                    @if($project->owners->contains(Auth::id()) || auth()->user()->isAdmin())
+                        <div x-show="inviteModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+                            <div @click.away="inviteModal = false" class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+                                    <h3 class="font-bold text-gray-900 text-sm">✉️ Invite User to Project</h3>
+                                    <button @click="inviteModal = false" class="text-gray-400 hover:text-gray-600">✕</button>
+                                </div>
+
+                                <form action="{{ route('projects.invite', $project->id) }}" method="POST" class="space-y-4">
+                                    @csrf
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Select User</label>
+                                        <select name="user_id" required class="w-full text-xs p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                            <option value="" disabled selected>-- Select User --</option>
+                                            @foreach($allUsers as $u)
+                                                @if(!$project->owners->contains($u->id) && !$project->editors->contains($u->id) && !$project->participants->contains($u->id))
+                                                    <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->email }})</option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Project Role</label>
+                                        <select name="role" required class="w-full text-xs p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                            <option value="participant">Participant</option>
+                                            <option value="editor">Editor</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="flex justify-end gap-2 pt-2">
+                                        <button type="button" @click="inviteModal = false" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded-lg hover:bg-gray-50">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 shadow-sm">
+                                            Send Invitation
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
+                @endauth
+            </div>
         </div>
     </div>
 

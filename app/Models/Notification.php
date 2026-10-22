@@ -40,7 +40,7 @@ class Notification extends Model
 
     public function getTargetUrlAttribute(): string
     {
-        if (!$this->notifiable) {
+        if (!$this->notifiable && $this->type !== 'project_invitation') {
             return '#';
         }
 
@@ -49,6 +49,7 @@ class Notification extends Model
                 $this->notifiable instanceof Project => route('projects.view', $this->notifiable->id),
                 default => '#',
             },
+            'project_invitation' => route('projects.invitations.index'),
             'friend_request' => match (true) {
                 $this->notifiable instanceof User => route('profile.view', $this->notifiable->id),
                 default => '#',
