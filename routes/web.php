@@ -117,6 +117,15 @@ Route::middleware('role.guard:admin')->prefix('admin/dashboard')->name('dashboar
         ->name('ticket-requests.approve');
     Route::post('/ticket-requests/{ticketRequest}/decline', [DashboardController::class, 'declineTicketRequest'])
         ->name('ticket-requests.decline');
+
+    Route::get('/position-requests', [DashboardController::class, 'positionRequests'])
+        ->name('position-requests');
+
+    Route::post('/position-requests/{positionRequest}/approve', [DashboardController::class, 'approvePositionRequest'])
+        ->name('position-requests.approve');
+
+    Route::post('/position-requests/{positionRequest}/decline', [DashboardController::class, 'declinePositionRequest'])
+        ->name('position-requests.decline');
 });
 
 Route::post('/games/{gameId}/rate', [RatingController::class, 'store'])->name('rating.store')->middleware('auth');
@@ -234,6 +243,9 @@ Route::middleware(['auth'])->prefix('projects')->name('projects.')->group(functi
         // Hiring / Tickets
         Route::post('/request-tickets', [HirePositionController::class, 'requestMoreTickets'])
             ->name('request-tickets');
+        Route::post('/request-position-slots', [HirePositionController::class, 'requestPositionSlots'])
+            ->name('request-position-slots');
+        
     });
 });
 

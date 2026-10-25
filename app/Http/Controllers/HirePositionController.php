@@ -222,4 +222,29 @@ class HirePositionController extends Controller
 
         return back()->with('success', 'Debug: Created 3 vacancies (Dev, Artist, Designer) with 2 tickets each!');
     }
+
+    public function requestPositionSlots(Request $request, Project $project)
+    {
+        if (!auth()->user()->isAdmin() && !$project->owners->contains(auth()->id())) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $validated = $request->validate([
+            'title'    => 'required|string|max:255',
+            'quantity' => 'required|integer|min:1|max:20',
+            'reason'   => 'required|string|min:10|max:1000',
+        ]);
+
+        \App\Models\ProjectPositionRequest::create([
+            'project_id' => $project->id,
+            'title'      => $validated['title'],
+            'quantity'   => $validated['quantity'],
+            'reason'     => $validated['reason'],
+            'status'     => 'pending',
+        ]);
+
+        return back()->with('success', 'Position slot request sent to admins for approval.');
+    }
+
+    
 }

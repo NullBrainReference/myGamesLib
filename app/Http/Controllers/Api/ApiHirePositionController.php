@@ -8,6 +8,7 @@ use App\Models\HirePosition;
 use App\Models\PositionSkill;
 use App\Models\PositionTicket;
 use App\Models\Project;
+use App\Models\ProjectPositionRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -25,13 +26,13 @@ class ApiHirePositionController extends Controller
             ->get();
 
         return response()->json([
-            'success' => true,
+            'success'   => true,
             'positions' => $positions
         ]);
     }
 
     /**
-     * Create a new hire position (Owners/Admins only).
+     * Create a new hire position directly (Owners/Admins only).
      */
     public function store(Request $request, Project $project): JsonResponse
     {
@@ -133,10 +134,10 @@ class ApiHirePositionController extends Controller
         $tickets = $query->latest()->paginate(15);
 
         return response()->json([
-            'success' => true,
-            'tickets' => $tickets->items(),
+            'success'      => true,
+            'tickets'      => $tickets->items(),
             'current_page' => $tickets->currentPage(),
-            'last_page' => $tickets->lastPage(),
+            'last_page'    => $tickets->lastPage(),
         ]);
     }
 
@@ -176,7 +177,7 @@ class ApiHirePositionController extends Controller
     }
 
     /**
-     * Request additional tickets from admins.
+     * Request additional TICKET CAPACITY for an existing position from admins.
      */
     public function requestMoreTickets(Request $request, Project $project): JsonResponse
     {
@@ -202,9 +203,82 @@ class ApiHirePositionController extends Controller
         ]);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Ticket extension request submitted.',
+            'success'        => true,
+            'message'        => 'Ticket extension request submitted to admins.',
             'ticket_request' => $ticketRequest
         ], 201);
+    }
+
+    /**
+     * Request NEW POSITION SLOTS (e.g. Developer, Artist) from admins.
+     */
+    public function requestPositionSlots(Request $request, Project $project): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->isAdmin() && !$project->owners->contains($user->id)) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+
+        $validated = $request->validate([
+            'title'    => 'required|string|max:255',
+            'quantity' => 'required|integer|min:1|max:20',
+            'reason'   => 'required|string|min:10|max:1000',
+        ]);
+
+        $positionRequest = ProjectPositionRequest::create([
+            'project_id' => $project->id,
+            'title'      => $validated['title'],
+            'quantity'   => $validated['quantity'],
+            'reason'     => $validated['reason'],
+            'status'     => 'pending',
+        ]);
+
+        return response()->json([
+            'success'          => true,
+            'message'          => 'New position slot request submitted to admins.',
+            'position_request' => $positionRequest
+        ], 201);
+    }
+
+    /**
+     * Admin Review: Approve or Reject a position slot request.
+     * When approved, creates the requested HirePosition automatically.
+     */
+    public function reviewPositionSlotRequest(Request $request, ProjectPositionRequest $positionRequest): JsonResponse
+    {
+        if (!$request->user()->isAdmin()) {
+            return response()->json(['message' => 'Only admins can review requests.'], 403);
+        }
+
+        $validated = $request->validate([
+            'action'      => 'required|in:approve,reject',
+            'description' => 'nullable|string',
+        ]);
+
+        if ($validated['action'] === 'approve') {
+            $positionRequest->update(['status' => 'approved']);
+
+            // Auto-create the position with requested params
+            $newPosition = $positionRequest->project->hirePositions()->create([
+                'title'          => $positionRequest->title,
+                'description'    => $validated['description'] ?? "Position approved by Admin: {$positionRequest->reason}",
+                'tickets_amount' => $positionRequest->quantity,
+                'is_open'        => true,
+            ]);
+
+            return response()->json([
+                'success'  => true,
+                'message'  => 'Position request approved and vacancy created.',
+                'position' => $newPosition
+            ]);
+        }
+
+        $positionRequest->update(['status' => 'rejected']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Position request rejected.'
+        ]);
     }
 }

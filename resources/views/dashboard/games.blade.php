@@ -17,6 +17,7 @@
             <a href="{{ route('dashboard.posts') }}" class="btn btn-sm btn-outline-secondary px-3">Posts</a>
             <a href="{{ route('dashboard.comments') }}" class="btn btn-sm btn-outline-secondary px-3">Comments</a>
             <a href="{{ route('dashboard.ticket-requests') }}" class="btn btn-sm btn-outline-secondary px-3">Ticket Requests</a>
+            <a href="{{ route('dashboard.position-requests') }}" class="btn btn-sm btn-outline-secondary px-3">Position Requests</a>
 
         </div>
     </div>

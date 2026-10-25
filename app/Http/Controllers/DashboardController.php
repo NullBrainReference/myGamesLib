@@ -6,7 +6,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Enums\UserRole;
+use App\Models\HirePosition;
 use App\Models\HirePosTicketRequest;
+use App\Models\ProjectPositionRequest;
 
 class DashboardController extends Controller
 {
@@ -94,5 +96,59 @@ class DashboardController extends Controller
         ]);
 
         return back()->with('success', "Ticket request #{$ticketRequest->id} declined.");
+    }
+
+    public function positionRequests(Request $request)
+    {
+        $query = ProjectPositionRequest::with('project');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('title', 'like', "%{$search}%")
+                  ->orWhereHas('project', function ($q) use ($search) {
+                      $q->where('title', 'like', "%{$search}%");
+                  });
+        }
+
+        $requests = $query->latest()->paginate(15)->withQueryString();
+
+        return view('dashboard.position-requests', compact('requests'));
+    }
+
+    /**
+     * Approve a position slot request and automatically spawn the new HirePosition.
+     */
+    public function approvePositionRequest(ProjectPositionRequest $positionRequest)
+    {
+        if ($positionRequest->status !== 'pending') {
+            return back()->with('error', 'Request has already been processed.');
+        }
+
+        $positionRequest->update(['status' => 'approved']);
+
+        // Auto-create the position for the project
+        HirePosition::create([
+            'project_id'     => $positionRequest->project_id,
+            'title'          => $positionRequest->title,
+            'description'    => "Approved by Admin: " . $positionRequest->reason,
+            'tickets_amount' => $positionRequest->quantity,
+            'is_open'        => true,
+        ]);
+
+        return back()->with('success', "Approved request! Created vacancy position '{$positionRequest->title}' with {$positionRequest->quantity} ticket slot(s).");
+    }
+
+    /**
+     * Decline a position slot request.
+     */
+    public function declinePositionRequest(ProjectPositionRequest $positionRequest)
+    {
+        if ($positionRequest->status !== 'pending') {
+            return back()->with('error', 'Request has already been processed.');
+        }
+
+        $positionRequest->update(['status' => 'rejected']);
+
+        return back()->with('success', "Position slot request for '{$positionRequest->title}' has been declined.");
     }
 }
