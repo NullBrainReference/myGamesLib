@@ -11,11 +11,11 @@ use Illuminate\Http\Request;
 
 class HirePositionController extends Controller
 {
-    // List all open vacancies for a project
+    
     public function index(Project $project)
     {
         $positions = $project->hirePositions()
-            ->with(['skills', 'tickets'])
+            ->with(['skills', 'tickets.user']) // Eager load tickets and user
             ->where('is_open', true)
             ->get();
 

@@ -31,9 +31,16 @@
                         ➕ Request Position Slots
                     </button>
 
+                    {{-- Request Ticket Capacity Extension Button --}}
+                    <button type="button"
+                            @click="openTicketModal = true"
+                            class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+                        🎫 Request Tickets
+                    </button>
+
                     {{-- Review Applicants Button --}}
                     <a href="{{ route('projects.vacancies.applicants', $project->id) }}"
-                       class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+                       class="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
                         📋 Review Applicants
                     </a>
                 @endif
@@ -55,13 +62,15 @@
 
     {{-- System Flash Messages --}}
     @if(session('success'))
-        <div class="mb-6 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium rounded-lg">
-            {{ session('success') }}
+        <div class="mb-6 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium rounded-lg flex items-center gap-2">
+            <span>✅</span>
+            <span>{{ session('success') }}</span>
         </div>
     @endif
     @if(session('error'))
-        <div class="mb-6 p-3 bg-red-50 border border-red-200 text-red-800 text-xs font-medium rounded-lg">
-            {{ session('error') }}
+        <div class="mb-6 p-3 bg-red-50 border border-red-200 text-red-800 text-xs font-medium rounded-lg flex items-center gap-2">
+            <span>⚠️</span>
+            <span>{{ session('error') }}</span>
         </div>
     @endif
 
@@ -69,44 +78,110 @@
     @if($positions->count() > 0)
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($positions as $position)
-                <div class="p-4 border border-gray-200 rounded-lg bg-white shadow-sm flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-start gap-2 mb-2">
-                            <h3 class="font-bold text-gray-900 text-sm">{{ $position->title }}</h3>
+                @php
+                    $acceptedTickets = $position->tickets->where('success', true);
+                    $hasApprovedUser = $acceptedTickets->isNotEmpty();
+                    $userTicket = auth()->check() ? $position->tickets->where('user_id', auth()->id())->first() : null;
+                @endphp
 
-                            {{-- Ticket Capacity Badge --}}
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 {{ $position->remaining_tickets > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800' }}">
-                                {{ $position->remaining_tickets }} / {{ $position->tickets_amount }} Tickets
-                            </span>
+                <div class="p-5 border border-gray-200 rounded-xl bg-white shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                    <div>
+                        {{-- Position Title & Ticket Capacity Badge --}}
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <h3 class="font-bold text-gray-900 text-base">{{ $position->title }}</h3>
+
+                            {{-- Ticket Capacity Badge (Hidden if card has an approved user) --}}
+                            @if(!$hasApprovedUser)
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 {{ $position->remaining_tickets > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800' }}">
+                                    {{ $position->remaining_tickets }} / {{ $position->tickets_amount }} Tickets
+                                </span>
+                            @endif
                         </div>
 
-                        <p class="text-xs text-gray-600 mb-4 line-clamp-3">{{ $position->description }}</p>
-                    </div>
+                        {{-- Position Description --}}
+                        <p class="text-xs text-gray-600 mb-4 leading-relaxed">{{ $position->description }}</p>
 
-                    <div>
-                        @if($position->hasAvailableTickets())
-                            {{-- Apply Form --}}
-                            <form action="{{ route('positions.apply', $position->id) }}" method="POST" class="mt-2">
-                                @csrf
-                                <textarea name="reason" rows="2" required placeholder="Why are you applying..." class="w-full text-xs p-2.5 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"></textarea>
-                                <button type="submit" class="w-full sm:w-auto px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors">
-                                    Apply (1 Ticket)
-                                </button>
-                            </form>
-                        @else
-                            {{-- Out of Capacity Alert --}}
-                            <div class="p-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-lg flex flex-col gap-1.5">
-                                <span class="font-medium">All application tickets spent for this position.</span>
-
-                                @if($project->owners->contains(auth()->id()) || auth()->user()->isAdmin())
-                                    <button type="button" 
-                                            @click="openTicketModal = true; selectedPositionId = '{{ $position->id }}'; selectedPositionTitle = '{{ e($position->title) }}'" 
-                                            class="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline text-left transition-colors">
-                                        Request Admin for More Tickets →
-                                    </button>
-                                @endif
+                        {{-- Skills List --}}
+                        @if($position->skills->count() > 0)
+                            <div class="mb-4 flex flex-wrap gap-1.5">
+                                @foreach($position->skills as $skill)
+                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-700 border border-gray-200 text-[11px] font-medium rounded-md">
+                                        {{ $skill->title }}
+                                    </span>
+                                @endforeach
                             </div>
                         @endif
+
+                        {{-- Approved / Hired Team Members --}}
+                        @if($hasApprovedUser)
+                            <div class="mb-4 pt-3 border-t border-gray-100">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block mb-2">
+                                    Approved Team Members ({{ $acceptedTickets->count() }})
+                                </span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    @foreach($acceptedTickets as $ticket)
+                                        <a href="{{ route('profile.view', $ticket->user_id) }}"
+                                           class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg transition-colors">
+                                            <span>✅</span> {{ $ticket->user->name ?? 'User #'.$ticket->user_id }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Application Action / Status Section --}}
+                    <div class="pt-3 border-t border-gray-100">
+                        @auth
+                            @if($userTicket)
+                                {{-- Current User's Application Status --}}
+                                @if($userTicket->success === true)
+                                    <div class="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-lg text-center flex items-center justify-center gap-1.5">
+                                        <span>🎉</span> You are hired for this position!
+                                    </div>
+                                @elseif($userTicket->success === false)
+                                    <div class="p-2.5 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-lg text-center">
+                                        Application Declined
+                                    </div>
+                                @else
+                                    <div class="p-2.5 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold rounded-lg text-center flex items-center justify-center gap-1.5">
+                                        <span>⏳</span> Application Pending Review
+                                    </div>
+                                @endif
+                            @else
+                                {{-- User Has Not Applied Yet --}}
+                                @if($position->hasAvailableTickets())
+                                    <form action="{{ route('positions.apply', $position->id) }}" method="POST">
+                                        @csrf
+                                        <textarea name="reason" rows="2" minlength="10" maxlength="1000" required placeholder="Why are you a good fit..." class="w-full text-xs p-2.5 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"></textarea>
+                                        <button type="submit" class="w-full sm:w-auto px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors">
+                                            Apply (1 Ticket)
+                                        </button>
+                                    </form>
+                                @else
+                                    {{-- Out of Tickets Alert (Only shown if NO approved user exists) --}}
+                                    @if(!$hasApprovedUser)
+                                        <div class="p-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-lg flex flex-col gap-1.5">
+                                            <span class="font-medium">All application tickets spent for this position.</span>
+
+                                            @if($project->owners->contains(auth()->id()) || auth()->user()->isAdmin())
+                                                <button type="button" 
+                                                        @click="openTicketModal = true; selectedPositionId = '{{ $position->id }}'; selectedPositionTitle = '{{ e($position->title) }}'" 
+                                                        class="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline text-left transition-colors">
+                                                    Request Admin for More Tickets →
+                                                </button>
+                                            @endif
+                                        </div>
+                                    @endif
+                                @endif
+                            @endif
+                        @else
+                            @if(!$hasApprovedUser)
+                                <a href="{{ route('login') }}" class="block text-center text-xs text-indigo-600 font-semibold hover:underline">
+                                    Log in to apply
+                                </a>
+                            @endif
+                        @endauth
                     </div>
                 </div>
             @endforeach
@@ -199,7 +274,7 @@
         </div>
     </div>
 
-    {{-- MODAL 2: Request New Position Slots (e.g., Developer, 3D Artist) --}}
+    {{-- MODAL 2: Request New Position Slots --}}
     <div x-show="openSlotModal" 
          x-cloak
          x-transition:enter="transition ease-out duration-300"

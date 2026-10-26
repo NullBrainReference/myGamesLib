@@ -14,13 +14,10 @@ use Illuminate\Http\Request;
 
 class ApiHirePositionController extends Controller
 {
-    /**
-     * Get all open vacancies for a project.
-     */
     public function index(Project $project): JsonResponse
     {
         $positions = $project->hirePositions()
-            ->with(['skills', 'tickets'])
+            ->with(['skills', 'tickets.user'])
             ->where('is_open', true)
             ->latest()
             ->get();
