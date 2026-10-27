@@ -1,6 +1,6 @@
 <div id="mechanicModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border border-gray-100">
-        
+
         <!-- Header -->
         <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
             <h3 id="mechanicModalTitle" class="text-base font-bold text-gray-900 flex items-center gap-2">
@@ -19,11 +19,11 @@
                     </label>
                     <span class="text-[10px] text-gray-400">Syntax: <code>mechanic:game</code></span>
                 </div>
-                <input type="text" 
-                       id="mechanicSearchInput" 
+                <input type="text"
+                       id="mechanicSearchInput"
                        oninput="handleMechanicSearch(this.value)"
-                       class="w-full rounded-lg border-gray-300 text-sm focus:border-amber-500 focus:ring-amber-500 shadow-sm" 
-                       placeholder="e.g. cra:mine, :mine, or Crafting" 
+                       class="w-full rounded-lg border-gray-300 text-sm focus:border-amber-500 focus:ring-amber-500 shadow-sm"
+                       placeholder="e.g. cra:mine, :mine, or Crafting"
                        autocomplete="off">
             </div>
 
@@ -38,8 +38,8 @@
 
             <div class="pt-3 border-t border-gray-100 flex justify-between items-center">
                 <span class="text-xs text-gray-500">Not found in database?</span>
-                <button type="button" 
-                        onclick="switchMechanicStep('create')" 
+                <button type="button"
+                        onclick="switchMechanicStep('create')"
                         class="px-3 py-1.5 bg-amber-500 text-white text-xs font-bold rounded-lg hover:bg-amber-600 shadow-sm transition-colors">
                     + Create New Mechanic
                 </button>
@@ -63,11 +63,11 @@
                 <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                     Mechanic Title <span class="text-red-500">*</span>
                 </label>
-                <input type="text" 
-                       name="title" 
+                <input type="text"
+                       name="title"
                        id="mechanicTitleInput"
-                       required 
-                       class="w-full rounded-lg border-gray-300 text-sm focus:border-amber-500 focus:ring-amber-500 shadow-sm" 
+                       required
+                       class="w-full rounded-lg border-gray-300 text-sm focus:border-amber-500 focus:ring-amber-500 shadow-sm"
                        placeholder="e.g. Double Jump with Cooldown">
             </div>
 
@@ -75,28 +75,28 @@
                 <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                     Description & Suggestion <span class="text-red-500">*</span>
                 </label>
-                <textarea name="content" 
+                <textarea name="content"
                           id="mechanicContentInput"
-                          rows="4" 
-                          required 
-                          class="w-full rounded-lg border-gray-300 text-sm focus:border-amber-500 focus:ring-amber-500 shadow-sm" 
+                          rows="4"
+                          required
+                          class="w-full rounded-lg border-gray-300 text-sm focus:border-amber-500 focus:ring-amber-500 shadow-sm"
                           placeholder="Describe how the mechanic works or your proposed changes..."></textarea>
             </div>
 
             <div class="flex justify-between items-center text-xs">
-                <button type="button" 
-                        onclick="switchMechanicStep('search')" 
+                <button type="button"
+                        onclick="switchMechanicStep('search')"
                         class="text-gray-500 hover:text-gray-700 underline font-medium">
                     &larr; Back to Search
                 </button>
 
                 <div class="flex gap-2">
-                    <button type="button" 
-                            onclick="closeCreateMechanicModal()" 
+                    <button type="button"
+                            onclick="closeCreateMechanicModal()"
                             class="px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors">
                         Cancel
                     </button>
-                    <button type="submit" 
+                    <button type="submit"
                             class="px-4 py-2 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600 shadow-sm transition-colors flex items-center gap-1.5">
                         <span id="mechanicSubmitBtnText">Submit Proposal</span> &rarr;
                     </button>
@@ -113,16 +113,16 @@ let searchDebounceTimer;
 window.openCreateMechanicModal = function(actionUrl, commentId = null, context = {}) {
     const modal = document.getElementById('mechanicModal');
     const form = document.getElementById('mechanicModalForm');
-    
+
     if (form && modal) {
         form.setAttribute('action', actionUrl);
         document.getElementById('mechanicModalCommentId').value = commentId || '';
         document.getElementById('mechanicModalGameId').value = context.game_id || '';
         document.getElementById('mechanicModalProjectId').value = context.project_id || '';
-        
+
         clearSelectedParent();
         switchMechanicStep('search');
-        
+
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
@@ -139,7 +139,7 @@ window.closeCreateMechanicModal = function() {
 window.switchMechanicStep = function(step) {
     const searchStep = document.getElementById('mechanicStepSearch');
     const createForm = document.getElementById('mechanicModalForm');
-    
+
     if (step === 'search') {
         searchStep.classList.remove('hidden');
         createForm.classList.add('hidden');
@@ -176,10 +176,10 @@ window.handleMechanicSearch = function(query) {
                 } else {
                     emptyMsg.classList.add('hidden');
                     resultsContainer.classList.remove('hidden');
-                    
+
                     data.forEach(item => {
-                        const gameBadge = item.game 
-                            ? `<span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-1.5 py-0.5 rounded border border-indigo-200">🎮 ${item.game.title}</span>` 
+                        const gameBadge = item.game
+                            ? `<span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-1.5 py-0.5 rounded border border-indigo-200">🎮 ${item.game.title}</span>`
                             : `<span class="bg-gray-100 text-gray-600 text-[10px] font-semibold px-1.5 py-0.5 rounded border border-gray-200">Generic</span>`;
 
                         const div = document.createElement('div');
@@ -206,11 +206,12 @@ window.handleMechanicSearch = function(query) {
 
 window.selectParentMechanic = function(mechanic) {
     document.getElementById('mechanicModalParentId').value = mechanic.mechanic_id;
+    document.getElementById('mechanicContentInput').value = mechanic.content || '';
     document.getElementById('mechanicTitleInput').value = mechanic.title;
     document.getElementById('parentTitleText').textContent = mechanic.title + (mechanic.game ? ` (${mechanic.game.title})` : '');
     document.getElementById('selectedParentBadge').classList.remove('hidden');
     document.getElementById('mechanicSubmitBtnText').textContent = 'Submit Variant Proposal';
-    
+
     switchMechanicStep('create');
 };
 
