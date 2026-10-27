@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Message;
 use App\Models\User;
+use App\Events\MessageSent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -41,11 +42,18 @@ class MessageController extends Controller
             'body' => 'required|string|max:2000',
         ]);
 
-        Message::create([
+        $message = Message::create([
             'sender_id' => Auth::id(),
             'receiver_id' => $user->id,
             'body' => $request->body,
         ]);
+
+        // Dispatch real-time event
+        broadcast(new MessageSent($message))->toOthers();
+
+        if ($request->wantsJson()) {
+            return response()->json($message->load('sender'));
+        }
 
         return redirect()->route('messages.index', $user->id);
     }
