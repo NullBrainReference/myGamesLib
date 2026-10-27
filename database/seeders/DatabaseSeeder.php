@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
             CommentSeeder::class,
             TagSeeder::class,
             ThreadSeeder::class,
-            ProjectTeamSeeder::class
+            ProjectTeamSeeder::class,
+            MechanicSeeder::class
         ]);
     }
 }
