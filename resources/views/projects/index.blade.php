@@ -16,9 +16,11 @@
                 <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest</option>
             </select>
             @auth
+                @if (auth()->user()->isAdmin())
                 <a href="{{ route('projects.create') }}" class="btn btn-success text-nowrap shadow-sm">
                     <i class="bi bi-plus-lg"></i> Launch Project Node
                 </a>
+                @endif
             @endauth
 
             <button type="submit" class="btn btn-outline-primary">Filter</button>
