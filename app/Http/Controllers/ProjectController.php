@@ -7,11 +7,13 @@ use App\Models\Project;
 use App\Models\Comment;
 use App\Models\User;
 use App\Models\Notification;
+use App\Models\ProjectApproveRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Strategies\EntityListBehavior\ProjectListProcessor;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
@@ -165,6 +167,52 @@ class ProjectController extends Controller
         return redirect()
             ->route('projects.view', $project->id)
             ->with('success', 'Project workspace created! Approve the project to sync roles.');
+    }
+
+    public function requestApproval(Request $request, Project $project)
+    {
+        $user = auth()->user();
+
+        // 1. Authorization Guard
+        $isAuthor = $request->filled('comment_id') && Comment::where('id', $request->input('comment_id'))->where('user_id', $user->id)->exists();
+        $isOwner  = $project->owners->contains($user->id);
+
+        if (!$user->isAdmin() && !$isOwner && !$isAuthor) {
+            return back()->with('error', 'Unauthorized to request approval for this project.');
+        }
+
+        // 2. Check if project is already approved
+        if ($project->is_approved) {
+            return back()->with('error', 'This project has already been approved.');
+        }
+
+        // 3. Entity Check: Disallow creation if an open/pending request already exists
+        if ($project->hasPendingApproveRequest()) {
+            return back()->with('error', 'An approval request is already open and pending voting for this project.');
+        }
+
+        // 4. Create comment and ProjectApproveRequest atomically
+        DB::transaction(function () use ($request, $project, $user) {
+            $parentCommentId = $request->input('comment_id');
+            $parentComment   = Comment::find($parentCommentId);
+
+            $comment = Comment::create([
+                'post_id'    => $parentComment ? $parentComment->post_id : null,
+                'parent_id'  => $parentCommentId,
+                'user_id'    => $user->id,
+                'project_id' => $project->id,
+                'content'    => "🗳️ **PROJECT APPROVAL REQUEST**: Upvote this comment to approve project '{$project->title}'!",
+            ]);
+
+            ProjectApproveRequest::create([
+                'project_id' => $project->id,
+                'user_id'    => $user->id,
+                'comment_id' => $comment->id,
+                'status'     => 'pending',
+            ]);
+        });
+
+        return back()->with('success', 'Project approval request submitted successfully! Community voting is now open.');
     }
 
     public function approve(int $id)

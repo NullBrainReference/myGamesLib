@@ -216,21 +216,46 @@
                     <div class="px-3 py-2 bg-gray-50 border-t border-blue-100 flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             @auth
+                                {{-- Propose Mechanic Button --}}
                                 <button type="button"
                                         onclick="openCreateMechanicModal('{{ route('forum.comments.mechanic.store', $comment->id) }}', {{$comment->id }}, 'Propose Mechanic')"
                                         class="text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
                                     <span>⚙️</span> Propose Mechanic
                                 </button>
-                                @if(auth()->user()->isAdmin() && isset($comment->project))
+
+                                @if(isset($comment->project))
                                     @if(!$comment->project->is_approved)
-                                        <form action="{{ route('projects.approve', $comment->project->id) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit"
-                                                    onclick="return confirm('Approve this project and auto-assign participants/editors?');"
-                                                    class="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1 transition">
-                                                <span>✅</span> Approve Project
-                                            </button>
-                                        </form>
+                                        @if($comment->project->hasPendingApproveRequest())
+                                            {{-- Open Request Exists Badge --}}
+                                            <span class="text-xs text-amber-800 font-semibold flex items-center gap-1 bg-amber-100 px-2 py-0.5 rounded">
+                                                <span>🗳️</span> Approval Voting Pending
+                                            </span>
+                                        @else
+                                            {{-- Allow Posting Approval Request --}}
+                                            @if(auth()->id() === $comment->user_id || $comment->project->owners->contains(auth()->id()) || auth()->user()->isAdmin())
+                                                <form action="{{ route('projects.request-approval', $comment->project->id) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    <input type="hidden" name="comment_id" value="{{ $comment->id }}">
+                                                    <button type="submit"
+                                                            onclick="return confirm('Submit a community voting comment for project approval?');"
+                                                            class="text-xs text-indigo-600 hover:text-indigo-700 font-bold flex items-center gap-1 transition">
+                                                        <span>🗳️</span> Request Approval
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        @endif
+
+                                        {{-- Admin Instant Override --}}
+                                        @if(auth()->user()->isAdmin())
+                                            <form action="{{ route('projects.approve', $comment->project->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                        onclick="return confirm('Approve this project and auto-assign participants/editors?');"
+                                                        class="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1 transition">
+                                                    <span>✅</span> Approve Project
+                                                </button>
+                                            </form>
+                                        @endif
                                     @else
                                         <span class="text-xs text-emerald-700 font-semibold flex items-center gap-1 bg-emerald-100 px-2 py-0.5 rounded">
                                             <span>✓</span> Project Approved

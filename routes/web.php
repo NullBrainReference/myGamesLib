@@ -245,7 +245,10 @@ Route::middleware(['auth'])->prefix('projects')->name('projects.')->group(functi
             ->name('request-tickets');
         Route::post('/request-position-slots', [HirePositionController::class, 'requestPositionSlots'])
             ->name('request-position-slots');
-        
+
+        Route::post('/request-approval', [ProjectController::class, 'requestApproval'])
+        ->name('request-approval');
+
     });
 });
 

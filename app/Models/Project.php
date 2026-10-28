@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
@@ -120,5 +121,20 @@ class Project extends Model
             'id',
             'id'
         );
+    }
+
+    public function approveRequests(): HasMany
+    {
+        return $this->hasMany(ProjectApproveRequest::class);
+    }
+
+    public function pendingApproveRequest(): HasOne
+    {
+        return $this->hasOne(ProjectApproveRequest::class)->where('status', 'pending');
+    }
+
+    public function hasPendingApproveRequest(): bool
+    {
+        return $this->pendingApproveRequest()->exists();
     }
 }
