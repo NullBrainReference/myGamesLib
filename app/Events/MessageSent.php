@@ -14,10 +14,11 @@ class MessageSent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public function __construct(public Message $message)
+    public $message;
+
+    public function __construct(Message $message)
     {
-        // Load the sender relationship so avatar/name can be rendered on frontend
-        $this->message->load('sender');
+        $this->message = $message->load('sender');
     }
 
     public function broadcastOn(): array

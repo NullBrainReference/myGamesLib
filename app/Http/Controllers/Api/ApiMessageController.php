@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\User;
+use App\Events\MessageSent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -92,9 +93,11 @@ class ApiMessageController extends Controller
             'body'        => $validated['body'],
         ]);
 
+        broadcast(new MessageSent($message));
+
         return response()->json([
             'success' => true,
-            'message' => $message,
+            'message' => $message->load('sender'),
         ], 201);
     }
 }

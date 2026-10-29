@@ -81,9 +81,69 @@
 </div>
 
 <script>
-    // Auto-scroll chat box to bottom
-    const chatBox = document.getElementById('chat-box');
-    if (chatBox) {
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const chatBox = document.getElementById('chat-box');
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        @if(auth()->check() && isset($user))
+            const authUserId = {{ auth()->id() }};
+            const activeUserId = {{ $user->id }};
+
+            // Listen for real-time messages sent from Mobile/Web on private channel
+            if (window.Echo) {
+                window.Echo.private(`chat.${authUserId}`)
+                    .listen('.message.sent', (e) => {
+                        // Only render if the incoming message is from the currently active contact
+                        if (e.message.sender_id === activeUserId) {
+                            appendIncomingMessage(e.message);
+                        }
+                    });
+            }
+        @endif
+    });
+
+    function appendIncomingMessage(message) {
+        const chatBox = document.getElementById('chat-box');
+        if (!chatBox) return;
+
+        // Remove empty state placeholder if this is the first message
+        const emptyState = chatBox.querySelector('.text-muted.my-auto');
+        if (emptyState) {
+            emptyState.remove();
+        }
+
+        // Format timestamp (HH:MM)
+        const date = message.created_at ? new Date(message.created_at) : new Date();
+        const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+        // Build message bubble
+        const msgContainer = document.createElement('div');
+        msgContainer.className = 'd-flex mb-3 justify-content-start';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'p-3 rounded-3 bg-light text-dark border';
+        bubble.style.maxWidth = '70%';
+
+        const bodyParagraph = document.createElement('p');
+        bodyParagraph.className = 'mb-1';
+        bodyParagraph.style.whiteSpace = 'pre-wrap';
+        bodyParagraph.style.wordBreak = 'break-word';
+        bodyParagraph.textContent = message.body; // Safe from XSS injection
+
+        const timeSmall = document.createElement('small');
+        timeSmall.className = 'd-block text-end opacity-75';
+        timeSmall.style.fontSize = '0.7rem';
+        timeSmall.textContent = formattedTime;
+
+        bubble.appendChild(bodyParagraph);
+        bubble.appendChild(timeSmall);
+        msgContainer.appendChild(bubble);
+
+        // Append to chat and auto-scroll
+        chatBox.appendChild(msgContainer);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 </script>
