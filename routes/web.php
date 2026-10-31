@@ -120,12 +120,17 @@ Route::middleware('role.guard:admin')->prefix('admin/dashboard')->name('dashboar
 
     Route::get('/position-requests', [DashboardController::class, 'positionRequests'])
         ->name('position-requests');
-
     Route::post('/position-requests/{positionRequest}/approve', [DashboardController::class, 'approvePositionRequest'])
         ->name('position-requests.approve');
-
     Route::post('/position-requests/{positionRequest}/decline', [DashboardController::class, 'declinePositionRequest'])
         ->name('position-requests.decline');
+
+    Route::get('/project-requests', [DashboardController::class, 'projectRequests'])
+        ->name('project-requests');
+    Route::post('/project-requests/{projectRequest}/approve', [DashboardController::class, 'approveProjectRequest'])
+        ->name('project-requests.approve');
+    Route::post('/project-requests/{projectRequest}/reject', [DashboardController::class, 'rejectProjectRequest'])
+        ->name('project-requests.reject');
 });
 
 Route::post('/games/{gameId}/rate', [RatingController::class, 'store'])->name('rating.store')->middleware('auth');

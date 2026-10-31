@@ -25,7 +25,9 @@ class ProjectController extends Controller
         $query = $processor->search($query, $request->input('search'));
         $query = $processor->applyExtraFilters($query, $request);
         $query = $processor->initialOrder($query, $request->input('sort', 'latest'));
-
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            $query = $query->where('is_approved', true);
+        }
         $projects = $query->paginate(10)->withQueryString();
 
         return view('projects.index', compact('projects'));

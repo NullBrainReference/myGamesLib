@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use App\Enums\UserRole;
+use App\Models\Comment;
 use App\Models\HirePosition;
 use App\Models\HirePosTicketRequest;
 use App\Models\ProjectPositionRequest;
+use App\Models\ProjectApproveRequest;
 
 class DashboardController extends Controller
 {
@@ -151,4 +155,83 @@ class DashboardController extends Controller
 
         return back()->with('success', "Position slot request for '{$positionRequest->title}' has been declined.");
     }
+
+    /**
+     * Display listing of pending & resolved project approval requests.
+     */
+    public function projectRequests(Request $request)
+    {
+        $query = ProjectApproveRequest::with(['project', 'user', 'comment.upvotes']);
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('project', function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%");
+            })->orWhereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        $requests = $query->latest()->paginate(15);
+
+        return view('dashboard.project-requests', compact('requests'));
+    }
+
+    /**
+     * Approve a Project Approval Request.
+     */
+    public function approveProjectRequest(int $id)
+    {
+        $approveRequest = ProjectApproveRequest::with(['project.owners', 'project.mechanics'])->findOrFail($id);
+        $project = $approveRequest->project;
+
+        DB::transaction(function () use ($approveRequest, $project) {
+            // 1. Compile participants from project owners, origin comment author, and thread replies
+            $participantIds = $project->owners->pluck('id')->toArray();
+
+            if ($project->comment_id) {
+                $originComment = Comment::with('replies')->find($project->comment_id);
+                if ($originComment) {
+                    if ($originComment->user_id) {
+                        $participantIds[] = $originComment->user_id;
+                    }
+                    $replyUserIds = $originComment->replies->pluck('user_id')->filter()->toArray();
+                    $participantIds = array_merge($participantIds, $replyUserIds);
+                }
+            }
+
+            $project->participants()->sync(array_unique($participantIds));
+
+            // 2. Compile editors from users who authored mechanics
+            $editorIds = $project->mechanics->pluck('user_id')->filter()->unique()->toArray();
+            $project->editors()->sync($editorIds);
+
+            // 3. Mark project as approved
+            if (Schema::hasColumn('projects', 'is_approved')) {
+                $project->update(['is_approved' => true]);
+            }
+
+            // 4. Update request entity status
+            $approveRequest->update(['status' => 'approved']);
+        });
+
+        return back()->with('success', 'Project approval request approved! Participants and Editors synced automatically.');
+    }
+
+    /**
+     * Reject/Decline a Project Approval Request.
+     */
+    public function rejectProjectRequest(int $id)
+    {
+        $approveRequest = ProjectApproveRequest::findOrFail($id);
+
+        if ($approveRequest->status !== 'pending') {
+            return back()->with('error', 'This approval request has already been resolved.');
+        }
+
+        $approveRequest->update(['status' => 'rejected']);
+
+        return back()->with('success', 'Project approval request has been rejected. Community members can post a new request later if needed.');
+    }
+
 }

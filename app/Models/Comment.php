@@ -28,6 +28,16 @@ class Comment extends Model
         return $this->morphMany(Vote::class, 'voteable');
     }
 
+    public function upvotes(): MorphMany
+    {
+        return $this->morphMany(Vote::class, 'voteable')->where('vote', '>', 0);
+    }
+
+    public function downvotes(): MorphMany
+    {
+        return $this->morphMany(Vote::class, 'voteable')->where('vote', '<', 0);
+    }
+
     public function mechanic(): HasOne
     {
         return $this->hasOne(Mechanic::class, 'comment_id', 'id');
