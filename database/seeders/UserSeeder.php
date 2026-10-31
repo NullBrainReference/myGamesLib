@@ -23,19 +23,25 @@ class UserSeeder extends Seeder
                 'email' => 'bob@example.com',
                 'password' => Hash::make('password'),
                 'role' => 'user',
+            ],
+            [
+                'email' => 'dude@gmail.com',
+                'name' => 'Dude Dudeman',
+                'password' => Hash::make('dude12345'),
+                'role' => 'user',
+            ],
+            [
+                'email' => 'dude2@gmail.com',
+                'name' => 'Dudya McDude',
+                'password' => Hash::make('dude12345'),
+                'role' => 'user',
+            ],
+            [
+                'email' => 'dude3@gmail.com',
+                'name' => 'Dudette Testor',
+                'password' => Hash::make('dude12345'),
+                'role' => 'user',
             ]
-            // [
-            //     'email' => 'lead@example.com',
-            //     'name' => 'Alex Leadman',
-            //     'password' => Hash::make('password123'),
-            //     'role' => 'admin',
-            // ],
-            // [
-            //     'email' => 'editor@example.com',
-            //     'name' => 'Jordan Editor',
-            //     'password' => Hash::make('password123'),
-            //     'role' => 'user',
-            // ]
 
         ];
 
