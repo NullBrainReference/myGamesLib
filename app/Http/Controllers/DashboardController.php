@@ -234,4 +234,75 @@ class DashboardController extends Controller
         return back()->with('success', 'Project approval request has been rejected. Community members can post a new request later if needed.');
     }
 
+    /**
+     * Batch process pending project approval requests based on community voting rules:
+     * - Minimum 3 total votes
+     * - At least 75% positive upvotes
+     * - Created > 12 hours ago (commented line)
+     */
+    public function processBatchApprovals()
+    {
+        $pendingRequests = ProjectApproveRequest::where('status', 'pending')
+            // ->where('created_at', '<=', now()->subHours(12)) // Uncomment to enforce 12-hour age rule
+            ->with(['project.owners', 'project.mechanics', 'comment.votes'])
+            ->get();
+
+        $approvedCount = 0;
+
+        foreach ($pendingRequests as $approveRequest) {
+            $comment = $approveRequest->comment;
+            if (!$comment) {
+                continue;
+            }
+
+            // 1. Calculate voting metrics
+            $totalVotes = $comment->votes->count();
+            $upvotes = $comment->votes->where('vote', '>', 0)->count();
+
+            // 2. Evaluate voting criteria: total votes >= 3 & upvote percentage >= 75%
+            if ($totalVotes >= 3) {
+                $upvoteRate = ($upvotes / $totalVotes) * 100;
+
+                if ($upvoteRate >= 75) {
+                    DB::transaction(function () use ($approveRequest) {
+                        $project = $approveRequest->project;
+
+                        if ($project) {
+                            // Sync team participants (owners + thread author + reply authors)
+                            $participantIds = $project->owners->pluck('id')->toArray();
+
+                            if ($project->comment_id) {
+                                $originComment = Comment::with('replies')->find($project->comment_id);
+                                if ($originComment) {
+                                    if ($originComment->user_id) {
+                                        $participantIds[] = $originComment->user_id;
+                                    }
+                                    $replyUserIds = $originComment->replies->pluck('user_id')->filter()->toArray();
+                                    $participantIds = array_merge($participantIds, $replyUserIds);
+                                }
+                            }
+
+                            $project->participants()->sync(array_unique($participantIds));
+
+                            // Sync editors (authors of proposed mechanics)
+                            $editorIds = $project->mechanics->pluck('user_id')->filter()->unique()->toArray();
+                            $project->editors()->sync($editorIds);
+
+                            // Mark project as approved
+                            if (Schema::hasColumn('projects', 'is_approved')) {
+                                $project->update(['is_approved' => true]);
+                            }
+                        }
+
+                        // Mark request as approved
+                        $approveRequest->update(['status' => 'approved']);
+                    });
+
+                    $approvedCount++;
+                }
+            }
+        }
+
+        return back()->with('success', "Batch evaluation finished! Approved {$approvedCount} request(s) meeting community voting criteria.");
+    }
 }

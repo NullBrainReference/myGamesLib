@@ -131,6 +131,9 @@ Route::middleware('role.guard:admin')->prefix('admin/dashboard')->name('dashboar
         ->name('project-requests.approve');
     Route::post('/project-requests/{projectRequest}/reject', [DashboardController::class, 'rejectProjectRequest'])
         ->name('project-requests.reject');
+
+    Route::post('/project-requests/process-batch', [DashboardController::class, 'processBatchApprovals'])
+        ->name('project-requests.process-batch');
 });
 
 Route::post('/games/{gameId}/rate', [RatingController::class, 'store'])->name('rating.store')->middleware('auth');

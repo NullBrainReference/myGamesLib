@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    {{-- Search Filter Card --}}
+    {{-- Search Filter & Action Card --}}
     <div class="card border border-gray-200 rounded-lg p-3 bg-white shadow-sm mb-4">
         <div class="row g-3 align-items-center justify-content-between">
             <div class="col-12 col-md-5 col-lg-4">
@@ -39,10 +39,20 @@
                 </form>
             </div>
 
-            <div class="col-12 col-md-auto d-flex align-items-center gap-3 justify-content-md-end">
+            <div class="col-12 col-md-auto d-flex align-items-center gap-2 justify-content-md-end">
                 @if(request('search'))
-                    <a href="{{ route('dashboard.project-requests') }}" class="text-sm text-gray-500 hover:text-gray-900 text-decoration-none">Clear Filters</a>
+                    <a href="{{ route('dashboard.project-requests') }}" class="text-sm text-gray-500 hover:text-gray-900 text-decoration-none me-2">Clear Filters</a>
                 @endif
+
+                {{-- Batch Processing Trigger Button --}}
+                <form method="POST" action="{{ route('dashboard.project-requests.process-batch') }}" class="m-0">
+                    @csrf
+                    <button type="submit"
+                            class="btn btn-sm btn-amber-600 text-white bg-indigo-600 hover:bg-indigo-700 font-bold px-3 py-1.5 rounded shadow-sm flex items-center gap-1"
+                            onclick="return confirm('Evaluate all pending requests against community rules (>=3 votes, >=75% upvote rate)?');">
+                        <span>⚡</span> Run Batch Approvals
+                    </button>
+                </form>
             </div>
         </div>
     </div>
