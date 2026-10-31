@@ -20,13 +20,13 @@
 
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('projects.vacancies', $project->id) }}"
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors shadow-sm">
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors shadow-sm">
                 💼 Explore Vacancies ({{ $project->hirePositions()->where('is_open', true)->count() }})
             </a>
 
             @if($project->comment_id)
                 <a href="{{ route('projects.contributions', $project->id) }}"
-                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold rounded-lg hover:bg-indigo-100 transition-colors shadow-sm">
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold rounded-lg hover:bg-indigo-100 transition-colors shadow-sm">
                     💬 Contributions & Thread Tree →
                 </a>
             @endif
@@ -34,7 +34,7 @@
             {{-- Fork Project Button for Authenticated Users --}}
             @auth
                 @if($project->is_approved)
-                    <form action="{{ route('projects.fork', $project->id) }}" method="POST" class="inline">
+                    <form action="{{ route('projects.fork', $project->id) }}" method="POST" class="inline-flex items-center m-0">
                         @csrf
                         <button type="submit"
                                 onclick="return confirm('Create a personal workspace copy (fork) of this project?');"
@@ -44,10 +44,11 @@
                     </form>
                 @endif
             @endauth
+
             @auth
                 @if($project->owners->contains(Auth::id()) || auth()->user()->isAdmin())
                     <a href="{{ route('projects.invite.create', $project->id) }}"
-                    class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors">
                         ✉️ Invite Team Member
                     </a>
                 @endif
