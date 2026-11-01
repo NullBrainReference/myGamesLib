@@ -65,6 +65,16 @@ class HirePosition extends Model
      */
     public function hasAvailableTickets(): bool
     {
-        return $this->is_open && $this->remaining_tickets > 0;
+        // Must be open regardless of subscription status
+        if (!$this->is_open) {
+            return false;
+        }
+
+        // Enterprise plan owners or Admins have unlimited ticket slots
+        $hasUnlimitedTickets = $this->project && $this->project->owners->contains(function ($owner) {
+            return $owner->hasEnterprisePlan() || $owner->isAdmin();
+        });
+
+        return $hasUnlimitedTickets || $this->remaining_tickets > 0;
     }
 }

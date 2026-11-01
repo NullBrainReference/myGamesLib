@@ -5,7 +5,13 @@
 @section('content')
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mb-12" x-data="{ editorModal: false, participantModal: false }">
 
-    {{-- System Success Flash Message --}}
+    {{-- System Flash Messages --}}
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     @if(session('success'))
         <div class="mb-4 p-4 text-center rounded-lg bg-emerald-50 text-emerald-700 text-sm font-medium border border-emerald-200 shadow-sm">
             {{ session('success') }}

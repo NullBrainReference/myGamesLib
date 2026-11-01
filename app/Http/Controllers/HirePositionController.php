@@ -58,14 +58,24 @@ class HirePositionController extends Controller
     // Submit an application ticket (Consumes 1 ticket slot)
     public function apply(Request $request, HirePosition $position)
     {
-        // Guard 1: Check if position has available ticket capacity
-        if (!$position->hasAvailableTickets()) {
-            return back()->with('error', 'No application tickets remaining for this position. The project owner must request more tickets.');
+        $user = auth()->user();
+
+        // Load project owners to verify subscription status
+        $position->loadMissing('project.owners');
+
+        // Check if any owner of this project has an Enterprise Plan or is an Admin
+        $isEnterpriseProject = $position->project->owners->contains(function ($owner) {
+            return $owner->hasEnterprisePlan() || $owner->isAdmin();
+        });
+
+        // Guard 1: Check ticket capacity (Bypassed if the project owner has an Enterprise plan)
+        if (!$position->hasAvailableTickets() && !$isEnterpriseProject) {
+            return back()->with('error', 'No application tickets remaining for this position. The project owner must upgrade to Enterprise Plan or request ticket slot extensions.');
         }
 
         // Guard 2: Prevent duplicate applications from same user
         $alreadyApplied = PositionTicket::where('position_id', $position->id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', $user->id)
             ->exists();
 
         if ($alreadyApplied) {
@@ -76,10 +86,10 @@ class HirePositionController extends Controller
             'reason' => 'required|string|min:10|max:1000',
         ]);
 
-        // Consume 1 ticket slot by creating application entry
+        // Create application entry
         PositionTicket::create([
             'position_id' => $position->id,
-            'user_id'     => auth()->id(),
+            'user_id'     => $user->id,
             'reason'      => $validated['reason'],
             'expired'     => false,
             'success'     => null, // Pending project owner review

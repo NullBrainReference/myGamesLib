@@ -212,6 +212,24 @@ class User extends Authenticatable
     }
 
     /**
+     * Get active plan name ('plus', 'enterprise', or null for free).
+     */
+    public function subscriptionPlan(): ?string
+    {
+        return $this->activeSubscription?->plan_name;
+    }
+
+    public function hasPlusPlan(): bool
+    {
+        return in_array($this->subscriptionPlan(), ['plus', 'enterprise']);
+    }
+
+    public function hasEnterprisePlan(): bool
+    {
+        return $this->subscriptionPlan() === 'enterprise';
+    }
+
+    /**
      * Projects owned by this user.
      */
     public function ownedProjects(): BelongsToMany
@@ -220,7 +238,18 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user already owns any project that was forked from another project.
+     * Count how many unapproved forked projects the user currently owns.
+     */
+    public function unapprovedForkedProjectsCount(): int
+    {
+        return $this->ownedProjects()
+            ->whereNotNull('parent_project_id')
+            ->where('is_approved', false)
+            ->count();
+    }
+
+    /**
+     * Check if user already owns any forked project.
      */
     public function ownsForkedProject(): bool
     {
@@ -230,15 +259,23 @@ class User extends Authenticatable
     }
 
     /**
-     * Fork Guard Logic:
-     * Non-subscribed users cannot fork additional projects if they already own a forked project.
+     * Forking Guard Logic:
+     * - Free Tier: Max 1 forked project total.
+     * - Plus Tier: Unlimited total forks, max 3 UNAPPROVED forks at once (anti-spam).
+     * - Enterprise Tier / Admin: Unlimited forks.
      */
     public function canForkProject(): bool
     {
-        if ($this->isAdmin() || $this->hasActiveSubscription()) {
+        if ($this->isAdmin() || $this->hasEnterprisePlan()) {
             return true;
         }
 
+        if ($this->hasPlusPlan()) {
+            // Plus subscribers can fork unlimited projects, max 3 pending approval
+            return $this->unapprovedForkedProjectsCount() < 3;
+        }
+
+        // Free subscribers can only own 1 forked project
         return !$this->ownsForkedProject();
     }
 

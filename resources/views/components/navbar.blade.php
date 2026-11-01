@@ -47,6 +47,7 @@
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('messages.index') }}">Messages</a></li>
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('users.index') }}">Users</a></li>
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('notifications.index') }}">Notifications</a></li>
+                            <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition" href="{{ route('subscriptions.index') }}">Subscriptions</a></li>
 
 
                             @if (Auth::user()->isAdmin())
@@ -105,6 +106,8 @@
                 <a class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition" href="{{ route('library') }}">My Library</a>
                 <a class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition" href="{{ route('messages.index') }}">Messages</a>
                 <a class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition" href="{{ route('users.index') }}">Users</a>
+                <a class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition" href="{{ route('notifications.index') }}">Notifications</a>
+                <a class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition" href="{{ route('subscriptions.index') }}">Subscriptions</a>
 
                 @if (Auth::user()->isAdmin())
                     <a class="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition" href="{{ route('dashboard') }}">Dashboard</a>

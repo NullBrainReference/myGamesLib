@@ -25,8 +25,16 @@ class ProjectController extends Controller
         $query = $processor->search($query, $request->input('search'));
         $query = $processor->applyExtraFilters($query, $request);
         $query = $processor->initialOrder($query, $request->input('sort', 'latest'));
-        if (!Auth::check() || !Auth::user()->isAdmin()) {
+        if (!Auth::check()) {
             $query = $query->where('is_approved', true);
+        }
+        else if (!Auth::user()->isAdmin()) {
+            $query = $query->where(function ($q) {
+                $q->where('is_approved', true)
+                  ->orWhereHas('owners', function ($q) {
+                      $q->where('user_id', Auth::id());
+                  });
+            });
         }
         $projects = $query->paginate(10)->withQueryString();
 
@@ -69,8 +77,13 @@ class ProjectController extends Controller
             return back()->with('error', 'Only approved projects can be forked.');
         }
 
-        if (!auth()->user()->canForkProject()) {
-            return back()->with('error', 'Free account limit reached: You already own a forked project workspace. Upgrade subscription to fork unlimited projects.');
+        $user = auth()->user();
+        if (!$user->canForkProject()) {
+            if ($user->hasPlusPlan()) {
+                return back()->with('error', 'Anti-Spam Cap Reached: You have 3 unapproved forked project workspaces. Get at least one approved before forking more.');
+            }
+
+            return back()->with('error', 'Free Account Limit Reached: You already own a forked project workspace copy. Upgrade to Plus Plan for unlimited project forking.');
         }
 
         // Duplicate project icons if present

@@ -24,6 +24,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\HirePositionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProjectInvitationController;
+use App\Http\Controllers\SubscriptionController;
 
 Route::get('/profile', function () {
     return app(\App\Http\Controllers\ProfileController::class)->view(Auth::id());
@@ -134,6 +135,12 @@ Route::middleware('role.guard:admin')->prefix('admin/dashboard')->name('dashboar
 
     Route::post('/project-requests/process-batch', [DashboardController::class, 'processBatchApprovals'])
         ->name('project-requests.process-batch');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+    Route::post('/subscriptions/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
+    Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
 });
 
 Route::post('/games/{gameId}/rate', [RatingController::class, 'store'])->name('rating.store')->middleware('auth');
