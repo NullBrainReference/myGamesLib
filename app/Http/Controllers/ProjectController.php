@@ -69,6 +69,10 @@ class ProjectController extends Controller
             return back()->with('error', 'Only approved projects can be forked.');
         }
 
+        if (!auth()->user()->canForkProject()) {
+            return back()->with('error', 'Free account limit reached: You already own a forked project workspace. Upgrade subscription to fork unlimited projects.');
+        }
+
         // Duplicate project icons if present
         $newIconBig = null;
         if ($project->icon_big && Storage::disk('public')->exists($project->icon_big)) {

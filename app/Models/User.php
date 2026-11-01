@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -186,6 +187,59 @@ class User extends Authenticatable
     public function getUnreadNotificationsCountAttribute(): int
     {
         return $this->unreadNotifications()->count();
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)
+            ->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>', now());
+            });
+    }
+
+    /**
+     * Check if user has an active subscription.
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return $this->activeSubscription()->exists();
+    }
+
+    /**
+     * Projects owned by this user.
+     */
+    public function ownedProjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'project_owners')->withTimestamps();
+    }
+
+    /**
+     * Check if user already owns any project that was forked from another project.
+     */
+    public function ownsForkedProject(): bool
+    {
+        return $this->ownedProjects()
+            ->whereNotNull('parent_project_id')
+            ->exists();
+    }
+
+    /**
+     * Fork Guard Logic:
+     * Non-subscribed users cannot fork additional projects if they already own a forked project.
+     */
+    public function canForkProject(): bool
+    {
+        if ($this->isAdmin() || $this->hasActiveSubscription()) {
+            return true;
+        }
+
+        return !$this->ownsForkedProject();
     }
 
 }
