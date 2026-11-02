@@ -22,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'role.guard' => \App\Http\Middleware\RoleGuard::class,
             'logout.banned' => \App\Http\Middleware\LogoutBannedUser::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'subscriptions/mercadopago/webhook',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

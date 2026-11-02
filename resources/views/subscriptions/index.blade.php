@@ -40,13 +40,14 @@
                 </li>
             </ul>
 
-            <form action="{{ route('subscriptions.subscribe') }}" method="POST">
+            {{-- Plus Plan Form --}}
+            <form action="{{ route('subscriptions.checkout') }}" method="POST">
                 @csrf
                 <input type="hidden" name="plan" value="plus">
                 <button type="submit" 
-                        class="w-full py-2.5 px-4 rounded-lg font-bold text-xs text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm {{ $user->subscriptionPlan() === 'plus' ? 'opacity-50 cursor-not-allowed' : '' }}"
+                        class="w-full py-2.5 px-4 rounded-lg font-bold text-xs text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm flex items-center justify-center gap-2 {{ $user->subscriptionPlan() === 'plus' ? 'opacity-50 cursor-not-allowed' : '' }}"
                         {{ $user->subscriptionPlan() === 'plus' ? 'disabled' : '' }}>
-                    {{ $user->subscriptionPlan() === 'plus' ? 'Active Plan' : 'Subscribe to Plus' }}
+                    <span>💳</span> {{ $user->subscriptionPlan() === 'plus' ? 'Active Plan' : 'Pay with MercadoPago ($4.99)' }}
                 </button>
             </form>
         </div>
@@ -77,13 +78,14 @@
                 </li>
             </ul>
 
-            <form action="{{ route('subscriptions.subscribe') }}" method="POST">
+            {{-- Enterprise Plan Form --}}
+            <form action="{{ route('subscriptions.checkout') }}" method="POST">
                 @csrf
                 <input type="hidden" name="plan" value="enterprise">
                 <button type="submit" 
-                        class="w-full py-2.5 px-4 rounded-lg font-bold text-xs text-white bg-emerald-600 hover:bg-emerald-700 transition shadow-sm {{ $user->subscriptionPlan() === 'enterprise' ? 'opacity-50 cursor-not-allowed' : '' }}"
+                        class="w-full py-2.5 px-4 rounded-lg font-bold text-xs text-white bg-emerald-600 hover:bg-emerald-700 transition shadow-sm flex items-center justify-center gap-2 {{ $user->subscriptionPlan() === 'enterprise' ? 'opacity-50 cursor-not-allowed' : '' }}"
                         {{ $user->subscriptionPlan() === 'enterprise' ? 'disabled' : '' }}>
-                    {{ $user->subscriptionPlan() === 'enterprise' ? 'Active Plan' : 'Subscribe to Enterprise' }}
+                    <span>💳</span> {{ $user->subscriptionPlan() === 'enterprise' ? 'Active Plan' : 'Pay with MercadoPago ($14.99)' }}
                 </button>
             </form>
         </div>

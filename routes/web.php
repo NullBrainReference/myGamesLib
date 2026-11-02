@@ -139,9 +139,17 @@ Route::middleware('role.guard:admin')->prefix('admin/dashboard')->name('dashboar
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
-    Route::post('/subscriptions/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
+    Route::post('/subscriptions/checkout', [SubscriptionController::class, 'checkout'])->name('subscriptions.checkout');
     Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
+
+    // Return Callback URLs
+    Route::get('/subscriptions/mercadopago/success', [SubscriptionController::class, 'success'])->name('subscriptions.mercadopago.success');
+    Route::get('/subscriptions/mercadopago/failure', [SubscriptionController::class, 'failure'])->name('subscriptions.mercadopago.failure');
+    Route::get('/subscriptions/mercadopago/pending', [SubscriptionController::class, 'pending'])->name('subscriptions.mercadopago.pending');
 });
+
+// Public Webhook Listener
+Route::post('/subscriptions/mercadopago/webhook', [SubscriptionController::class, 'webhook'])->name('subscriptions.mercadopago.webhook');
 
 Route::post('/games/{gameId}/rate', [RatingController::class, 'store'])->name('rating.store')->middleware('auth');
 
