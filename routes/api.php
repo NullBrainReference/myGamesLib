@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ApiProjectController;
 use App\Http\Controllers\Api\ApiHirePositionController;
 use App\Http\Controllers\Api\ApiFriendController;
 use App\Http\Controllers\Api\ApiMessageController;
+use App\Http\Controllers\Api\ApiNotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [ApiAuthController::class, 'login']);
@@ -13,6 +14,13 @@ Route::post('/register', [ApiAuthController::class, 'register']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [ApiAuthController::class, 'me']);
     Route::post('/logout', [ApiAuthController::class, 'logout']);
+
+    // Notifications API
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [ApiNotificationController::class, 'index']);
+        Route::post('/{notification}/read', [ApiNotificationController::class, 'markAsRead']);
+        Route::post('/mark-all-read', [ApiNotificationController::class, 'markAllAsRead']);
+    });
 
     // Messages API
     Route::get('/messages/conversations', [ApiMessageController::class, 'conversations']);

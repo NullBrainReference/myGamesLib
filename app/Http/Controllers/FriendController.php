@@ -1,13 +1,14 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class FriendController extends Controller
 {
-
     public function index()
     {
         $user = auth()->user();
@@ -36,6 +37,15 @@ class FriendController extends Controller
 
         if (!$authUser->isFriendsWith($user) && !$authUser->hasPendingRequestTo($user)) {
             $authUser->pendingFriendsSent()->attach($user->id, ['status' => 'pending']);
+
+            // Send notification to recipient
+            Notification::send(
+                userId: $user->id,
+                type: 'friend_request',
+                title: 'New Friend Request',
+                message: $authUser->name . ' sent you a friend request.',
+                notifiable: $authUser
+            );
         }
 
         return back()->with('success', 'Friend request sent!');
@@ -47,6 +57,15 @@ class FriendController extends Controller
 
         if ($authUser->hasPendingRequestFrom($user)) {
             $authUser->pendingFriendsReceived()->updateExistingPivot($user->id, ['status' => 'accepted']);
+
+            // Send notification to original sender that request was accepted
+            Notification::send(
+                userId: $user->id,
+                type: 'friend_request',
+                title: 'Friend Request Accepted',
+                message: $authUser->name . ' accepted your friend request.',
+                notifiable: $authUser
+            );
         }
 
         return back()->with('success', 'Friend request accepted!');

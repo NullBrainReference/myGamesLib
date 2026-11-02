@@ -75,12 +75,22 @@ class ApiHirePositionController extends Controller
     {
         $user = $request->user();
 
-        if (!$position->hasAvailableTickets()) {
+        // 1. Load project owners to verify subscription status
+        $position->loadMissing('project.owners');
+
+        // 2. Check if any project owner has Enterprise Plan or is Admin
+        $isEnterpriseProject = $position->project->owners->contains(function ($owner) {
+            return $owner->hasEnterprisePlan() || $owner->isAdmin();
+        });
+
+        // Guard 1: Ticket capacity (bypassed if project owner has Enterprise Plan / is Admin)
+        if (!$position->hasAvailableTickets() && !$isEnterpriseProject) {
             return response()->json([
-                'message' => 'No application tickets remaining for this position.'
+                'message' => 'No application tickets remaining for this position. The project owner must upgrade to Enterprise Plan or request ticket slot extensions.'
             ], 422);
         }
 
+        // Guard 2: Prevent duplicate applications from same user
         $alreadyApplied = PositionTicket::where('position_id', $position->id)
             ->where('user_id', $user->id)
             ->exists();
@@ -100,13 +110,13 @@ class ApiHirePositionController extends Controller
             'user_id'     => $user->id,
             'reason'      => $validated['reason'],
             'expired'     => false,
-            'success'     => null,
+            'success'     => null, // Pending review
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Application ticket submitted successfully!',
-            'ticket'  => $ticket
+            'ticket'  => $ticket,
         ], 201);
     }
 
