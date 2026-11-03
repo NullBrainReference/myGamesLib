@@ -20,6 +20,7 @@
             <a href="{{ route('dashboard.ticket-requests') }}" class="btn btn-sm btn-outline-secondary px-3">Ticket Extensions</a>
             <a href="{{ route('dashboard.position-requests') }}" class="btn btn-sm btn-outline-secondary px-3">Position Requests</a>
             <a href="{{ route('dashboard.project-requests') }}" class="btn btn-sm btn-primary active px-3">Project Approvals</a>
+            <a href="{{ route('dashboard.mechanics') }}" class="btn btn-sm btn-outline-secondary px-3">Mechanics</a>
         </div>
     </div>
 
@@ -86,7 +87,7 @@
                                         @endif
                                     </div>
                                     <div class="small text-gray-500">
-                                        Requested by: 
+                                        Requested by:
                                         @if($req->user)
                                             <span class="font-medium text-gray-700">{{ $req->user->name }}</span>
                                         @else

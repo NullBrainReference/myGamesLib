@@ -13,6 +13,8 @@ use App\Models\HirePosition;
 use App\Models\HirePosTicketRequest;
 use App\Models\ProjectPositionRequest;
 use App\Models\ProjectApproveRequest;
+use App\Models\Mechanic;
+use App\Models\Notification;
 
 class DashboardController extends Controller
 {
@@ -237,17 +239,18 @@ class DashboardController extends Controller
     /**
      * Batch process pending project approval requests based on community voting rules:
      * - Minimum 3 total votes
-     * - At least 75% positive upvotes
-     * - Created > 12 hours ago (commented line)
+     * - At least 75% positive upvotes = Approved
+     * - Less than 75% positive upvotes = Rejected
      */
     public function processBatchApprovals()
     {
         $pendingRequests = ProjectApproveRequest::where('status', 'pending')
-            // ->where('created_at', '<=', now()->subHours(12)) // Uncomment to enforce 12-hour age rule
+            // ->where('created_at', '<=', now()->subHours(12)) // Enforce 12-hour age rule if needed
             ->with(['project.owners', 'project.mechanics', 'comment.votes'])
             ->get();
 
         $approvedCount = 0;
+        $rejectedCount = 0;
 
         foreach ($pendingRequests as $approveRequest) {
             $comment = $approveRequest->comment;
@@ -259,11 +262,12 @@ class DashboardController extends Controller
             $totalVotes = $comment->votes->count();
             $upvotes = $comment->votes->where('vote', '>', 0)->count();
 
-            // 2. Evaluate voting criteria: total votes >= 3 & upvote percentage >= 75%
+            // 2. Evaluate voting criteria: total votes >= 3
             if ($totalVotes >= 3) {
                 $upvoteRate = ($upvotes / $totalVotes) * 100;
 
                 if ($upvoteRate >= 75) {
+                    // APPROVE: Rate is >= 75%
                     DB::transaction(function () use ($approveRequest) {
                         $project = $approveRequest->project;
 
@@ -292,6 +296,17 @@ class DashboardController extends Controller
                             if (Schema::hasColumn('projects', 'is_approved')) {
                                 $project->update(['is_approved' => true]);
                             }
+
+                            // Notify owners
+                            foreach ($project->owners as $owner) {
+                                Notification::send(
+                                    userId: $owner->id,
+                                    type: 'project',
+                                    title: 'Project Approved via Community Vote! 🎉',
+                                    message: 'Your project "' . $project->title . '" was approved based on community upvotes.',
+                                    notifiable: $project
+                                );
+                            }
                         }
 
                         // Mark request as approved
@@ -299,10 +314,54 @@ class DashboardController extends Controller
                     });
 
                     $approvedCount++;
+                } else {
+                    // REJECT: Votes >= 3 but upvote rate < 75%
+                    DB::transaction(function () use ($approveRequest) {
+                        $approveRequest->update(['status' => 'rejected']);
+
+                        $project = $approveRequest->project;
+                        if ($project) {
+                            foreach ($project->owners as $owner) {
+                                Notification::send(
+                                    userId: $owner->id,
+                                    type: 'project',
+                                    title: 'Project Approval Declined',
+                                    message: 'The approval request for your project "' . $project->title . '" reached 3+ votes but did not meet the 75% approval rate.',
+                                    notifiable: $project
+                                );
+                            }
+                        }
+                    });
+
+                    $rejectedCount++;
                 }
             }
         }
 
-        return back()->with('success', "Batch evaluation finished! Approved {$approvedCount} request(s) meeting community voting criteria.");
+        return back()->with('success', "Batch evaluation finished! Approved {$approvedCount} and rejected {$rejectedCount} request(s) meeting community voting criteria.");
+    }
+
+    /**
+     * Display mechanic proposals for admin review and batch action.
+     */
+    public function mechanics(Request $request)
+    {
+        $query = Mechanic::with(['user', 'game', 'project', 'parent', 'comment.votes'])
+            ->where('approved', false)
+            ->latest();
+
+        // Optional search across mechanic title, author name, game title, or project title
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%{$search}%")
+                  ->orWhereHas('user', fn($u) => $u->where('name', 'LIKE', "%{$search}%"))
+                  ->orWhereHas('game', fn($g) => $g->where('title', 'LIKE', "%{$search}%"))
+                  ->orWhereHas('project', fn($p) => $p->where('title', 'LIKE', "%{$search}%"));
+            });
+        }
+
+        $mechanics = $query->paginate(15)->withQueryString();
+
+        return view('dashboard.mechanics', compact('mechanics'));
     }
 }

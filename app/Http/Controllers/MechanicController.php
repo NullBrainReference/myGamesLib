@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Game;
 use App\Models\Mechanic;
+use App\Models\Notification;
 use App\Models\Project;
 use App\Models\Comment;
 use Illuminate\Http\Request;
@@ -79,8 +80,8 @@ class MechanicController extends Controller
             'project_id' => 'nullable|exists:projects,id',
         ]);
 
-        $projectId = $validated['project_id'] 
-            ?? $comment->project?->id 
+        $projectId = $validated['project_id']
+            ?? $comment->project?->id
             ?? ($comment->commentable_type === \App\Models\Project::class ? $comment->commentable_id : null);
 
         $approved = Auth::user()->isAdmin();
@@ -179,5 +180,144 @@ class MechanicController extends Controller
         $mechanics = $query->limit(15)->get(['mechanic_id', 'title', 'content', 'game_id', 'project_id']);
 
         return response()->json($mechanics);
+    }
+
+        /**
+     * Approve a pending mechanic or variant.
+     */
+    public function approve($mechanic_id)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $mechanic = Mechanic::with(['user', 'project', 'game'])
+            ->where('mechanic_id', $mechanic_id)
+            ->firstOrFail();
+
+        $mechanic->update(['approved' => true]);
+
+        // Send notification to the author who proposed the mechanic
+        if ($mechanic->user_id && $mechanic->user_id !== Auth::id()) {
+            // Resolve parent entity for navigation target_url (Project or Game)
+            $notifiable = $mechanic->project ?? $mechanic->game;
+
+            Notification::send(
+                userId: $mechanic->user_id,
+                type: $mechanic->project_id ? 'project' : 'mechanic',
+                title: 'Mechanic Proposal Approved! ⚙️',
+                message: 'Your proposed mechanic "' . $mechanic->title . '" has been approved and published.',
+                notifiable: $notifiable
+            );
+        }
+
+        return back()->with('success', 'Mechanic proposal approved successfully!');
+    }
+
+    /**
+     * Reject / Decline a pending mechanic proposal.
+     */
+    public function reject($mechanic_id)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $mechanic = Mechanic::with(['user', 'project', 'game'])
+            ->where('mechanic_id', $mechanic_id)
+            ->firstOrFail();
+
+        // Notify author before soft/hard deleting the proposal
+        if ($mechanic->user_id && $mechanic->user_id !== Auth::id()) {
+            $notifiable = $mechanic->project ?? $mechanic->game;
+
+            Notification::send(
+                userId: $mechanic->user_id,
+                type: $mechanic->project_id ? 'project' : 'mechanic',
+                title: 'Mechanic Proposal Declined',
+                message: 'Your proposed mechanic "' . $mechanic->title . '" was declined by an administrator.',
+                notifiable: $notifiable
+            );
+        }
+
+        $mechanic->delete();
+
+        return back()->with('success', 'Mechanic proposal rejected.');
+    }
+
+    /**
+     * Batch process pending mechanic proposals based on community voting rules:
+     * - Minimum 3 total votes on the proposal comment
+     * - At least 75% positive upvotes
+     */
+    public function processBatchMechanicApprovals()
+    {
+        // Fetch all pending mechanics linked to a comment thread with votes
+        $pendingMechanics = Mechanic::where('approved', false)
+            ->whereNotNull('comment_id')
+            ->with(['comment.votes', 'user', 'project', 'game'])
+            ->get();
+
+        $approvedCount = 0;
+        $rejectedCount = 0;
+
+        foreach ($pendingMechanics as $mechanic) {
+            $comment = $mechanic->comment;
+            if (!$comment) {
+                continue;
+            }
+
+            // 1. Calculate voting metrics from the comment
+            $totalVotes = $comment->votes->count();
+            $upvotes = $comment->votes->where('vote', '>', 0)->count();
+
+            // 2. Evaluate criteria: total votes >= 3
+            if ($totalVotes >= 3) {
+                $upvoteRate = ($upvotes / $totalVotes) * 100;
+
+                if ($upvoteRate >= 75) {
+                    // APPROVE: Rate is >= 75%
+                    DB::transaction(function () use ($mechanic) {
+                        $mechanic->update(['approved' => true]);
+
+                        if ($mechanic->user_id) {
+                            $notifiable = $mechanic->project ?? $mechanic->game;
+
+                            Notification::send(
+                                userId: $mechanic->user_id,
+                                type: $mechanic->project_id ? 'project' : 'mechanic',
+                                title: 'Mechanic Approved by Community! ⚙️',
+                                message: 'Your proposed mechanic "' . $mechanic->title . '" reached the community vote threshold and was automatically published.',
+                                notifiable: $notifiable
+                            );
+                        }
+                    });
+
+                    $approvedCount++;
+                } else {
+                    // REJECT & REMOVE: Votes >= 3 but upvote rate < 75%
+                    DB::transaction(function () use ($mechanic) {
+                        if ($mechanic->user_id) {
+                            $notifiable = $mechanic->project ?? $mechanic->game;
+
+                            Notification::send(
+                                userId: $mechanic->user_id,
+                                type: $mechanic->project_id ? 'project' : 'mechanic',
+                                title: 'Mechanic Declined by Community',
+                                message: 'Your proposed mechanic "' . $mechanic->title . '" received sufficient votes but failed to reach the 75% approval threshold and was removed.',
+                                notifiable: $notifiable
+                            );
+                        }
+
+                        // Delete the failed proposal
+                        $mechanic->delete();
+                    });
+
+                    $rejectedCount++;
+                }
+            }
+        }
+
+        return back()->with('success', "Batch evaluation completed! Approved {$approvedCount} and removed {$rejectedCount} mechanic proposal(s) based on community votes.");
     }
 }

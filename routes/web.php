@@ -135,6 +135,18 @@ Route::middleware('role.guard:admin')->prefix('admin/dashboard')->name('dashboar
 
     Route::post('/project-requests/process-batch', [DashboardController::class, 'processBatchApprovals'])
         ->name('project-requests.process-batch');
+
+    Route::get('/mechanics', [DashboardController::class, 'mechanics'])
+        ->name('mechanics');
+    Route::post('/mechanics/{mechanic_id}/approve', [MechanicController::class, 'approve'])
+        ->name('mechanics.approve');
+    Route::post('/mechanics/{mechanic_id}/reject', [MechanicController::class, 'reject'])
+        ->name('mechanics.reject');
+
+    Route::post('/mechanics/process-batch', [MechanicController::class, 'processBatchMechanicApprovals'])
+        ->name('mechanics.process-batch');
+
+
 });
 
 Route::middleware(['auth'])->group(function () {

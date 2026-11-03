@@ -96,4 +96,9 @@ class Mechanic extends Model
     {
         return $query->whereNull('parent_id');
     }
+
+    public function comment(): BelongsTo
+    {
+        return $this->belongsTo(Comment::class, 'comment_id');
+    }
 }

@@ -19,6 +19,7 @@
             <a href="{{ route('dashboard.ticket-requests') }}" class="btn btn-sm btn-outline-secondary px-3">Ticket Requests</a>
             <a href="{{ route('dashboard.position-requests') }}" class="btn btn-sm btn-outline-secondary px-3">Position Requests</a>
             <a href="{{ route('dashboard.project-requests') }}" class="btn btn-sm btn-outline-secondary px-3">Project Approvals</a>
+            <a href="{{ route('dashboard.mechanics') }}" class="btn btn-sm btn-outline-secondary px-3">Mechanics</a>
         </div>
     </div>
 

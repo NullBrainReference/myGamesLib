@@ -8,7 +8,7 @@ use App\Models\Vote;
 
 class VoteController extends Controller
 {
-    protected const APPROVAL_THRESHOLD = 2; 
+    protected const APPROVAL_THRESHOLD = 2;
 
     public function voteComment(Request $request, Comment $comment)
     {
@@ -33,13 +33,13 @@ class VoteController extends Controller
 
         $netScore = (int) $comment->votes()->sum('vote');
 
-        if ($comment->mechanic) {
-            if ($netScore >= self::APPROVAL_THRESHOLD && !$comment->mechanic->approved) {
-                $comment->mechanic->update(['approved' => true]);
-            } elseif ($netScore < self::APPROVAL_THRESHOLD && $comment->mechanic->approved) {
-                $comment->mechanic->update(['approved' => false]);
-            }
-        }
+        // if ($comment->mechanic) {
+        //     if ($netScore >= self::APPROVAL_THRESHOLD && !$comment->mechanic->approved) {
+        //         $comment->mechanic->update(['approved' => true]);
+        //     } elseif ($netScore < self::APPROVAL_THRESHOLD && $comment->mechanic->approved) {
+        //         $comment->mechanic->update(['approved' => false]);
+        //     }
+        // }
 
         return back();
     }
