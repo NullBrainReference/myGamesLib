@@ -232,7 +232,7 @@
                                             </span>
                                         @else
                                             {{-- Allow Posting Approval Request --}}
-                                            @if(auth()->id() === $comment->user_id || $comment->project->owners->contains(auth()->id()) || auth()->user()->isAdmin())
+                                            @if(auth()->check())
                                                 <form action="{{ route('projects.request-approval', $comment->project->id) }}" method="POST" class="inline">
                                                     @csrf
                                                     <input type="hidden" name="comment_id" value="{{ $comment->id }}">

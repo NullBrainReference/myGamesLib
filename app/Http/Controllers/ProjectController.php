@@ -192,13 +192,13 @@ class ProjectController extends Controller
     {
         $user = auth()->user();
 
-        // 1. Authorization Guard
-        $isAuthor = $request->filled('comment_id') && Comment::where('id', $request->input('comment_id'))->where('user_id', $user->id)->exists();
-        $isOwner  = $project->owners->contains($user->id);
+        // 1. Authorization Guard -> nope everybody can request approval for a project if authenticated.
+        // $isAuthor = $request->filled('comment_id') && Comment::where('id', $request->input('comment_id'))->where('user_id', $user->id)->exists();
+        // $isOwner  = $project->owners->contains($user->id);
 
-        if (!$user->isAdmin() && !$isOwner && !$isAuthor) {
-            return back()->with('error', 'Unauthorized to request approval for this project.');
-        }
+        // if (!$user->isAdmin() && !$isOwner && !$isAuthor) {
+        //     return back()->with('error', 'Unauthorized to request approval for this project.');
+        // }
 
         // 2. Check if project is already approved
         if ($project->is_approved) {

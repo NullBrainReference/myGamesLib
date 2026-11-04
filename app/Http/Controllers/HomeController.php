@@ -44,6 +44,7 @@ class HomeController extends Controller
         $latestBlogs = Blog::with('user')->latest()->take(3)->get();
 
         $projects = Project::where('is_public', true)
+            ->where('is_approved', true)
             ->withCount('mechanics')
             ->latest()
             ->take(6)
