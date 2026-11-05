@@ -130,18 +130,22 @@ class DashboardController extends Controller
             return back()->with('error', 'Request has already been processed.');
         }
 
-        $positionRequest->update(['status' => 'approved']);
+        DB::transaction(function () use ($positionRequest) {
+            $positionRequest->update(['status' => 'approved']);
 
-        // Auto-create the position for the project
-        HirePosition::create([
-            'project_id'     => $positionRequest->project_id,
-            'title'          => $positionRequest->title,
-            'description'    => "Approved by Admin: " . $positionRequest->reason,
-            'tickets_amount' => $positionRequest->quantity,
-            'is_open'        => true,
-        ]);
+            // Spawn 'quantity' number of positions with 2 default tickets each
+            for ($i = 0; $i < $positionRequest->quantity; $i++) {
+                HirePosition::create([
+                    'project_id'     => $positionRequest->project_id,
+                    'title'          => $positionRequest->title,
+                    'description'    => "Approved by Admin: " . $positionRequest->reason,
+                    'tickets_amount' => 2,
+                    'is_open'        => true,
+                ]);
+            }
+        });
 
-        return back()->with('success', "Approved request! Created vacancy position '{$positionRequest->title}' with {$positionRequest->quantity} ticket slot(s).");
+        return back()->with('success', "Approved request! Created {$positionRequest->quantity} position slot(s) for '{$positionRequest->title}' with 2 default tickets each.");
     }
 
     /**
